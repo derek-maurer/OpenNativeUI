@@ -12,7 +12,7 @@ import {
   updateServerConversation,
   buildChatPayload,
 } from "@/services/conversationApi";
-import type { Message, ChatCompletionRequest } from "@/lib/types";
+import type { Message, MessageInfo, ChatCompletionRequest } from "@/lib/types";
 
 export function useStreamingChat() {
   const abortRef = useRef<(() => void) | null>(null);
@@ -26,6 +26,7 @@ export function useStreamingChat() {
         addUserMessage,
         appendStreamToken,
         setStreaming,
+        setStreamingStatus,
         finalizeStream,
         messages,
         pendingFiles,
@@ -78,13 +79,36 @@ export function useStreamingChat() {
       setStreaming(true);
 
       let fullContent = "";
+      let firstTokenTime: number | null = null;
+      let tokenCount = 0;
 
       const stream = streamChatCompletion(serverUrl, token, requestBody, {
         onToken: (token) => {
+          if (firstTokenTime === null) firstTokenTime = Date.now();
+          tokenCount++;
           fullContent += token;
           appendStreamToken(token);
         },
+        onStatus: (status) => {
+          setStreamingStatus(status.done ? null : status);
+        },
         onDone: async () => {
+          // Approximate output tokens (~0.75 tokens per word is a rough heuristic)
+          const wordCount = fullContent.split(/\s+/).filter(Boolean).length;
+          const estimatedTokens = Math.round(wordCount * 1.33);
+          const totalDuration = firstTokenTime
+            ? (Date.now() - firstTokenTime) / 1000
+            : 0;
+          const tokensPerSecond =
+            totalDuration > 0 ? estimatedTokens / totalDuration : 0;
+
+          const info: MessageInfo = {
+            model,
+            totalDuration,
+            outputTokens: estimatedTokens,
+            tokensPerSecond,
+          };
+
           const assistantMessage: Message = {
             id: Crypto.randomUUID(),
             conversationId,
@@ -92,6 +116,7 @@ export function useStreamingChat() {
             content: fullContent,
             createdAt: Date.now(),
             model,
+            info,
           };
 
           finalizeStream(assistantMessage);

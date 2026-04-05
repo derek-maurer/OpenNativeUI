@@ -41,6 +41,13 @@ export interface ModelsResponse {
 }
 
 // Messages & Conversations
+export interface MessageInfo {
+  model: string;
+  totalDuration: number; // seconds from first token to last
+  outputTokens: number; // approximate output token count (word-based estimate)
+  tokensPerSecond: number;
+}
+
 export interface Message {
   id: string;
   conversationId: string;
@@ -49,6 +56,7 @@ export interface Message {
   createdAt: number;
   model?: string;
   files?: AttachedFile[];
+  info?: MessageInfo;
 }
 
 export interface Conversation {
@@ -117,6 +125,12 @@ export interface ChatCompletionRequest {
     web_search?: boolean;
   };
   think?: ThinkingLevel;
+}
+
+export interface StreamingStatus {
+  action?: string;
+  description: string;
+  done: boolean;
 }
 
 export interface ChatCompletionChunk {

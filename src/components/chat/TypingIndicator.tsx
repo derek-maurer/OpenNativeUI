@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -33,14 +33,25 @@ function Dot({ delay }: { delay: number }) {
   return <Animated.View style={[styles.dot, animatedStyle]} />;
 }
 
-export function TypingIndicator() {
+interface TypingIndicatorProps {
+  statusDescription?: string | null;
+}
+
+export function TypingIndicator({ statusDescription }: TypingIndicatorProps) {
   return (
     <View style={styles.container}>
       <View style={styles.avatar} />
-      <View style={styles.dotsContainer}>
-        <Dot delay={0} />
-        <Dot delay={200} />
-        <Dot delay={400} />
+      <View style={styles.content}>
+        <View style={styles.dotsContainer}>
+          <Dot delay={0} />
+          <Dot delay={200} />
+          <Dot delay={400} />
+        </View>
+        {statusDescription ? (
+          <Text style={styles.statusLabel} numberOfLines={1}>
+            {statusDescription}
+          </Text>
+        ) : null}
       </View>
     </View>
   );
@@ -59,12 +70,20 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: "rgba(16,163,127,0.12)",
   },
+  content: {
+    gap: 4,
+  },
   dotsContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  statusLabel: {
+    fontSize: 12,
+    color: "#737373",
+    paddingHorizontal: 12,
   },
   dot: {
     width: 8,

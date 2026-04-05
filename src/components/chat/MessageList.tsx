@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import type { Message } from "@/lib/types";
+import type { Message, StreamingStatus } from "@/lib/types";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 
@@ -17,6 +17,7 @@ interface MessageListProps {
   messages: Message[];
   streamingContent: string;
   isStreaming: boolean;
+  streamingStatus?: StreamingStatus | null;
 }
 
 const BOTTOM_THRESHOLD = 60;
@@ -25,6 +26,7 @@ export function MessageList({
   messages,
   streamingContent,
   isStreaming,
+  streamingStatus,
 }: MessageListProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -76,11 +78,17 @@ export function MessageList({
           />
         );
       }
-      return <TypingIndicator />;
+      return <TypingIndicator statusDescription={streamingStatus?.description} />;
     }
 
     const message = item as Message;
-    return <MessageBubble role={message.role} content={message.content} />;
+    return (
+      <MessageBubble
+        role={message.role}
+        content={message.content}
+        info={message.info}
+      />
+    );
   };
 
   return (
@@ -90,7 +98,9 @@ export function MessageList({
         data={displayData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
+        contentContainerStyle={{ paddingBottom: 16, paddingTop: 8, flexGrow: 1 }}
+        keyboardDismissMode="on-drag"
+        alwaysBounceVertical
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<View />}
         onScroll={handleScroll}

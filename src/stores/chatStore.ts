@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Message, AttachedFile, ThinkingLevel } from "@/lib/types";
+import type { Message, AttachedFile, ThinkingLevel, StreamingStatus } from "@/lib/types";
 
 interface ChatState {
   currentConversationId: string | null;
@@ -9,6 +9,7 @@ interface ChatState {
   pendingFiles: AttachedFile[];
   webSearchEnabled: boolean;
   thinkingLevel: ThinkingLevel | null;
+  streamingStatus: StreamingStatus | null;
 
   setConversation: (id: string, messages: Message[]) => void;
   addUserMessage: (message: Message) => void;
@@ -18,6 +19,7 @@ interface ChatState {
   clearChat: () => void;
   toggleWebSearch: () => void;
   setThinkingLevel: (level: ThinkingLevel | null) => void;
+  setStreamingStatus: (status: StreamingStatus | null) => void;
 
   addPendingFile: (file: AttachedFile) => void;
   removePendingFile: (fileId: string) => void;
@@ -33,6 +35,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   pendingFiles: [],
   webSearchEnabled: false,
   thinkingLevel: null,
+  streamingStatus: null,
 
   setConversation: (id, messages) =>
     set({
@@ -40,6 +43,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages,
       streamingContent: "",
       isStreaming: false,
+      streamingStatus: null,
     }),
 
   addUserMessage: (message) =>
@@ -56,6 +60,7 @@ export const useChatStore = create<ChatState>()((set) => ({
     set({
       isStreaming: value,
       streamingContent: value ? "" : "",
+      streamingStatus: value ? null : null,
     }),
 
   finalizeStream: (fullMessage) =>
@@ -63,6 +68,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages: [...state.messages, fullMessage],
       streamingContent: "",
       isStreaming: false,
+      streamingStatus: null,
     })),
 
   clearChat: () =>
@@ -71,6 +77,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages: [],
       streamingContent: "",
       isStreaming: false,
+      streamingStatus: null,
       pendingFiles: [],
       webSearchEnabled: false,
       thinkingLevel: null,
@@ -80,6 +87,8 @@ export const useChatStore = create<ChatState>()((set) => ({
     set((state) => ({ webSearchEnabled: !state.webSearchEnabled })),
 
   setThinkingLevel: (level) => set({ thinkingLevel: level }),
+
+  setStreamingStatus: (status) => set({ streamingStatus: status }),
 
   addPendingFile: (file) =>
     set((state) => ({

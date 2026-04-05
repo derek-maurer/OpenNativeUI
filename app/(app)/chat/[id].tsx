@@ -26,6 +26,7 @@ export default function ChatScreen() {
   const messages = useChatStore((s) => s.messages);
   const streamingContent = useChatStore((s) => s.streamingContent);
   const isStreaming = useChatStore((s) => s.isStreaming);
+  const streamingStatus = useChatStore((s) => s.streamingStatus);
 
   const { sendMessage, abort } = useStreamingChat();
 
@@ -88,6 +89,7 @@ export default function ChatScreen() {
         messages={messages}
         streamingContent={streamingContent}
         isStreaming={isStreaming}
+        streamingStatus={streamingStatus}
       />
 
       <InputComposer

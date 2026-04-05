@@ -1,11 +1,12 @@
 import EventSource from "react-native-sse";
 import type { Socket } from "socket.io-client";
-import type { ChatCompletionRequest, ChatCompletionChunk } from "@/lib/types";
+import type { ChatCompletionRequest, ChatCompletionChunk, StreamingStatus } from "@/lib/types";
 import { API_PATHS } from "@/lib/constants";
 import { getSocket, getSessionId } from "./socket";
 
 interface StreamCallbacks {
   onToken: (token: string) => void;
+  onStatus: (status: StreamingStatus) => void;
   onDone: () => void;
   onError: (error: Error) => void;
 }
@@ -67,6 +68,17 @@ function streamViaSocket(
     if (!data) return;
 
     const type = data.type as string | undefined;
+
+    // Status/progress updates (web search, RAG, image gen, tools, etc.)
+    if (type === "status") {
+      const inner = (data.data ?? data) as Record<string, unknown>;
+      callbacks.onStatus({
+        action: inner.action as string | undefined,
+        description: (inner.description as string) ?? "",
+        done: (inner.done as boolean) ?? false,
+      });
+      return;
+    }
 
     // Streaming content chunks
     if (type === "chat:message:delta" || type === "message") {

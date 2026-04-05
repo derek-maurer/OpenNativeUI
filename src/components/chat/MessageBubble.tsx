@@ -6,11 +6,14 @@ import { useTheme } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
+import { MessageActions } from "./MessageActions";
+import type { MessageInfo } from "@/lib/types";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
   content: string;
   isStreaming?: boolean;
+  info?: MessageInfo;
 }
 
 function CodeBlock({ code, style, dark }: { code: string; style: any; dark: boolean }) {
@@ -48,6 +51,7 @@ export const MessageBubble = memo(function MessageBubble({
   role,
   content,
   isStreaming,
+  info,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
 
@@ -101,6 +105,15 @@ export const MessageBubble = memo(function MessageBubble({
       marginVertical: 8,
       fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     },
+    blockquote: {
+      backgroundColor: dark ? "#1a1a1a" : "#f4f4f4",
+      borderLeftColor: dark ? "#444" : "#ccc",
+      borderLeftWidth: 3,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 4,
+      marginVertical: 8,
+    },
     link: {
       color: "#10a37f",
     },
@@ -151,6 +164,7 @@ export const MessageBubble = memo(function MessageBubble({
           {content}
         </Markdown>
         {isStreaming && <View style={styles.cursor} />}
+        {!isStreaming && <MessageActions content={content} info={info} />}
       </View>
     </View>
   );
