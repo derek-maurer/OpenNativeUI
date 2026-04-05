@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useConversationStore } from "@/stores/conversationStore";
 import { useChatStore } from "@/stores/chatStore";
+import { disconnectSocket } from "@/services/socket";
 
 function SettingsRow({
   icon,
@@ -103,6 +104,7 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: () => {
             clearChat();
+            disconnectSocket();
             logout();
           },
         },

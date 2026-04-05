@@ -1,8 +1,9 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
 import { useTheme } from "@react-navigation/native";
+import * as WebBrowser from "expo-web-browser";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
@@ -16,6 +17,13 @@ export const MessageBubble = memo(function MessageBubble({
   isStreaming,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
+
+  const handleLinkPress = useCallback((url: string) => {
+    WebBrowser.openBrowserAsync(url, {
+      dismissButtonStyle: "close",
+    });
+    return false;
+  }, []);
 
   if (role === "user") {
     return (
@@ -95,7 +103,7 @@ export const MessageBubble = memo(function MessageBubble({
         <Ionicons name="sparkles" size={14} color="#10a37f" />
       </View>
       <View style={styles.assistantContent}>
-        <Markdown style={markdownStyles}>{content}</Markdown>
+        <Markdown style={markdownStyles} onLinkPress={handleLinkPress}>{content}</Markdown>
         {isStreaming && <View style={styles.cursor} />}
       </View>
     </View>

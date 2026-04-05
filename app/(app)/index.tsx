@@ -24,7 +24,13 @@ export default function NewChatScreen() {
 
       try {
         const conversationId = Crypto.randomUUID();
+        // Capture web search state before clearing
+        const wasWebSearchEnabled = useChatStore.getState().webSearchEnabled;
         clearChat();
+        // Restore web search toggle so the chat screen can use it
+        if (wasWebSearchEnabled) {
+          useChatStore.getState().toggleWebSearch();
+        }
 
         router.replace(
           `/(app)/chat/${conversationId}?initialMessage=${encodeURIComponent(content)}&isNew=true`

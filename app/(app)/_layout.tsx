@@ -8,6 +8,7 @@ import { ConversationList } from "@/components/sidebar/ConversationList";
 import { useConversationStore } from "@/stores/conversationStore";
 import { useModelStore } from "@/stores/modelStore";
 import { useAuthStore } from "@/stores/authStore";
+import { connectSocket, disconnectSocket } from "@/services/socket";
 
 export default function AppLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -18,6 +19,11 @@ export default function AppLayout() {
   useEffect(() => {
     loadConversations();
     fetchModels();
+    connectSocket();
+
+    return () => {
+      disconnectSocket();
+    };
   }, []);
 
   if (!isAuthenticated) {
