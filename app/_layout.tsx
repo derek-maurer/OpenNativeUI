@@ -14,6 +14,7 @@ import "react-native-reanimated";
 import { useAuthStore } from "@/stores/authStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { validateToken } from "@/services/api";
+import { ToastProvider } from "@/components/ui/Toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -65,10 +66,12 @@ export default function RootLayout() {
     <ThemeProvider
       value={effectiveScheme === "dark" ? AppDarkTheme : AppLightTheme}
     >
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="sign-in" />
-        <Stack.Screen name="(app)" />
-      </Stack>
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="sign-in" />
+          <Stack.Screen name="(app)" />
+        </Stack>
+      </ToastProvider>
       <StatusBar style={effectiveScheme === "dark" ? "light" : "dark"} />
     </ThemeProvider>
   );

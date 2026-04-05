@@ -1,14 +1,47 @@
 import { memo, useCallback } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
 import { useTheme } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
+import * as Clipboard from "expo-clipboard";
+import { useToast } from "@/components/ui/Toast";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
   content: string;
   isStreaming?: boolean;
+}
+
+function CodeBlock({ code, style, dark }: { code: string; style: any; dark: boolean }) {
+  const toast = useToast();
+
+  const handleCopy = useCallback(async () => {
+    await Clipboard.setStringAsync(code);
+    toast.show("Copied to clipboard");
+  }, [code, toast]);
+
+  return (
+    <View style={[style.fence, { position: "relative" as const }]}>
+      <TouchableOpacity
+        onPress={handleCopy}
+        style={[
+          codeBlockStyles.copyButton,
+          { backgroundColor: dark ? "#333" : "#e0e0e0" },
+        ]}
+        activeOpacity={0.7}
+      >
+        <Ionicons
+          name="copy-outline"
+          size={14}
+          color={dark ? "#aaa" : "#555"}
+        />
+      </TouchableOpacity>
+      <Text style={{ color: style.fence.color, fontSize: style.fence.fontSize, fontFamily: style.fence.fontFamily }}>
+        {code}
+      </Text>
+    </View>
+  );
 }
 
 export const MessageBubble = memo(function MessageBubble({
@@ -103,14 +136,25 @@ export const MessageBubble = memo(function MessageBubble({
         <Ionicons name="sparkles" size={14} color="#10a37f" />
       </View>
       <View style={styles.assistantContent}>
-        <Markdown style={markdownStyles} onLinkPress={handleLinkPress}>{content}</Markdown>
+        <Markdown
+          style={markdownStyles}
+          onLinkPress={handleLinkPress}
+          rules={{
+            fence: (node, _children, _parent, styles) => {
+              const code = node.content ?? "";
+              return (
+                <CodeBlock key={node.key} code={code} style={styles} dark={dark} />
+              );
+            },
+          }}
+        >
+          {content}
+        </Markdown>
         {isStreaming && <View style={styles.cursor} />}
       </View>
     </View>
   );
 });
-
-import { Platform } from "react-native";
 
 const styles = StyleSheet.create({
   userRow: {
@@ -155,5 +199,16 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     marginLeft: 2,
     opacity: 0.8,
+  },
+});
+
+const codeBlockStyles = StyleSheet.create({
+  copyButton: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    borderRadius: 6,
+    padding: 4,
+    zIndex: 1,
   },
 });
