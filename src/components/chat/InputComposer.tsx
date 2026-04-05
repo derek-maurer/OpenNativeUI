@@ -10,8 +10,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@/stores/chatStore";
-import { useFileUpload } from "@/hooks/useFileUpload";
 import { FileUploadProgress } from "@/components/files/FileUploadProgress";
+import { ChatOptionsSheet } from "@/components/chat/ChatOptionsSheet";
 
 interface InputComposerProps {
   onSend: (content: string) => void;
@@ -25,12 +25,14 @@ export function InputComposer({
   onStop,
 }: InputComposerProps) {
   const [text, setText] = useState("");
+  const [optionsVisible, setOptionsVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const { dark, colors } = useTheme();
   const pendingFiles = useChatStore((s) => s.pendingFiles);
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
-  const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
-  const { pickAndUpload } = useFileUpload();
+  const thinkingLevel = useChatStore((s) => s.thinkingLevel);
+
+  const hasActiveOptions = webSearchEnabled || thinkingLevel !== null;
 
   const canSend =
     text.trim().length > 0 || pendingFiles.some((f) => f.status === "ready");
@@ -62,15 +64,21 @@ export function InputComposer({
           },
         ]}
       >
-        <Pressable onPress={pickAndUpload} style={styles.attachButton}>
-          <Ionicons name="add-circle" size={28} color="#737373" />
-        </Pressable>
-
-        <Pressable onPress={toggleWebSearch} style={styles.attachButton}>
+        <Pressable
+          onPress={() => setOptionsVisible(true)}
+          style={{
+            ...styles.attachButton,
+            backgroundColor: hasActiveOptions
+              ? "#10a37f"
+              : dark
+                ? "#2a2a2a"
+                : "#e0e0e0",
+          }}
+        >
           <Ionicons
-            name="globe-outline"
-            size={24}
-            color={webSearchEnabled ? "#10a37f" : "#737373"}
+            name="add"
+            size={20}
+            color={hasActiveOptions ? "#fff" : "#737373"}
           />
         </Pressable>
 
@@ -116,6 +124,11 @@ export function InputComposer({
           </Pressable>
         )}
       </View>
+
+      <ChatOptionsSheet
+        visible={optionsVisible}
+        onClose={() => setOptionsVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -130,7 +143,12 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   attachButton: {
-    paddingBottom: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
   },
   inputContainer: {
     flex: 1,

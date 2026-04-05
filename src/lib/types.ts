@@ -104,6 +104,8 @@ export interface ServerConversation {
 }
 
 // Chat completions
+export type ThinkingLevel = "low" | "medium" | "high";
+
 export interface ChatCompletionRequest {
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -114,6 +116,7 @@ export interface ChatCompletionRequest {
   features?: {
     web_search?: boolean;
   };
+  think?: ThinkingLevel;
 }
 
 export interface ChatCompletionChunk {

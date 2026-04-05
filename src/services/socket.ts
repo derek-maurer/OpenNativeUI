@@ -22,6 +22,7 @@ export function connectSocket(): void {
 
   socket = io(serverUrl, {
     auth: { token },
+    transports: ["websocket", "polling"],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: Infinity,

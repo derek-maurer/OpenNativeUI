@@ -3,13 +3,13 @@ import {
   View,
   Text,
   Pressable,
-  Modal,
   FlatList,
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useModelStore } from "@/stores/modelStore";
+import { BottomSheet } from "@/components/common/BottomSheet";
 
 export function ModelSelector() {
   const [visible, setVisible] = useState(false);
@@ -41,86 +41,76 @@ export function ModelSelector() {
         <Ionicons name="chevron-down" size={14} color="#737373" />
       </Pressable>
 
-      <Modal
+      <BottomSheet
         visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setVisible(false)}
+        onClose={() => setVisible(false)}
+        backgroundColor={dark ? "#1a1a1a" : "#fff"}
+        maxHeight="60%"
       >
-        <Pressable style={styles.overlay} onPress={() => setVisible(false)}>
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={[
-              styles.sheet,
-              { backgroundColor: dark ? "#1a1a1a" : "#fff" },
-            ]}
-          >
-            <View
-              style={[
-                styles.sheetHeader,
-                { borderBottomColor: colors.border },
-              ]}
-            >
-              <Text style={[styles.sheetTitle, { color: colors.text }]}>
-                Select Model
+        <View
+          style={[
+            styles.sheetHeader,
+            { borderBottomColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>
+            Select Model
+          </Text>
+        </View>
+
+        <FlatList
+          data={models}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          renderItem={({ item }) => {
+            const isSelected = item.id === selectedModelId;
+            return (
+              <Pressable
+                onPress={() => {
+                  setSelectedModel(item.id);
+                  setVisible(false);
+                }}
+                style={[
+                  styles.modelRow,
+                  isSelected && {
+                    backgroundColor: "rgba(16,163,127,0.1)",
+                  },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.modelName,
+                      { color: isSelected ? "#10a37f" : colors.text },
+                      isSelected && { fontWeight: "600" },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.name || item.id}
+                  </Text>
+                  {item.owned_by ? (
+                    <Text style={styles.modelOwner}>{item.owned_by}</Text>
+                  ) : null}
+                </View>
+                {isSelected && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={22}
+                    color="#10a37f"
+                  />
+                )}
+              </Pressable>
+            );
+          }}
+          ListEmptyComponent={
+            <View style={styles.emptyList}>
+              <Text style={{ color: "#737373" }}>
+                {isLoading ? "Loading models..." : "No models available"}
               </Text>
             </View>
-
-            <FlatList
-              data={models}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={{ paddingBottom: 32 }}
-              renderItem={({ item }) => {
-                const isSelected = item.id === selectedModelId;
-                return (
-                  <Pressable
-                    onPress={() => {
-                      setSelectedModel(item.id);
-                      setVisible(false);
-                    }}
-                    style={[
-                      styles.modelRow,
-                      isSelected && {
-                        backgroundColor: "rgba(16,163,127,0.1)",
-                      },
-                    ]}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={[
-                          styles.modelName,
-                          { color: isSelected ? "#10a37f" : colors.text },
-                          isSelected && { fontWeight: "600" },
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {item.name || item.id}
-                      </Text>
-                      {item.owned_by ? (
-                        <Text style={styles.modelOwner}>{item.owned_by}</Text>
-                      ) : null}
-                    </View>
-                    {isSelected && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={22}
-                        color="#10a37f"
-                      />
-                    )}
-                  </Pressable>
-                );
-              }}
-              ListEmptyComponent={
-                <View style={styles.emptyList}>
-                  <Text style={{ color: "#737373" }}>
-                    {isLoading ? "Loading models..." : "No models available"}
-                  </Text>
-                </View>
-              }
-            />
-          </Pressable>
-        </Pressable>
-      </Modal>
+          }
+        />
+      </BottomSheet>
     </>
   );
 }
@@ -135,21 +125,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    marginHorizontal: 8,
+    marginHorizontal: 10,
   },
   chipText: {
     fontSize: 15,
     fontWeight: "500",
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "60%",
   },
   sheetHeader: {
     paddingHorizontal: 20,

@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import * as Crypto from "expo-crypto";
+import * as Haptics from "expo-haptics";
 
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -30,6 +31,7 @@ export function useStreamingChat() {
         pendingFiles,
         clearPendingFiles,
         webSearchEnabled,
+        thinkingLevel,
       } = useChatStore.getState();
 
       const model = selectedModelId ?? "default";
@@ -67,6 +69,9 @@ export function useStreamingChat() {
         ...(webSearchEnabled && {
           features: { web_search: true },
         }),
+        ...(thinkingLevel && {
+          think: thinkingLevel,
+        }),
       };
 
       clearPendingFiles();
@@ -90,6 +95,7 @@ export function useStreamingChat() {
           };
 
           finalizeStream(assistantMessage);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           // Sync conversation to the server
           await syncToServer(

@@ -88,10 +88,7 @@ export function ConversationList(props: DrawerContentComponentProps) {
         </Text>
         <Pressable
           onPress={handleNewChat}
-          style={[
-            styles.newChatButton,
-            { backgroundColor: dark ? "#1a1a1a" : "#e8e8e8" },
-          ]}
+          style={{ ...styles.newChatButton, backgroundColor: dark ? "#2a2a2a" : "#e5e5e5" }}
         >
           <Ionicons name="create-outline" size={20} color={colors.text} />
         </Pressable>
@@ -160,7 +157,7 @@ const styles = StyleSheet.create({
   newChatButton: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },

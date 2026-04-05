@@ -1,7 +1,7 @@
-import { View, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ModelSelector } from "./ModelSelector";
 
 interface ChatHeaderProps {
@@ -10,12 +10,15 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ onMenuPress }: ChatHeaderProps) {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { dark, colors } = useTheme();
 
   return (
     <View style={[styles.container, { borderBottomColor: colors.border }]}>
-      <Pressable onPress={onMenuPress} style={styles.iconButton}>
-        <Ionicons name="menu" size={24} color={colors.text} />
+      <Pressable
+        onPress={onMenuPress}
+        style={{ ...styles.iconButton, backgroundColor: dark ? "#2a2a2a" : "#e5e5e5" }}
+      >
+        <Ionicons name="menu" size={20} color={colors.text} />
       </Pressable>
 
       <ModelSelector />
@@ -24,9 +27,9 @@ export function ChatHeader({ onMenuPress }: ChatHeaderProps) {
         onPress={() => {
           router.replace("/(app)");
         }}
-        style={styles.iconButton}
+        style={{ ...styles.iconButton, backgroundColor: dark ? "#2a2a2a" : "#e5e5e5" }}
       >
-        <Ionicons name="create-outline" size={22} color={colors.text} />
+        <Ionicons name="create-outline" size={20} color={colors.text} />
       </Pressable>
     </View>
   );
@@ -41,6 +44,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   iconButton: {
-    padding: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
