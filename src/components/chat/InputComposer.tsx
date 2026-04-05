@@ -78,7 +78,7 @@ export function InputComposer({
           <Ionicons
             name="add"
             size={20}
-            color={hasActiveOptions ? "#fff" : "#737373"}
+            color={hasActiveOptions ? "#fff" : colors.text}
           />
         </Pressable>
 

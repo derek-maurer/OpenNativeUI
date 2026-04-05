@@ -8,6 +8,7 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { MessageList } from "@/components/chat/MessageList";
 import { InputComposer } from "@/components/chat/InputComposer";
 import { useChatStore } from "@/stores/chatStore";
+import { useModelStore } from "@/stores/modelStore";
 import { useStreamingChat } from "@/hooks/useStreamingChat";
 import { fetchConversation, historyToMessages } from "@/services/conversationApi";
 
@@ -46,6 +47,12 @@ export default function ChatScreen() {
           const serverConv = await fetchConversation(id);
           const msgs = historyToMessages(serverConv.chat.history, id);
           setConversation(id, msgs);
+
+          // Re-select the model that was used in this conversation
+          const convModel = serverConv.chat?.models?.[0];
+          if (convModel) {
+            useModelStore.getState().setSelectedModel(convModel);
+          }
         } catch {
           // If fetch fails (e.g. 404), start empty
           setConversation(id, []);

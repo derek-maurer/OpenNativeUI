@@ -8,9 +8,11 @@ import type { Model, ModelsResponse } from "@/lib/types";
 interface ModelState {
   models: Model[];
   selectedModelId: string | null;
+  defaultModelId: string | null;
   isLoading: boolean;
   fetchModels: () => Promise<void>;
   setSelectedModel: (id: string) => void;
+  setDefaultModel: (id: string | null) => void;
 }
 
 export const useModelStore = create<ModelState>()(
@@ -18,6 +20,7 @@ export const useModelStore = create<ModelState>()(
     (set, get) => ({
       models: [],
       selectedModelId: null,
+      defaultModelId: null,
       isLoading: false,
 
       fetchModels: async () => {
@@ -27,9 +30,11 @@ export const useModelStore = create<ModelState>()(
           const models = response.data ?? [];
           set({ models, isLoading: false });
 
-          // Auto-select first model if none selected
+          // Auto-select: prefer default model, then fall back to first model
           if (!get().selectedModelId && models.length > 0) {
-            set({ selectedModelId: models[0].id });
+            const defaultId = get().defaultModelId;
+            const hasDefault = defaultId && models.some((m) => m.id === defaultId);
+            set({ selectedModelId: hasDefault ? defaultId : models[0].id });
           }
         } catch {
           set({ isLoading: false });
@@ -37,12 +42,14 @@ export const useModelStore = create<ModelState>()(
       },
 
       setSelectedModel: (id) => set({ selectedModelId: id }),
+      setDefaultModel: (id) => set({ defaultModelId: id }),
     }),
     {
       name: STORAGE_KEYS.MODELS,
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => ({
         selectedModelId: state.selectedModelId,
+        defaultModelId: state.defaultModelId,
       }),
     }
   )

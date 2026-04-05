@@ -166,15 +166,9 @@ async function syncToServer(
 
   try {
     if (isNew) {
-      const serverConv = await createServerConversation(chatPayload);
-      // Add to sidebar
-      useConversationStore.getState().addConversation({
-        id: serverConv.id,
-        title: serverConv.chat?.title ?? title,
-        model,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
+      await createServerConversation(chatPayload);
+      // Refresh full conversation list from the server
+      await useConversationStore.getState().loadConversations();
     } else {
       await updateServerConversation(conversationId, chatPayload);
       useConversationStore.getState().updateConversationLocally(conversationId, {

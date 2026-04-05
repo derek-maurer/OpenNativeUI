@@ -2,13 +2,14 @@ import { useCallback, useRef } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useNavigation, DrawerActions, useTheme } from "@react-navigation/native";
+import { useNavigation, DrawerActions, useTheme, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Crypto from "expo-crypto";
 
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { InputComposer } from "@/components/chat/InputComposer";
 import { useChatStore } from "@/stores/chatStore";
+import { useModelStore } from "@/stores/modelStore";
 
 export default function NewChatScreen() {
   const router = useRouter();
@@ -16,6 +17,16 @@ export default function NewChatScreen() {
   const { colors } = useTheme();
   const clearChat = useChatStore((s) => s.clearChat);
   const isCreating = useRef(false);
+
+  // Apply default model every time the new chat screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      const { defaultModelId, models, setSelectedModel } = useModelStore.getState();
+      if (defaultModelId && models.some((m) => m.id === defaultModelId)) {
+        setSelectedModel(defaultModelId);
+      }
+    }, [])
+  );
 
   const handleSend = useCallback(
     async (content: string) => {

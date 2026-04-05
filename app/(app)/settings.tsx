@@ -1,4 +1,5 @@
-import { View, Text, Pressable, Alert, ScrollView, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, Pressable, Alert, ScrollView, FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,9 +7,11 @@ import { useTheme } from "@react-navigation/native";
 
 import { useAuthStore } from "@/stores/authStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useModelStore } from "@/stores/modelStore";
 import { useConversationStore } from "@/stores/conversationStore";
 import { useChatStore } from "@/stores/chatStore";
 import { disconnectSocket } from "@/services/socket";
+import { BottomSheet } from "@/components/common/BottomSheet";
 
 function SettingsRow({
   icon,
@@ -54,14 +57,21 @@ function SettingsRow({
 export default function SettingsScreen() {
   const router = useRouter();
   const { colors, dark } = useTheme();
+  const [modelPickerVisible, setModelPickerVisible] = useState(false);
 
   const serverUrl = useAuthStore((s) => s.serverUrl);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
+  const models = useModelStore((s) => s.models);
+  const defaultModelId = useModelStore((s) => s.defaultModelId);
+  const setDefaultModel = useModelStore((s) => s.setDefaultModel);
   const clearAll = useConversationStore((s) => s.clearAll);
   const clearChat = useChatStore((s) => s.clearChat);
+
+  const defaultModel = models.find((m) => m.id === defaultModelId);
+  const defaultModelLabel = defaultModel?.name ?? defaultModel?.id ?? "None";
 
   const themeLabel =
     theme === "system" ? "System" : theme === "dark" ? "Dark" : "Light";
@@ -145,6 +155,22 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Chat */}
+        <Text style={styles.sectionTitle}>CHAT</Text>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: dark ? "#141414" : "#f5f5f5" },
+          ]}
+        >
+          <SettingsRow
+            icon="chatbubble-outline"
+            label="Default Model"
+            value={defaultModelLabel}
+            onPress={() => setModelPickerVisible(true)}
+          />
+        </View>
+
         {/* Server */}
         <Text style={styles.sectionTitle}>SERVER</Text>
         <View
@@ -198,6 +224,96 @@ export default function SettingsScreen() {
           <Text style={styles.footerText}>Powered by Open WebUI</Text>
         </View>
       </ScrollView>
+      <BottomSheet
+        visible={modelPickerVisible}
+        onClose={() => setModelPickerVisible(false)}
+        backgroundColor={dark ? "#1a1a1a" : "#fff"}
+        maxHeight="60%"
+      >
+        <View
+          style={[
+            styles.sheetHeader,
+            { borderBottomColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>
+            Default Model
+          </Text>
+        </View>
+
+        <FlatList
+          data={models}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          ListHeaderComponent={
+            <Pressable
+              onPress={() => {
+                setDefaultModel(null);
+                setModelPickerVisible(false);
+              }}
+              style={[
+                styles.modelRow,
+                !defaultModelId && {
+                  backgroundColor: "rgba(16,163,127,0.1)",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.modelName,
+                  { color: !defaultModelId ? "#10a37f" : colors.text },
+                  !defaultModelId && { fontWeight: "600" },
+                ]}
+              >
+                None
+              </Text>
+              {!defaultModelId && (
+                <Ionicons name="checkmark-circle" size={22} color="#10a37f" />
+              )}
+            </Pressable>
+          }
+          renderItem={({ item }) => {
+            const isSelected = item.id === defaultModelId;
+            return (
+              <Pressable
+                onPress={() => {
+                  setDefaultModel(item.id);
+                  setModelPickerVisible(false);
+                }}
+                style={[
+                  styles.modelRow,
+                  isSelected && {
+                    backgroundColor: "rgba(16,163,127,0.1)",
+                  },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.modelName,
+                      { color: isSelected ? "#10a37f" : colors.text },
+                      isSelected && { fontWeight: "600" },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.name || item.id}
+                  </Text>
+                  {item.owned_by ? (
+                    <Text style={styles.modelOwner}>{item.owned_by}</Text>
+                  ) : null}
+                </View>
+                {isSelected && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={22}
+                    color="#10a37f"
+                  />
+                )}
+              </Pressable>
+            );
+          }}
+        />
+      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -258,5 +374,28 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     color: "#525252",
+  },
+  sheetHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  modelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  modelName: {
+    fontSize: 16,
+  },
+  modelOwner: {
+    fontSize: 12,
+    color: "#737373",
+    marginTop: 2,
   },
 });

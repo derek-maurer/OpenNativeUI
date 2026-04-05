@@ -44,6 +44,8 @@ export function ConversationList(props: DrawerContentComponentProps) {
   const router = useRouter();
   const { colors, dark } = useTheme();
   const conversations = useConversationStore((s) => s.conversations);
+  const isLoading = useConversationStore((s) => s.isLoading);
+  const loadConversations = useConversationStore((s) => s.loadConversations);
   const currentConversationId = useChatStore((s) => s.currentConversationId);
   const clearChat = useChatStore((s) => s.clearChat);
 
@@ -99,6 +101,8 @@ export function ConversationList(props: DrawerContentComponentProps) {
         data={flatData}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
+        refreshing={isLoading}
+        onRefresh={loadConversations}
         renderItem={({ item }) => {
           if (item.type === "header") {
             return (

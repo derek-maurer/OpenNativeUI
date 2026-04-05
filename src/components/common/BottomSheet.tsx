@@ -13,6 +13,7 @@ import Animated, {
   runOnJS,
   Easing,
 } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 const DURATION = 300;
 const EASING = Easing.out(Easing.cubic);
@@ -68,6 +69,30 @@ export function BottomSheet({
     transform: [{ translateY: translateY.value }],
   }));
 
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      if (e.translationY > 0) {
+        translateY.value = e.translationY;
+      }
+    })
+    .onEnd((e) => {
+      if (e.translationY > 100 || e.velocityY > 500) {
+        translateY.value = withTiming(
+          screenHeight,
+          { duration: DURATION, easing: Easing.in(Easing.cubic) },
+          (finished) => {
+            if (finished) runOnJS(onClose)();
+          }
+        );
+        backdropOpacity.value = withTiming(0, {
+          duration: DURATION,
+          easing: Easing.in(Easing.cubic),
+        });
+      } else {
+        translateY.value = withTiming(0, { duration: DURATION, easing: EASING });
+      }
+    });
+
   if (!visible) return null;
 
   return (
@@ -83,16 +108,18 @@ export function BottomSheet({
           <Pressable style={StyleSheet.absoluteFill} onPress={dismiss} />
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.sheet,
-            { backgroundColor, maxHeight: maxHeight as any },
-            sheetStyle,
-          ]}
-        >
-          <View style={styles.handle} />
-          {children}
-        </Animated.View>
+        <GestureDetector gesture={panGesture}>
+          <Animated.View
+            style={[
+              styles.sheet,
+              { backgroundColor, maxHeight: maxHeight as any },
+              sheetStyle,
+            ]}
+          >
+            <View style={styles.handle} />
+            {children}
+          </Animated.View>
+        </GestureDetector>
       </View>
     </Modal>
   );
