@@ -49,11 +49,7 @@ export function InputComposer({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={0}
     >
-      {pendingFiles.length > 0 && (
-        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-          <FileUploadProgress />
-        </View>
-      )}
+      {pendingFiles.length > 0 && <FileUploadProgress />}
 
       <View
         style={[

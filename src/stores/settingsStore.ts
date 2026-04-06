@@ -8,6 +8,10 @@ type ThemeMode = "light" | "dark" | "system";
 interface SettingsState {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
+  chimeOnComplete: boolean;
+  setChimeOnComplete: (enabled: boolean) => void;
+  hapticOnComplete: boolean;
+  setHapticOnComplete: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -15,6 +19,10 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       theme: "system",
       setTheme: (theme) => set({ theme }),
+      chimeOnComplete: true,
+      setChimeOnComplete: (enabled) => set({ chimeOnComplete: enabled }),
+      hapticOnComplete: true,
+      setHapticOnComplete: (enabled) => set({ hapticOnComplete: enabled }),
     }),
     {
       name: STORAGE_KEYS.SETTINGS,

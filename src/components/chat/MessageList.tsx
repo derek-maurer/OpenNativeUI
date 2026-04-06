@@ -87,6 +87,7 @@ export function MessageList({
         role={message.role}
         content={message.content}
         info={message.info}
+        files={message.files}
       />
     );
   };

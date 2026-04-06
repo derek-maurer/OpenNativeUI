@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
 import { useTheme } from "@react-navigation/native";
@@ -7,13 +7,14 @@ import * as WebBrowser from "expo-web-browser";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
 import { MessageActions } from "./MessageActions";
-import type { MessageInfo } from "@/lib/types";
+import type { MessageInfo, AttachedFile } from "@/lib/types";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
   content: string;
   isStreaming?: boolean;
   info?: MessageInfo;
+  files?: AttachedFile[];
 }
 
 function CodeBlock({ code, style, dark }: { code: string; style: any; dark: boolean }) {
@@ -52,6 +53,7 @@ export const MessageBubble = memo(function MessageBubble({
   content,
   isStreaming,
   info,
+  files,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
 
@@ -62,6 +64,8 @@ export const MessageBubble = memo(function MessageBubble({
     return false;
   }, []);
 
+  const imageFiles = files?.filter((f) => f.mimeType?.startsWith("image/")) ?? [];
+
   if (role === "user") {
     return (
       <View style={styles.userRow}>
@@ -69,13 +73,34 @@ export const MessageBubble = memo(function MessageBubble({
           style={[
             styles.userBubble,
             { backgroundColor: dark ? "#2f2f2f" : "#f0f0f0" },
+            imageFiles.length > 0 && styles.userBubbleWithImages,
           ]}
         >
-          <Text
-            style={[styles.userText, { color: colors.text }]}
-          >
-            {content}
-          </Text>
+          {imageFiles.length > 0 && (
+            <View style={styles.imageGrid}>
+              {imageFiles.map((f) => (
+                <Image
+                  key={f.id}
+                  source={{ uri: f.dataUrl ?? f.uri }}
+                  style={[
+                    styles.inlineImage,
+                    imageFiles.length === 1 && styles.inlineImageSingle,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+          {content.length > 0 && (
+            <Text
+              style={[
+                styles.userText,
+                { color: colors.text },
+                imageFiles.length > 0 && { paddingHorizontal: 12, paddingVertical: 4 },
+              ]}
+            >
+              {content}
+            </Text>
+          )}
         </View>
       </View>
     );
@@ -183,6 +208,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     maxWidth: "85%",
+  },
+  userBubbleWithImages: {
+    paddingHorizontal: 4,
+    paddingTop: 4,
+    paddingBottom: 4,
+    overflow: "hidden",
+  },
+  imageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    marginBottom: 4,
+  },
+  inlineImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+  },
+  inlineImageSingle: {
+    width: 200,
+    height: 200,
   },
   userText: {
     fontSize: 16,

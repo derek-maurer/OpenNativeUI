@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, Alert, ScrollView, FlatList, StyleSheet } from "react-native";
+import { View, Text, Pressable, Alert, ScrollView, FlatList, StyleSheet, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,6 +67,10 @@ export default function SettingsScreen() {
   const models = useModelStore((s) => s.models);
   const defaultModelId = useModelStore((s) => s.defaultModelId);
   const setDefaultModel = useModelStore((s) => s.setDefaultModel);
+  const chimeOnComplete = useSettingsStore((s) => s.chimeOnComplete);
+  const setChimeOnComplete = useSettingsStore((s) => s.setChimeOnComplete);
+  const hapticOnComplete = useSettingsStore((s) => s.hapticOnComplete);
+  const setHapticOnComplete = useSettingsStore((s) => s.setHapticOnComplete);
   const clearAll = useConversationStore((s) => s.clearAll);
   const clearChat = useChatStore((s) => s.clearChat);
 
@@ -169,6 +173,36 @@ export default function SettingsScreen() {
             value={defaultModelLabel}
             onPress={() => setModelPickerVisible(true)}
           />
+          <View
+            style={[styles.divider, { backgroundColor: colors.border }]}
+          />
+          <View style={styles.row}>
+            <Ionicons name="musical-note-outline" size={20} color={colors.text} />
+            <Text style={[styles.rowLabel, { color: colors.text }]}>
+              Chime on Response
+            </Text>
+            <Switch
+              value={chimeOnComplete}
+              onValueChange={setChimeOnComplete}
+              trackColor={{ false: "#525252", true: "#10a37f" }}
+              thumbColor="#fff"
+            />
+          </View>
+          <View
+            style={[styles.divider, { backgroundColor: colors.border }]}
+          />
+          <View style={styles.row}>
+            <Ionicons name="phone-portrait-outline" size={20} color={colors.text} />
+            <Text style={[styles.rowLabel, { color: colors.text }]}>
+              Haptic on Response
+            </Text>
+            <Switch
+              value={hapticOnComplete}
+              onValueChange={setHapticOnComplete}
+              trackColor={{ false: "#525252", true: "#10a37f" }}
+              thumbColor="#fff"
+            />
+          </View>
         </View>
 
         {/* Server */}

@@ -1,5 +1,5 @@
-import { useEffect, useCallback, useRef } from "react";
-import { StyleSheet } from "react-native";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { StyleSheet, ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 import { useNavigation, DrawerActions, useTheme } from "@react-navigation/native";
@@ -21,6 +21,7 @@ export default function ChatScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const isNewConversation = useRef(isNew === "true");
+  const [loading, setLoading] = useState(!isNewConversation.current);
 
   const setConversation = useChatStore((s) => s.setConversation);
   const messages = useChatStore((s) => s.messages);
@@ -57,6 +58,8 @@ export default function ChatScreen() {
         } catch {
           // If fetch fails (e.g. 404), start empty
           setConversation(id, []);
+        } finally {
+          setLoading(false);
         }
 
         if (initialMessage) {
@@ -85,22 +88,35 @@ export default function ChatScreen() {
     >
       <ChatHeader onMenuPress={openDrawer} />
 
-      <MessageList
-        messages={messages}
-        streamingContent={streamingContent}
-        isStreaming={isStreaming}
-        streamingStatus={streamingStatus}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#10a37f" />
+        </View>
+      ) : (
+        <>
+          <MessageList
+            messages={messages}
+            streamingContent={streamingContent}
+            isStreaming={isStreaming}
+            streamingStatus={streamingStatus}
+          />
 
-      <InputComposer
-        onSend={handleSend}
-        isStreaming={isStreaming}
-        onStop={abort}
-      />
+          <InputComposer
+            onSend={handleSend}
+            isStreaming={isStreaming}
+            onStop={abort}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

@@ -35,12 +35,19 @@ export default function NewChatScreen() {
 
       try {
         const conversationId = Crypto.randomUUID();
-        // Capture web search state before clearing
-        const wasWebSearchEnabled = useChatStore.getState().webSearchEnabled;
+        // Capture transient state before clearing
+        const { webSearchEnabled: wasWebSearchEnabled, pendingFiles: savedFiles, thinkingLevel: savedThinking } =
+          useChatStore.getState();
         clearChat();
-        // Restore web search toggle so the chat screen can use it
+        // Restore transient state so the chat screen can use it
         if (wasWebSearchEnabled) {
           useChatStore.getState().toggleWebSearch();
+        }
+        if (savedThinking) {
+          useChatStore.getState().setThinkingLevel(savedThinking);
+        }
+        for (const file of savedFiles) {
+          useChatStore.getState().addPendingFile(file);
         }
 
         router.replace(

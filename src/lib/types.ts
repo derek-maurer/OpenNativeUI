@@ -72,6 +72,9 @@ export interface AttachedFile {
   name: string;
   size: number;
   status: "uploading" | "processing" | "ready" | "error";
+  uri?: string;
+  mimeType?: string;
+  dataUrl?: string;
 }
 
 // Open WebUI conversation format
@@ -114,9 +117,13 @@ export interface ServerConversation {
 // Chat completions
 export type ThinkingLevel = "low" | "medium" | "high";
 
+export type MessageContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
 export interface ChatCompletionRequest {
   model: string;
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: string; content: string | MessageContentPart[] }>;
   stream: boolean;
   files?: Array<{ type: string; id: string }>;
   chat_id?: string;

@@ -5,14 +5,16 @@ import * as Haptics from "expo-haptics";
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useModelStore } from "@/stores/modelStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useConversationStore } from "@/stores/conversationStore";
+import { playChime } from "@/lib/chime";
 import { streamChatCompletion } from "@/services/streaming";
 import {
   createServerConversation,
   updateServerConversation,
   buildChatPayload,
 } from "@/services/conversationApi";
-import type { Message, MessageInfo, ChatCompletionRequest } from "@/lib/types";
+import type { Message, MessageInfo, ChatCompletionRequest, MessageContentPart } from "@/lib/types";
 
 export function useStreamingChat() {
   const abortRef = useRef<(() => void) | null>(null);
@@ -51,21 +53,34 @@ export function useStreamingChat() {
 
       // Build messages array for the API
       const allMessages = [...messages, userMessage];
-      const apiMessages = allMessages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
-      // Include files if any are ready
       const readyFiles = pendingFiles.filter((f) => f.status === "ready");
+      const imageFiles = readyFiles.filter((f) => f.dataUrl);
+      const docFiles = readyFiles.filter((f) => !f.dataUrl);
+
+      const apiMessages = allMessages.map((m) => {
+        // For the current user message, embed images inline as base64 data URIs
+        const isCurrentMsg = m.id === userMessage.id;
+        if (isCurrentMsg && imageFiles.length > 0) {
+          const parts: MessageContentPart[] = [
+            { type: "text", text: m.content },
+            ...imageFiles.map((f) => ({
+              type: "image_url" as const,
+              image_url: { url: f.dataUrl! },
+            })),
+          ];
+          return { role: m.role, content: parts };
+        }
+        return { role: m.role, content: m.content };
+      });
+
       const requestBody: ChatCompletionRequest = {
         model,
         messages: apiMessages,
         stream: true,
         chat_id: conversationId,
         id: userMessage.id,
-        ...(readyFiles.length > 0 && {
-          files: readyFiles.map((f) => ({ type: "file", id: f.id })),
+        ...(docFiles.length > 0 && {
+          files: docFiles.map((f) => ({ type: "file", id: f.id })),
         }),
         ...(webSearchEnabled && {
           features: { web_search: true },
@@ -120,7 +135,14 @@ export function useStreamingChat() {
           };
 
           finalizeStream(assistantMessage);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+          const settings = useSettingsStore.getState();
+          if (settings.hapticOnComplete) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+          if (settings.chimeOnComplete) {
+            playChime();
+          }
 
           // Sync conversation to the server
           await syncToServer(

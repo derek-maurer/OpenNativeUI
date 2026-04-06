@@ -27,11 +27,15 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
 
   const handlePickFile = async () => {
     onClose();
+    // Allow the Modal to fully dismiss before presenting the system picker
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await pickAndUpload();
   };
 
   const handlePickPhoto = async () => {
     onClose();
+    // Allow the Modal to fully dismiss before presenting the system picker
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await pickPhotoAndUpload();
   };
 
