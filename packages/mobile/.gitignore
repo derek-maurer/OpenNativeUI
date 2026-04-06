@@ -1,0 +1,26 @@
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native (Expo prebuild output — regenerable)
+/ios
+/android
+
+# Kotlin build cache
+.kotlin/
+
+# Signing artifacts
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Example scaffolding
+app-example
