@@ -88,6 +88,7 @@ export function MessageList({
         content={message.content}
         info={message.info}
         files={message.files}
+        sources={message.sources}
       />
     );
   };

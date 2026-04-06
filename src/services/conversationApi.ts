@@ -142,6 +142,7 @@ export function historyToMessages(
       createdAt: msg.timestamp * 1000, // Convert back to ms
       model: msg.model,
       files: msg.files,
+      sources: msg.sources,
     });
 
     // Follow children — pick the last child (most recent branch) if multiple
@@ -188,6 +189,7 @@ export function buildChatPayload(
       content: msg.content,
       timestamp: Math.floor(msg.createdAt / 1000),
       ...(msg.files && msg.files.length > 0 && { files: msg.files }),
+      ...(msg.sources && msg.sources.length > 0 && { sources: msg.sources }),
       ...(msg.role === "user" && { models: [model] }),
       ...(msg.role === "assistant" &&
         msg.model && {

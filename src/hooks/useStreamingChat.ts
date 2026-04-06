@@ -16,7 +16,13 @@ import {
   updateServerConversation,
   buildChatPayload,
 } from "@/services/conversationApi";
-import type { Message, MessageInfo, ChatCompletionRequest, MessageContentPart } from "@/lib/types";
+import type {
+  Message,
+  MessageInfo,
+  MessageSource,
+  ChatCompletionRequest,
+  MessageContentPart,
+} from "@/lib/types";
 
 export function useStreamingChat() {
   const abortRef = useRef<(() => void) | null>(null);
@@ -169,6 +175,11 @@ export function useStreamingChat() {
       let fullContent = "";
       let firstTokenTime: number | null = null;
       let tokenCount = 0;
+      // Sources can arrive as their own stream frame (RAG/web-search hits)
+      // either mid-stream or on the final completion event. We accumulate
+      // them and attach to the finalized assistant message so pass 2 can
+      // render clickable [N] citations without needing to re-stream.
+      let collectedSources: MessageSource[] | undefined;
 
       console.log("[chat:send] starting stream", {
         effectiveId,
@@ -190,6 +201,16 @@ export function useStreamingChat() {
         },
         onStatus: (status) => {
           setStreamingStatus(status.done ? null : status);
+        },
+        onSources: (sources) => {
+          // Replace wholesale rather than append — Open WebUI re-emits the
+          // full sources array on later frames (web search batches results),
+          // so the last payload is authoritative.
+          collectedSources = sources;
+          console.log("[chat:stream] sources captured", {
+            effectiveId,
+            count: sources.length,
+          });
         },
         onDone: async () => {
           console.log("[chat:stream] done", {
@@ -221,6 +242,7 @@ export function useStreamingChat() {
             createdAt: Date.now(),
             model,
             info,
+            sources: collectedSources,
           };
 
           finalizeStream(assistantMessage);
@@ -256,6 +278,7 @@ export function useStreamingChat() {
               content: fullContent + "\n\n*[Stream interrupted]*",
               createdAt: Date.now(),
               model,
+              sources: collectedSources,
             };
             finalizeStream(partialMessage);
 

@@ -1,14 +1,42 @@
 import EventSource from "react-native-sse";
 import type { Socket } from "socket.io-client";
-import type { ChatCompletionRequest, ChatCompletionChunk, StreamingStatus } from "@/lib/types";
+import type {
+  ChatCompletionRequest,
+  ChatCompletionChunk,
+  StreamingStatus,
+  MessageSource,
+} from "@/lib/types";
 import { API_PATHS } from "@/lib/constants";
 import { getSocket, getSessionId } from "./socket";
 
 interface StreamCallbacks {
   onToken: (token: string) => void;
   onStatus: (status: StreamingStatus) => void;
+  onSources: (sources: MessageSource[]) => void;
   onDone: () => void;
   onError: (error: Error) => void;
+}
+
+/**
+ * Open WebUI emits RAG/web-search sources as a sibling field to `content`
+ * on chat completion frames (see docs/open-webui-api-reference.md:229).
+ * This helper extracts the `sources` array from whichever envelope the
+ * current frame happens to be — it can live on `data.sources` (top-level)
+ * or on `data.data.sources` (wrapped).
+ */
+function extractSources(
+  data: Record<string, unknown>,
+  inner: Record<string, unknown>,
+): MessageSource[] | null {
+  const fromInner = inner.sources;
+  if (Array.isArray(fromInner) && fromInner.length > 0) {
+    return fromInner as MessageSource[];
+  }
+  const fromTop = data.sources;
+  if (Array.isArray(fromTop) && fromTop.length > 0) {
+    return fromTop as MessageSource[];
+  }
+  return null;
 }
 
 export function streamChatCompletion(
@@ -68,6 +96,17 @@ function streamViaSocket(
     if (!data) return;
 
     const type = data.type as string | undefined;
+
+    // Sources can arrive either piggy-backed on delta/completion events OR
+    // as a standalone event with its own `type`. Check up front so we catch
+    // every variant regardless of which branch the event ultimately matches.
+    {
+      const innerProbe = (data.data ?? data) as Record<string, unknown>;
+      const sources = extractSources(data, innerProbe);
+      if (sources) {
+        callbacks.onSources(sources);
+      }
+    }
 
     // Status/progress updates (web search, RAG, image gen, tools, etc.)
     if (type === "status") {
@@ -194,13 +233,24 @@ function streamViaSSE(
     }
 
     try {
-      const chunk: ChatCompletionChunk = JSON.parse(event.data);
-      const content = chunk.choices[0]?.delta?.content;
+      // Parse loosely — per docs/open-webui-api-reference.md:229 the stream
+      // interleaves OpenAI-shaped chunks (`choices[]`) with sidecar frames
+      // like `{"sources": [...]}` and `{"usage": {...}}` that do NOT have
+      // `choices`. The old typed cast crashed on those and they got swallowed.
+      const frame = JSON.parse(event.data) as Partial<ChatCompletionChunk> & {
+        sources?: MessageSource[];
+      };
+
+      const content = frame.choices?.[0]?.delta?.content;
       if (content) {
         callbacks.onToken(content);
       }
 
-      if (chunk.choices[0]?.finish_reason === "stop") {
+      if (Array.isArray(frame.sources) && frame.sources.length > 0) {
+        callbacks.onSources(frame.sources);
+      }
+
+      if (frame.choices?.[0]?.finish_reason === "stop") {
         es.removeAllEventListeners();
         es.close();
         callbacks.onDone();

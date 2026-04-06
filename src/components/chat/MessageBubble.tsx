@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo, type ReactNode } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
@@ -7,7 +7,8 @@ import * as WebBrowser from "expo-web-browser";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
 import { MessageActions } from "./MessageActions";
-import type { MessageInfo, AttachedFile } from "@/lib/types";
+import { MessageSources, flattenCitations } from "./MessageSources";
+import type { MessageInfo, AttachedFile, MessageSource } from "@/lib/types";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
@@ -15,6 +16,7 @@ interface MessageBubbleProps {
   isStreaming?: boolean;
   info?: MessageInfo;
   files?: AttachedFile[];
+  sources?: MessageSource[];
 }
 
 function CodeBlock({ code, style, dark }: { code: string; style: any; dark: boolean }) {
@@ -54,6 +56,7 @@ export const MessageBubble = memo(function MessageBubble({
   isStreaming,
   info,
   files,
+  sources,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
 
@@ -63,6 +66,14 @@ export const MessageBubble = memo(function MessageBubble({
     });
     return false;
   }, []);
+
+  const openCitation = useCallback((url: string) => {
+    WebBrowser.openBrowserAsync(url, {
+      dismissButtonStyle: "close",
+    });
+  }, []);
+
+  const citations = useMemo(() => flattenCitations(sources), [sources]);
 
   const imageFiles = files?.filter((f) => f.mimeType?.startsWith("image/")) ?? [];
 
@@ -184,12 +195,72 @@ export const MessageBubble = memo(function MessageBubble({
                 <CodeBlock key={node.key} code={code} style={styles} dark={dark} />
               );
             },
+            // Override the leaf text rule to rewrite `[N]` tokens into
+            // pressable spans wired to the citation URL. We must preserve
+            // `inheritedStyles` so text inside bold/italic/list-item still
+            // picks up its ancestor styling. Tokens without a matching
+            // citation (or whose source has no URL) fall through as plain
+            // text. The fast-path bails out when there are no citations or
+            // the text contains no `[` at all.
+            text: (node, _children, _parent, styles, inheritedStyles = {}) => {
+              const text: string = node.content ?? "";
+              if (citations.length === 0 || !text.includes("[")) {
+                return (
+                  <Text key={node.key} style={[inheritedStyles, styles.text]}>
+                    {text}
+                  </Text>
+                );
+              }
+
+              const parts: ReactNode[] = [];
+              const matches = Array.from(text.matchAll(/\[(\d+)\]/g));
+              let cursor = 0;
+              matches.forEach((m, idx) => {
+                const start = m.index ?? 0;
+                if (start > cursor) {
+                  parts.push(text.slice(cursor, start));
+                }
+                const n = parseInt(m[1], 10);
+                const citation = citations[n - 1];
+                if (citation) {
+                  parts.push(
+                    <Text
+                      key={`cite-${node.key}-${idx}`}
+                      style={[inheritedStyles, citationStyles.citation]}
+                      onPress={() => openCitation(citation.url)}
+                      accessibilityRole="link"
+                      accessibilityLabel={`Source ${n}: ${citation.title}`}
+                    >
+                      [{n}]
+                    </Text>,
+                  );
+                } else {
+                  parts.push(m[0]);
+                }
+                cursor = start + m[0].length;
+              });
+
+              if (cursor < text.length) {
+                parts.push(text.slice(cursor));
+              }
+
+              return (
+                <Text key={node.key} style={[inheritedStyles, styles.text]}>
+                  {parts}
+                </Text>
+              );
+            },
           }}
         >
           {content}
         </Markdown>
         {isStreaming && <View style={styles.cursor} />}
-        {!isStreaming && <MessageActions content={content} info={info} />}
+        {!isStreaming && (
+          <>
+            <MessageSources citations={citations} />
+            <MessageActions content={content} info={info} />
+          </>
+        )}
       </View>
     </View>
   );
@@ -270,5 +341,12 @@ const codeBlockStyles = StyleSheet.create({
     borderRadius: 6,
     padding: 4,
     zIndex: 1,
+  },
+});
+
+const citationStyles = StyleSheet.create({
+  citation: {
+    color: "#10a37f",
+    fontWeight: "600",
   },
 });

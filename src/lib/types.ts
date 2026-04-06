@@ -48,6 +48,48 @@ export interface MessageInfo {
   tokensPerSecond: number;
 }
 
+/**
+ * Per-document metadata inside a {@link MessageSource} bundle. Each entry
+ * here corresponds 1:1 to an entry in the parent bundle's `document` array.
+ *
+ * Note: the field named `source` is the *URL string* of that document
+ * (Open WebUI's naming, not ours). Don't confuse it with the outer
+ * {@link MessageSource.source} which describes the search/RAG bundle.
+ */
+export interface MessageSourceMetadata {
+  source?: string; // URL
+  title?: string;
+  description?: string;
+  language?: string;
+  start_index?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * One source bundle attached to an assistant message. Emitted by Open
+ * WebUI as its own frame in the chat completion stream. A single bundle
+ * typically represents one search query or one knowledge-base lookup that
+ * returned multiple documents — the `document`/`metadata` arrays are
+ * parallel, indexed by document.
+ *
+ * Citation tokens like `[N]` in the assistant content are 1-indexed into
+ * the **flat concatenation** of `metadata[]` across all bundles attached
+ * to the message — see `flattenCitations()` in MessageBubble.
+ */
+export interface MessageSource {
+  source?: {
+    name?: string;
+    type?: string; // e.g. "web_search"
+    urls?: string[];
+    queries?: string[];
+    collection_name?: string;
+  };
+  document?: string[];
+  metadata?: MessageSourceMetadata[];
+  distances?: number[];
+  [key: string]: unknown;
+}
+
 export interface Message {
   id: string;
   conversationId: string;
@@ -57,6 +99,7 @@ export interface Message {
   model?: string;
   files?: AttachedFile[];
   info?: MessageInfo;
+  sources?: MessageSource[];
 }
 
 export interface Conversation {
@@ -93,6 +136,7 @@ export interface OpenWebUIMessage {
   modelName?: string;
   modelIdx?: number;
   done?: boolean;
+  sources?: MessageSource[];
 }
 
 export interface OpenWebUIHistory {
