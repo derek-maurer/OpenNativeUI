@@ -5,9 +5,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useModelStore } from "@/stores/modelStore";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { BottomSheet } from "@/components/common/BottomSheet";
-import type { ThinkingLevel } from "@/lib/types";
-
-const THINKING_LEVELS: ThinkingLevel[] = ["low", "medium", "high"];
+import { getModelCapabilities } from "@/lib/modelCapabilities";
 
 interface ChatOptionsSheetProps {
   visible: boolean;
@@ -23,7 +21,8 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const selectedModelId = useModelStore((s) => s.selectedModelId);
   const { pickAndUpload, pickPhotoAndUpload } = useFileUpload();
 
-  const isGptOss = selectedModelId?.toLowerCase().includes("gpt-oss") ?? false;
+  const thinkingCapability = getModelCapabilities(selectedModelId).thinking;
+  const thinkingEnabled = thinkingLevel !== null;
 
   const handlePickFile = async () => {
     onClose();
@@ -107,8 +106,42 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
           <Ionicons name="chevron-forward" size={18} color="#737373" />
         </Pressable>
 
-        {/* Thinking Level — only for GPT-OSS models */}
-        {isGptOss && (
+        {/* Thinking toggle — for models with binary on/off thinking (e.g. Gemma 3+) */}
+        {thinkingCapability.mode === "binary" && (
+          <Pressable
+            onPress={() => setThinkingLevel(thinkingEnabled ? null : "medium")}
+            style={[styles.row, { backgroundColor: rowBg }]}
+          >
+            <View style={styles.rowIcon}>
+              <Ionicons
+                name="bulb-outline"
+                size={22}
+                color={thinkingEnabled ? "#10a37f" : "#737373"}
+              />
+            </View>
+            <Text style={[styles.rowLabel, { color: colors.text }]}>
+              Thinking
+            </Text>
+            <View
+              style={[
+                styles.toggle,
+                thinkingEnabled
+                  ? styles.toggleOn
+                  : { backgroundColor: dark ? "#404040" : "#d4d4d4" },
+              ]}
+            >
+              <View
+                style={[
+                  styles.toggleThumb,
+                  thinkingEnabled && styles.toggleThumbOn,
+                ]}
+              />
+            </View>
+          </Pressable>
+        )}
+
+        {/* Thinking Level — for models with tiered thinking effort (e.g. GPT-OSS) */}
+        {thinkingCapability.mode === "tiered" && (
           <View style={[styles.thinkingSection, { backgroundColor: rowBg }]}>
             <View style={styles.thinkingHeader}>
               <View style={styles.rowIcon}>
@@ -124,7 +157,7 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
             </View>
 
             <View style={styles.thinkingOptions}>
-              {THINKING_LEVELS.map((level) => {
+              {thinkingCapability.levels.map((level) => {
                 const active = thinkingLevel === level;
                 return (
                   <Pressable

@@ -131,7 +131,7 @@ export interface ChatCompletionRequest {
   features?: {
     web_search?: boolean;
   };
-  think?: ThinkingLevel;
+  think?: ThinkingLevel | boolean;
 }
 
 export interface StreamingStatus {

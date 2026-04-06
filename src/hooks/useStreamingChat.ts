@@ -9,6 +9,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useConversationStore } from "@/stores/conversationStore";
 import { playChime } from "@/lib/chime";
 import { streamChatCompletion } from "@/services/streaming";
+import { getModelCapabilities } from "@/lib/modelCapabilities";
 import {
   createServerConversation,
   updateServerConversation,
@@ -38,6 +39,7 @@ export function useStreamingChat() {
       } = useChatStore.getState();
 
       const model = selectedModelId ?? "default";
+      const capabilities = getModelCapabilities(model);
 
       // For new conversations, create the record on the server BEFORE streaming
       // so it exists in the DB regardless of how the stream completes.
@@ -104,8 +106,11 @@ export function useStreamingChat() {
         ...(webSearchEnabled && {
           features: { web_search: true },
         }),
-        ...(thinkingLevel && {
-          think: thinkingLevel,
+        ...(thinkingLevel && capabilities.thinking.mode !== "none" && {
+          // Binary-mode models (e.g. Gemma 3+) get a boolean toggle;
+          // tiered-mode models (e.g. GPT-OSS) get the chosen effort level.
+          think:
+            capabilities.thinking.mode === "binary" ? true : thinkingLevel,
         }),
       };
 
