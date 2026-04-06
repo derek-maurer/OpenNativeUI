@@ -97,7 +97,11 @@ function streamViaSocket(
 
     // Full message replacement (end of stream in some flows)
     if (type === "chat:message" || type === "replace") {
-      // Replace events send the full content — already streamed via deltas
+      const inner = (data.data ?? data) as Record<string, unknown>;
+      if (inner.done === true) {
+        finish();
+        return;
+      }
     }
 
     // Completion event — stream is done

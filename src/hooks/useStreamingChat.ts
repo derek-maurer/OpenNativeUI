@@ -39,6 +39,25 @@ export function useStreamingChat() {
 
       const model = selectedModelId ?? "default";
 
+      // For new conversations, create the record on the server BEFORE streaming
+      // so it exists in the DB regardless of how the stream completes.
+      if (isNew) {
+        try {
+          const stub = buildChatPayload(conversationId, "New Chat", model, []);
+          await createServerConversation(stub);
+          // Add to sidebar immediately so the user sees it
+          useConversationStore.getState().addConversation({
+            id: conversationId,
+            title: "New Chat",
+            model,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        } catch (e) {
+          console.warn("Failed to create conversation on server:", e);
+        }
+      }
+
       // Create user message (in-memory only)
       const userMessage: Message = {
         id: Crypto.randomUUID(),
@@ -144,13 +163,12 @@ export function useStreamingChat() {
             playChime();
           }
 
-          // Sync conversation to the server
+          // Update conversation with full message history
           await syncToServer(
             conversationId,
             [...allMessages, assistantMessage],
             model,
             content,
-            isNew
           );
         },
         onError: (error) => {
@@ -171,7 +189,6 @@ export function useStreamingChat() {
               [...allMessages, partialMessage],
               model,
               content,
-              isNew
             );
           } else {
             setStreaming(false);
@@ -198,32 +215,23 @@ export function useStreamingChat() {
 }
 
 /**
- * Persist the conversation to the Open WebUI server.
- * Creates a new conversation on first exchange, updates on subsequent ones.
+ * Update the conversation on the server with the latest messages.
+ * The conversation record should already exist (created before streaming).
  */
 async function syncToServer(
   conversationId: string,
   messages: Message[],
   model: string,
   firstUserContent: string,
-  isNew: boolean
 ): Promise<void> {
   const title = messages.find((m) => m.role === "user")?.content.slice(0, 100) ?? "New Chat";
   const chatPayload = buildChatPayload(conversationId, title, model, messages);
 
   try {
-    if (isNew) {
-      await createServerConversation(chatPayload);
-      // Refresh full conversation list from the server
-      await useConversationStore.getState().loadConversations();
-    } else {
-      await updateServerConversation(conversationId, chatPayload);
-      useConversationStore.getState().updateConversationLocally(conversationId, {
-        updatedAt: Date.now(),
-      });
-    }
+    await updateServerConversation(conversationId, chatPayload);
+    // Refresh sidebar to pick up the updated title/timestamp
+    await useConversationStore.getState().loadConversations();
   } catch (e) {
-    // Silently fail — conversation still works locally, will sync on next message
     console.warn("Failed to sync conversation to server:", e);
   }
 }
