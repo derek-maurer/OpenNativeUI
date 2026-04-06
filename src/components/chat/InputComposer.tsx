@@ -10,6 +10,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@/stores/chatStore";
+import { useModelStore } from "@/stores/modelStore";
+import { useModelPreferencesStore } from "@/stores/modelPreferencesStore";
 import { FileUploadProgress } from "@/components/files/FileUploadProgress";
 import { ChatOptionsSheet } from "@/components/chat/ChatOptionsSheet";
 
@@ -30,7 +32,10 @@ export function InputComposer({
   const { dark, colors } = useTheme();
   const pendingFiles = useChatStore((s) => s.pendingFiles);
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
-  const thinkingLevel = useChatStore((s) => s.thinkingLevel);
+  const selectedModelId = useModelStore((s) => s.selectedModelId);
+  const thinkingLevel = useModelPreferencesStore((s) =>
+    selectedModelId ? (s.thinkingByModel[selectedModelId] ?? null) : null,
+  );
 
   const hasActiveOptions = webSearchEnabled || thinkingLevel !== null;
 

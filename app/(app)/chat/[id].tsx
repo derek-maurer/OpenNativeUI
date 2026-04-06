@@ -20,8 +20,10 @@ export default function ChatScreen() {
   }>();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const isNewConversation = useRef(isNew === "true");
-  const [loading, setLoading] = useState(!isNewConversation.current);
+  const [loading, setLoading] = useState(isNew !== "true");
+  // Tracks which chat id we've already processed so the effect is idempotent
+  // across dev strict-mode double-invocations and expo-router param updates.
+  const processedIdRef = useRef<string | null>(null);
 
   const setConversation = useChatStore((s) => s.setConversation);
   const messages = useChatStore((s) => s.messages);
@@ -32,16 +34,25 @@ export default function ChatScreen() {
   const { sendMessage, abort } = useStreamingChat();
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || processedIdRef.current === id) return;
+    processedIdRef.current = id;
+
+    // Read isNew fresh on every id change — NOT from a ref captured at mount
+    // time. Expo Router reuses this component across chat navigations, so a
+    // ref initialized once on mount would go stale when the user creates
+    // another new chat from the same session.
+    const isNewConvo = isNew === "true";
 
     const loadMessages = async () => {
-      if (isNewConversation.current) {
-        // New conversation — start with empty messages
+      if (isNewConvo) {
+        // New conversation — start with empty messages and send the initial
+        // message with isNew=true so the streaming hook creates the server
+        // record before streaming.
         setConversation(id, []);
+        setLoading(false);
 
         if (initialMessage) {
           sendMessage(decodeURIComponent(initialMessage), id, true);
-          isNewConversation.current = false;
         }
       } else {
         // Existing conversation — load from server
@@ -69,12 +80,16 @@ export default function ChatScreen() {
     };
 
     loadMessages();
-  }, [id]);
+  }, [id, isNew, initialMessage, sendMessage, setConversation]);
 
   const handleSend = useCallback(
     (content: string) => {
       if (!id) return;
-      sendMessage(content, id, false);
+      // Prefer the server-assigned id that the streaming hook stashes in the
+      // chat store after a new-chat create. The URL param `id` is the
+      // client-generated UUID and won't match what the server persisted.
+      const storeId = useChatStore.getState().currentConversationId;
+      sendMessage(content, storeId ?? id, false);
     },
     [id, sendMessage]
   );

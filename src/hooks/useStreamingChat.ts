@@ -10,6 +10,7 @@ import { useConversationStore } from "@/stores/conversationStore";
 import { playChime } from "@/lib/chime";
 import { streamChatCompletion } from "@/services/streaming";
 import { getModelCapabilities } from "@/lib/modelCapabilities";
+import { getThinkingForModel } from "@/stores/modelPreferencesStore";
 import {
   createServerConversation,
   updateServerConversation,
@@ -23,6 +24,12 @@ export function useStreamingChat() {
 
   const sendMessage = useCallback(
     async (content: string, conversationId: string, isNew = false) => {
+      console.log("[chat:send] sendMessage()", {
+        conversationId,
+        isNew,
+        contentLength: content.length,
+      });
+
       const { serverUrl, token } = useAuthStore.getState();
       const { selectedModelId } = useModelStore.getState();
       const {
@@ -35,32 +42,22 @@ export function useStreamingChat() {
         pendingFiles,
         clearPendingFiles,
         webSearchEnabled,
-        thinkingLevel,
       } = useChatStore.getState();
 
       const model = selectedModelId ?? "default";
       const capabilities = getModelCapabilities(model);
+      const thinkingLevel = getThinkingForModel(model);
 
-      // For new conversations, create the record on the server BEFORE streaming
-      // so it exists in the DB regardless of how the stream completes.
-      if (isNew) {
-        try {
-          const stub = buildChatPayload(conversationId, "New Chat", model, []);
-          await createServerConversation(stub);
-          // Add to sidebar immediately so the user sees it
-          useConversationStore.getState().addConversation({
-            id: conversationId,
-            title: "New Chat",
-            model,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-        } catch (e) {
-          console.warn("Failed to create conversation on server:", e);
-        }
-      }
+      // OpenWebUI always generates its own chat id on POST /chats/new and
+      // ignores the one we send. After create we swap this local variable
+      // to the server-assigned id and use it for every subsequent server
+      // call (stream chat_id, sync, sidebar). The client-generated UUID
+      // lives only in the URL route for this session.
+      let effectiveId = conversationId;
 
-      // Create user message (in-memory only)
+      // Create user message first so it can be persisted with the initial
+      // server record — that way an empty "New Chat" stub never lingers if
+      // the stream fails before producing any tokens.
       const userMessage: Message = {
         id: Crypto.randomUUID(),
         conversationId,
@@ -71,6 +68,58 @@ export function useStreamingChat() {
       };
 
       addUserMessage(userMessage);
+
+      // For new conversations, create the record on the server BEFORE streaming
+      // so it exists in the DB regardless of how the stream completes.
+      if (isNew) {
+        console.log("[chat:send] creating new conversation on server", {
+          conversationId,
+          model,
+          userMessageId: userMessage.id,
+        });
+        try {
+          // Strip heavy attachments (base64 images, file refs) from the create
+          // payload to avoid request timeouts — those still go through the
+          // chat completion request itself.
+          const lightweightUserMessage: Message = {
+            ...userMessage,
+            files: undefined,
+          };
+          // Send id:"" — server assigns its own id regardless, matching Conduit.
+          const stub = buildChatPayload(
+            "",
+            "New Chat",
+            model,
+            [lightweightUserMessage],
+          );
+          const created = await createServerConversation(stub);
+          effectiveId = created?.id ?? conversationId;
+          // Update the chat store so subsequent sendMessage calls (e.g. the
+          // user's second message in this same chat) pick up the server id
+          // via chat/[id].tsx::handleSend → store.currentConversationId.
+          useChatStore.setState({ currentConversationId: effectiveId });
+          console.log("[chat:send] create succeeded — adding to sidebar", {
+            clientId: conversationId,
+            effectiveId,
+            idsMatch: effectiveId === conversationId,
+          });
+          // Add to sidebar immediately so the user sees it
+          useConversationStore.getState().addConversation({
+            id: effectiveId,
+            title: "New Chat",
+            model,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        } catch (e) {
+          console.error("[chat:send] create FAILED — conversation will NOT be in sidebar", {
+            conversationId,
+            error: e instanceof Error ? e.message : String(e),
+            status: (e as any)?.status,
+            body: (e as any)?.body,
+          });
+        }
+      }
 
       // Build messages array for the API
       const allMessages = [...messages, userMessage];
@@ -98,7 +147,7 @@ export function useStreamingChat() {
         model,
         messages: apiMessages,
         stream: true,
-        chat_id: conversationId,
+        chat_id: effectiveId,
         id: userMessage.id,
         ...(docFiles.length > 0 && {
           files: docFiles.map((f) => ({ type: "file", id: f.id })),
@@ -121,9 +170,20 @@ export function useStreamingChat() {
       let firstTokenTime: number | null = null;
       let tokenCount = 0;
 
+      console.log("[chat:send] starting stream", {
+        effectiveId,
+        model,
+        messageCount: apiMessages.length,
+        hasImages: imageFiles.length > 0,
+        hasDocs: docFiles.length > 0,
+      });
+
       const stream = streamChatCompletion(serverUrl, token, requestBody, {
         onToken: (token) => {
-          if (firstTokenTime === null) firstTokenTime = Date.now();
+          if (firstTokenTime === null) {
+            firstTokenTime = Date.now();
+            console.log("[chat:stream] first token received", { effectiveId });
+          }
           tokenCount++;
           fullContent += token;
           appendStreamToken(token);
@@ -132,6 +192,11 @@ export function useStreamingChat() {
           setStreamingStatus(status.done ? null : status);
         },
         onDone: async () => {
+          console.log("[chat:stream] done", {
+            effectiveId,
+            tokenCount,
+            contentLength: fullContent.length,
+          });
           // Approximate output tokens (~0.75 tokens per word is a rough heuristic)
           const wordCount = fullContent.split(/\s+/).filter(Boolean).length;
           const estimatedTokens = Math.round(wordCount * 1.33);
@@ -150,7 +215,7 @@ export function useStreamingChat() {
 
           const assistantMessage: Message = {
             id: Crypto.randomUUID(),
-            conversationId,
+            conversationId: effectiveId,
             role: "assistant",
             content: fullContent,
             createdAt: Date.now(),
@@ -170,17 +235,23 @@ export function useStreamingChat() {
 
           // Update conversation with full message history
           await syncToServer(
-            conversationId,
+            effectiveId,
             [...allMessages, assistantMessage],
             model,
             content,
           );
         },
         onError: (error) => {
+          console.error("[chat:stream] error", {
+            effectiveId,
+            error: error instanceof Error ? error.message : String(error),
+            hadPartialContent: Boolean(fullContent),
+            tokenCount,
+          });
           if (fullContent) {
             const partialMessage: Message = {
               id: Crypto.randomUUID(),
-              conversationId,
+              conversationId: effectiveId,
               role: "assistant",
               content: fullContent + "\n\n*[Stream interrupted]*",
               createdAt: Date.now(),
@@ -190,7 +261,7 @@ export function useStreamingChat() {
 
             // Still try to sync partial content
             syncToServer(
-              conversationId,
+              effectiveId,
               [...allMessages, partialMessage],
               model,
               content,
@@ -232,11 +303,29 @@ async function syncToServer(
   const title = messages.find((m) => m.role === "user")?.content.slice(0, 100) ?? "New Chat";
   const chatPayload = buildChatPayload(conversationId, title, model, messages);
 
+  console.log("[chat:sync] syncing conversation after stream", {
+    conversationId,
+    title,
+    messageCount: messages.length,
+  });
+
   try {
     await updateServerConversation(conversationId, chatPayload);
+    console.log("[chat:sync] update succeeded — reloading sidebar", { conversationId });
     // Refresh sidebar to pick up the updated title/timestamp
     await useConversationStore.getState().loadConversations();
+    const sidebarIds = useConversationStore.getState().conversations.map((c) => c.id);
+    console.log("[chat:sync] sidebar reloaded", {
+      conversationId,
+      sidebarCount: sidebarIds.length,
+      conversationInSidebar: sidebarIds.includes(conversationId),
+    });
   } catch (e) {
-    console.warn("Failed to sync conversation to server:", e);
+    console.error("[chat:sync] sync FAILED", {
+      conversationId,
+      error: e instanceof Error ? e.message : String(e),
+      status: (e as any)?.status,
+      body: (e as any)?.body,
+    });
   }
 }

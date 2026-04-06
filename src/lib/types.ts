@@ -85,8 +85,14 @@ export interface OpenWebUIMessage {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
-  model?: string;
   files?: AttachedFile[];
+  // User-message fields
+  models?: string[];
+  // Assistant-message fields
+  model?: string;
+  modelName?: string;
+  modelIdx?: number;
+  done?: boolean;
 }
 
 export interface OpenWebUIHistory {
@@ -100,7 +106,7 @@ export interface OpenWebUIChatPayload {
   models: string[];
   params: Record<string, unknown>;
   history: OpenWebUIHistory;
-  messages: string[];
+  messages: OpenWebUIMessage[];
   tags: string[];
   timestamp: number;
 }

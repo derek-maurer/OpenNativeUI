@@ -29,14 +29,68 @@ export async function fetchConversation(
 export async function createServerConversation(
   chat: OpenWebUIChatPayload
 ): Promise<ServerConversation> {
-  return apiPost<ServerConversation>(API_PATHS.CHATS_NEW, { chat });
+  const payload = { chat };
+  const payloadSize = JSON.stringify(payload).length;
+  console.log("[chat:api] POST /chats/new", {
+    clientId: chat.id,
+    title: chat.title,
+    model: chat.models?.[0],
+    messageCount: chat.messages?.length,
+    historyCount: Object.keys(chat.history?.messages ?? {}).length,
+    currentId: chat.history?.currentId,
+    payloadBytes: payloadSize,
+  });
+  try {
+    const result = await apiPost<ServerConversation>(API_PATHS.CHATS_NEW, payload);
+    console.log("[chat:api] POST /chats/new OK", {
+      clientId: chat.id,
+      serverId: result?.id,
+      returnedTitle: result?.chat?.title,
+      returnedMessageCount: result?.chat?.messages?.length,
+      idsMatch: result?.id === chat.id,
+    });
+    return result;
+  } catch (e) {
+    console.error("[chat:api] POST /chats/new FAILED", {
+      clientId: chat.id,
+      error: e instanceof Error ? e.message : String(e),
+      status: (e as any)?.status,
+      body: (e as any)?.body,
+    });
+    throw e;
+  }
 }
 
 export async function updateServerConversation(
   id: string,
   chat: Partial<OpenWebUIChatPayload>
 ): Promise<ServerConversation> {
-  return apiPost<ServerConversation>(API_PATHS.CHAT_BY_ID(id), { chat });
+  const payload = { chat };
+  const payloadSize = JSON.stringify(payload).length;
+  console.log("[chat:api] POST /chats/:id (update)", {
+    id,
+    title: chat.title,
+    messageCount: chat.messages?.length,
+    historyCount: chat.history ? Object.keys(chat.history.messages ?? {}).length : undefined,
+    payloadBytes: payloadSize,
+  });
+  try {
+    const result = await apiPost<ServerConversation>(API_PATHS.CHAT_BY_ID(id), payload);
+    console.log("[chat:api] POST /chats/:id OK", {
+      id,
+      serverId: result?.id,
+      returnedMessageCount: result?.chat?.messages?.length,
+    });
+    return result;
+  } catch (e) {
+    console.error("[chat:api] POST /chats/:id FAILED", {
+      id,
+      error: e instanceof Error ? e.message : String(e),
+      status: (e as any)?.status,
+      body: (e as any)?.body,
+    });
+    throw e;
+  }
 }
 
 export async function deleteServerConversation(id: string): Promise<void> {
@@ -48,40 +102,6 @@ export async function deleteAllServerConversations(): Promise<void> {
 }
 
 // --- Format conversion helpers ---
-
-/**
- * Convert a flat ordered message array to the Open WebUI history tree format.
- * Since our app doesn't support branching, the tree is always a linear chain.
- */
-export function messagesToHistory(messages: Message[]): OpenWebUIHistory {
-  if (messages.length === 0) {
-    return { messages: {}, currentId: null };
-  }
-
-  const historyMessages: OpenWebUIHistory["messages"] = {};
-
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-    const parentId = i > 0 ? messages[i - 1].id : null;
-    const childrenIds = i < messages.length - 1 ? [messages[i + 1].id] : [];
-
-    historyMessages[msg.id] = {
-      id: msg.id,
-      parentId,
-      childrenIds,
-      role: msg.role,
-      content: msg.content,
-      timestamp: msg.createdAt / 1000, // Open WebUI uses seconds
-      model: msg.model,
-      files: msg.files,
-    };
-  }
-
-  return {
-    messages: historyMessages,
-    currentId: messages[messages.length - 1].id,
-  };
-}
 
 /**
  * Convert an Open WebUI history tree to a flat ordered message array.
@@ -136,7 +156,11 @@ export function historyToMessages(
 }
 
 /**
- * Build a full chat payload from messages and metadata.
+ * Build a full chat payload from messages and metadata in the exact shape
+ * OpenWebUI's backend expects. This mirrors Conduit's `createConversation`
+ * helper: `history.messages` is a parent-child map, and `chat.messages` is
+ * a parallel array of full message objects (NOT just IDs) so the WebUI and
+ * our own loader can render the conversation.
  */
 export function buildChatPayload(
   conversationId: string,
@@ -144,15 +168,60 @@ export function buildChatPayload(
   model: string,
   messages: Message[]
 ): OpenWebUIChatPayload {
-  const history = messagesToHistory(messages);
+  const messagesMap: Record<string, OpenWebUIMessage> = {};
+  const messagesArray: OpenWebUIMessage[] = [];
+  let previousId: string | null = null;
+  let lastUserId: string | null = null;
+  let currentId: string | null = null;
+
+  for (const msg of messages) {
+    // Assistant messages branch from the last user message (OpenWebUI-style);
+    // user/system messages chain linearly from the previous message.
+    const parentId =
+      msg.role === "assistant" ? (lastUserId ?? previousId) : previousId;
+
+    const entry: OpenWebUIMessage = {
+      id: msg.id,
+      parentId,
+      childrenIds: [],
+      role: msg.role,
+      content: msg.content,
+      timestamp: Math.floor(msg.createdAt / 1000),
+      ...(msg.files && msg.files.length > 0 && { files: msg.files }),
+      ...(msg.role === "user" && { models: [model] }),
+      ...(msg.role === "assistant" &&
+        msg.model && {
+          model: msg.model,
+          modelName: msg.model,
+          modelIdx: 0,
+          done: true,
+        }),
+    };
+
+    messagesMap[msg.id] = entry;
+    // Link child back into parent
+    if (parentId && messagesMap[parentId]) {
+      messagesMap[parentId].childrenIds.push(msg.id);
+    }
+    messagesArray.push(entry);
+
+    previousId = msg.id;
+    currentId = msg.id;
+    if (msg.role === "user") {
+      lastUserId = msg.id;
+    }
+  }
 
   return {
     id: conversationId,
     title,
     models: [model],
     params: {},
-    history,
-    messages: messages.map((m) => m.id),
+    history: {
+      messages: messagesMap,
+      currentId,
+    },
+    messages: messagesArray,
     tags: [],
     timestamp: Date.now() / 1000,
   };

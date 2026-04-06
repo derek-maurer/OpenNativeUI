@@ -3,9 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@/stores/chatStore";
 import { useModelStore } from "@/stores/modelStore";
+import { useModelPreferencesStore } from "@/stores/modelPreferencesStore";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { BottomSheet } from "@/components/common/BottomSheet";
 import { getModelCapabilities } from "@/lib/modelCapabilities";
+import type { ThinkingLevel } from "@/lib/types";
 
 interface ChatOptionsSheetProps {
   visible: boolean;
@@ -16,13 +18,22 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const { dark, colors } = useTheme();
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
   const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
-  const thinkingLevel = useChatStore((s) => s.thinkingLevel);
-  const setThinkingLevel = useChatStore((s) => s.setThinkingLevel);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
+  const thinkingLevel = useModelPreferencesStore((s) =>
+    selectedModelId ? (s.thinkingByModel[selectedModelId] ?? null) : null,
+  );
+  const setThinkingForModel = useModelPreferencesStore(
+    (s) => s.setThinkingForModel,
+  );
   const { pickAndUpload, pickPhotoAndUpload } = useFileUpload();
 
   const thinkingCapability = getModelCapabilities(selectedModelId).thinking;
   const thinkingEnabled = thinkingLevel !== null;
+
+  const setThinkingLevel = (level: ThinkingLevel | null) => {
+    if (!selectedModelId) return;
+    setThinkingForModel(selectedModelId, level);
+  };
 
   const handlePickFile = async () => {
     onClose();

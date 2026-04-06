@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Message, AttachedFile, ThinkingLevel, StreamingStatus } from "@/lib/types";
+import type { Message, AttachedFile, StreamingStatus } from "@/lib/types";
 
 interface ChatState {
   currentConversationId: string | null;
@@ -8,7 +8,6 @@ interface ChatState {
   isStreaming: boolean;
   pendingFiles: AttachedFile[];
   webSearchEnabled: boolean;
-  thinkingLevel: ThinkingLevel | null;
   streamingStatus: StreamingStatus | null;
 
   setConversation: (id: string, messages: Message[]) => void;
@@ -18,7 +17,6 @@ interface ChatState {
   finalizeStream: (fullMessage: Message) => void;
   clearChat: () => void;
   toggleWebSearch: () => void;
-  setThinkingLevel: (level: ThinkingLevel | null) => void;
   setStreamingStatus: (status: StreamingStatus | null) => void;
 
   addPendingFile: (file: AttachedFile) => void;
@@ -34,7 +32,6 @@ export const useChatStore = create<ChatState>()((set) => ({
   isStreaming: false,
   pendingFiles: [],
   webSearchEnabled: false,
-  thinkingLevel: null,
   streamingStatus: null,
 
   setConversation: (id, messages) =>
@@ -80,13 +77,10 @@ export const useChatStore = create<ChatState>()((set) => ({
       streamingStatus: null,
       pendingFiles: [],
       webSearchEnabled: false,
-      thinkingLevel: null,
     }),
 
   toggleWebSearch: () =>
     set((state) => ({ webSearchEnabled: !state.webSearchEnabled })),
-
-  setThinkingLevel: (level) => set({ thinkingLevel: level }),
 
   setStreamingStatus: (status) => set({ streamingStatus: status }),
 

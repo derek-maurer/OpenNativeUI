@@ -24,4 +24,5 @@ export const STORAGE_KEYS = {
   AUTH: "auth-storage",
   SETTINGS: "settings-storage",
   MODELS: "models-storage",
+  MODEL_PREFERENCES: "model-preferences-storage",
 } as const;
