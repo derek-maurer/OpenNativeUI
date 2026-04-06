@@ -1,9 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { View, Text, Pressable, Alert, StyleSheet, Animated } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useConversationStore } from "@/stores/conversationStore";
+import { FolderPickerSheet } from "@/components/folders/FolderPickerSheet";
 import type { Conversation } from "@/lib/types";
 
 interface ConversationItemProps {
@@ -20,7 +21,11 @@ export function ConversationItem({
   const { dark, colors } = useTheme();
   const removeConversation = useConversationStore((s) => s.removeConversation);
   const renameConversation = useConversationStore((s) => s.renameConversation);
+  const moveConversationToFolder = useConversationStore(
+    (s) => s.moveConversationToFolder,
+  );
   const swipeableRef = useRef<Swipeable>(null);
+  const [folderPickerVisible, setFolderPickerVisible] = useState(false);
 
   const handleDelete = () => {
     Alert.alert(
@@ -64,9 +69,25 @@ export function ConversationItem({
   const handleLongPress = () => {
     Alert.alert(conversation.title, undefined, [
       { text: "Rename", onPress: handleRename },
+      {
+        text: "Move to folder",
+        onPress: () => setFolderPickerVisible(true),
+      },
       { text: "Delete", style: "destructive", onPress: handleDelete },
       { text: "Cancel", style: "cancel" },
     ]);
+  };
+
+  const handleFolderSelect = async (folderId: string | null) => {
+    try {
+      await moveConversationToFolder(conversation.id, folderId);
+    } catch (e) {
+      console.error("[sidebar] folder move failed", {
+        conversationId: conversation.id,
+        folderId,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
   };
 
   const renderRightActions = (
@@ -89,46 +110,55 @@ export function ConversationItem({
   };
 
   return (
-    <Swipeable
-      ref={swipeableRef}
-      renderRightActions={renderRightActions}
-      overshootRight={false}
-      rightThreshold={40}
-    >
-      <Pressable
-        onPress={onPress}
-        onLongPress={handleLongPress}
-        style={[
-          styles.container,
-          { backgroundColor: dark ? "#0d0d0d" : "#f9f9f9" },
-          isActive && {
-            backgroundColor: dark ? "#1a1a1a" : "#e0e0e0",
-          },
-        ]}
+    <>
+      <Swipeable
+        ref={swipeableRef}
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        rightThreshold={40}
       >
-        <Text
-          style={[
-            styles.title,
-            { color: colors.text },
-            isActive && { fontWeight: "500" },
-          ]}
-          numberOfLines={1}
-        >
-          {conversation.title}
-        </Text>
         <Pressable
-          onPress={handleLongPress}
-          hitSlop={8}
-          style={styles.editButton}
+          onPress={onPress}
+          onLongPress={handleLongPress}
+          style={[
+            styles.container,
+            { backgroundColor: dark ? "#0d0d0d" : "#f9f9f9" },
+            isActive && {
+              backgroundColor: dark ? "#1a1a1a" : "#e0e0e0",
+            },
+          ]}
         >
-          <Ionicons
-            name="pencil-outline"
-            size={14}
-            color={dark ? "#666" : "#999"}
-          />
+          <Text
+            style={[
+              styles.title,
+              { color: colors.text },
+              isActive && { fontWeight: "500" },
+            ]}
+            numberOfLines={1}
+          >
+            {conversation.title}
+          </Text>
+          <Pressable
+            onPress={handleLongPress}
+            hitSlop={8}
+            style={styles.editButton}
+          >
+            <Ionicons
+              name="pencil-outline"
+              size={14}
+              color={dark ? "#666" : "#999"}
+            />
+          </Pressable>
         </Pressable>
-      </Pressable>
-    </Swipeable>
+      </Swipeable>
+
+      <FolderPickerSheet
+        visible={folderPickerVisible}
+        onClose={() => setFolderPickerVisible(false)}
+        currentFolderId={conversation.folderId ?? null}
+        onSelect={handleFolderSelect}
+      />
+    </>
   );
 }
 

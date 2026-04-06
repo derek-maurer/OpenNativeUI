@@ -18,6 +18,16 @@ export const API_PATHS = {
   FILES_UPLOAD: "/api/v1/files/",
   FILE_STATUS: (id: string) => `/api/v1/files/${id}/process/status`,
   KNOWLEDGE_ADD_FILE: (id: string) => `/api/v1/knowledge/${id}/file/add`,
+
+  // Folders
+  FOLDERS: "/api/v1/folders/",
+  FOLDER_BY_ID: (id: string) => `/api/v1/folders/${id}`,
+  FOLDER_UPDATE: (id: string) => `/api/v1/folders/${id}/update`,
+  FOLDER_UPDATE_PARENT: (id: string) => `/api/v1/folders/${id}/update/parent`,
+  FOLDER_UPDATE_EXPANDED: (id: string) => `/api/v1/folders/${id}/update/expanded`,
+  CHAT_FOLDER: (id: string) => `/api/v1/chats/${id}/folder`,
+  CHATS_IN_FOLDER: (folderId: string) =>
+    `/api/v1/chats/folder/${folderId}`,
 } as const;
 
 export const STORAGE_KEYS = {

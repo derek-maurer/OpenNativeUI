@@ -9,6 +9,7 @@ interface ChatState {
   pendingFiles: AttachedFile[];
   webSearchEnabled: boolean;
   streamingStatus: StreamingStatus | null;
+  pendingFolderId: string | null;
 
   setConversation: (id: string, messages: Message[]) => void;
   addUserMessage: (message: Message) => void;
@@ -18,6 +19,7 @@ interface ChatState {
   clearChat: () => void;
   toggleWebSearch: () => void;
   setStreamingStatus: (status: StreamingStatus | null) => void;
+  setPendingFolderId: (folderId: string | null) => void;
 
   addPendingFile: (file: AttachedFile) => void;
   removePendingFile: (fileId: string) => void;
@@ -33,6 +35,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   pendingFiles: [],
   webSearchEnabled: false,
   streamingStatus: null,
+  pendingFolderId: null,
 
   setConversation: (id, messages) =>
     set({
@@ -77,12 +80,15 @@ export const useChatStore = create<ChatState>()((set) => ({
       streamingStatus: null,
       pendingFiles: [],
       webSearchEnabled: false,
+      pendingFolderId: null,
     }),
 
   toggleWebSearch: () =>
     set((state) => ({ webSearchEnabled: !state.webSearchEnabled })),
 
   setStreamingStatus: (status) => set({ streamingStatus: status }),
+
+  setPendingFolderId: (folderId) => set({ pendingFolderId: folderId }),
 
   addPendingFile: (file) =>
     set((state) => ({

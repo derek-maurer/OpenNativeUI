@@ -15,8 +15,11 @@ export async function fetchConversations(
   limit = 50,
   skip = 0
 ): Promise<ServerConversation[]> {
+  // include_folders=true is required because by default the server omits
+  // foldered chats from this list endpoint, which would make them invisible
+  // to the sidebar and to folder detail views.
   return apiGet<ServerConversation[]>(
-    `${API_PATHS.CHATS}?limit=${limit}&skip=${skip}`
+    `${API_PATHS.CHATS}?limit=${limit}&skip=${skip}&include_folders=true`
   );
 }
 
@@ -239,5 +242,6 @@ export function toConversation(sc: ServerConversation): Conversation {
     model: sc.chat?.models?.[0] ?? "unknown",
     createdAt: sc.created_at * 1000,
     updatedAt: sc.updated_at * 1000,
+    folderId: sc.folder_id ?? null,
   };
 }

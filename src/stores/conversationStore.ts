@@ -7,6 +7,8 @@ import {
   updateServerConversation,
   toConversation,
 } from "@/services/conversationApi";
+import { assignChatToFolder, fetchChatIdsInFolder } from "@/services/folderApi";
+import { useFolderStore } from "@/stores/folderStore";
 
 interface ConversationState {
   conversations: Conversation[];
@@ -15,6 +17,11 @@ interface ConversationState {
   addConversation: (conv: Conversation) => void;
   removeConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
+  moveConversationToFolder: (
+    id: string,
+    folderId: string | null
+  ) => Promise<void>;
+  reloadFolderMemberships: () => Promise<void>;
   updateConversationLocally: (id: string, updates: Partial<Conversation>) => void;
   clearAll: () => Promise<void>;
 }
@@ -53,6 +60,56 @@ export const useConversationStore = create<ConversationState>()((set) => ({
       conversations: state.conversations.map((c) =>
         c.id === id ? { ...c, title, updatedAt: Date.now() } : c
       ),
+    }));
+  },
+
+  moveConversationToFolder: async (id, folderId) => {
+    await assignChatToFolder(id, folderId);
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, folderId, updatedAt: Date.now() } : c
+      ),
+    }));
+  },
+
+  reloadFolderMemberships: async () => {
+    const folders = useFolderStore.getState().folders;
+    if (folders.length === 0) {
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.folderId ? { ...c, folderId: null } : c
+        ),
+      }));
+      return;
+    }
+
+    const results = await Promise.all(
+      folders.map(async (folder) => {
+        try {
+          const chatIds = await fetchChatIdsInFolder(folder.id);
+          return { folderId: folder.id, chatIds };
+        } catch (e) {
+          console.error("[folder:memberships] fetch failed", {
+            folderId: folder.id,
+            error: e instanceof Error ? e.message : String(e),
+          });
+          return { folderId: folder.id, chatIds: [] as string[] };
+        }
+      })
+    );
+
+    const membership = new Map<string, string>();
+    for (const { folderId, chatIds } of results) {
+      for (const chatId of chatIds) {
+        membership.set(chatId, folderId);
+      }
+    }
+
+    set((state) => ({
+      conversations: state.conversations.map((c) => ({
+        ...c,
+        folderId: membership.get(c.id) ?? null,
+      })),
     }));
   },
 

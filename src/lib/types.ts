@@ -108,6 +108,16 @@ export interface Conversation {
   createdAt: number;
   updatedAt: number;
   model: string;
+  folderId?: string | null;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  is_expanded: boolean;
+  created_at: number; // seconds
+  updated_at: number; // seconds
 }
 
 export interface AttachedFile {
@@ -162,6 +172,7 @@ export interface ServerConversation {
   updated_at: number;
   created_at: number;
   share_id?: string | null;
+  folder_id?: string | null;
 }
 
 // Chat completions

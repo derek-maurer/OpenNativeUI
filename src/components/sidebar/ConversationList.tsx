@@ -7,8 +7,11 @@ import type { DrawerContentComponentProps } from "@react-navigation/drawer";
 
 import { useConversationStore } from "@/stores/conversationStore";
 import { useChatStore } from "@/stores/chatStore";
+import { useFolderStore } from "@/stores/folderStore";
 import { ConversationItem } from "./ConversationItem";
-import type { Conversation } from "@/lib/types";
+import type { Conversation, Folder } from "@/lib/types";
+
+const MAX_RECENT_FOLDERS = 3;
 
 function groupByDate(conversations: Conversation[]) {
   const today = new Date();
@@ -40,16 +43,97 @@ function groupByDate(conversations: Conversation[]) {
   return groups;
 }
 
+/**
+ * Rank folders by most recent activity — the max `updatedAt` across
+ * conversations in the folder. Folders with no conversations fall back
+ * to their own server-side `updated_at`. Returns top N.
+ */
+function getRecentFolders(
+  folders: Folder[],
+  conversations: Conversation[],
+  limit: number
+): Array<{ folder: Folder; count: number }> {
+  const stats = new Map<string, { count: number; lastActivity: number }>();
+
+  for (const folder of folders) {
+    stats.set(folder.id, {
+      count: 0,
+      lastActivity: (folder.updated_at ?? 0) * 1000,
+    });
+  }
+
+  for (const conv of conversations) {
+    if (!conv.folderId) continue;
+    const entry = stats.get(conv.folderId);
+    if (!entry) continue;
+    entry.count += 1;
+    if (conv.updatedAt > entry.lastActivity) {
+      entry.lastActivity = conv.updatedAt;
+    }
+  }
+
+  return folders
+    .map((folder) => ({
+      folder,
+      count: stats.get(folder.id)?.count ?? 0,
+      lastActivity: stats.get(folder.id)?.lastActivity ?? 0,
+    }))
+    .sort((a, b) => b.lastActivity - a.lastActivity)
+    .slice(0, limit)
+    .map(({ folder, count }) => ({ folder, count }));
+}
+
+type Row =
+  | { type: "foldersButton"; id: string }
+  | { type: "folderTile"; folder: Folder; count: number; id: string }
+  | { type: "dateHeader"; title: string; id: string }
+  | { type: "item"; conversation: Conversation; id: string };
+
 export function ConversationList(props: DrawerContentComponentProps) {
   const router = useRouter();
   const { colors, dark } = useTheme();
   const conversations = useConversationStore((s) => s.conversations);
   const isLoading = useConversationStore((s) => s.isLoading);
   const loadConversations = useConversationStore((s) => s.loadConversations);
+  const reloadFolderMemberships = useConversationStore(
+    (s) => s.reloadFolderMemberships
+  );
+  const folders = useFolderStore((s) => s.folders);
+  const loadFolders = useFolderStore((s) => s.loadFolders);
   const currentConversationId = useChatStore((s) => s.currentConversationId);
   const clearChat = useChatStore((s) => s.clearChat);
 
-  const groups = groupByDate(conversations);
+  const recentFolders = getRecentFolders(
+    folders,
+    conversations,
+    MAX_RECENT_FOLDERS
+  );
+
+  const flatData: Row[] = [];
+
+  // Folders section at the top
+  flatData.push({ type: "foldersButton", id: "folders-button" });
+  for (const { folder, count } of recentFolders) {
+    flatData.push({
+      type: "folderTile",
+      folder,
+      count,
+      id: `folder-${folder.id}`,
+    });
+  }
+
+  // All conversations in flat date groups below (unfiltered)
+  const dateGroups = groupByDate(conversations);
+  for (const group of dateGroups) {
+    flatData.push({
+      type: "dateHeader",
+      title: group.title,
+      id: `date-${group.title}`,
+    });
+    for (const conv of group.data) {
+      flatData.push({ type: "item", conversation: conv, id: conv.id });
+    }
+  }
 
   const handleNewChat = () => {
     clearChat();
@@ -62,21 +146,23 @@ export function ConversationList(props: DrawerContentComponentProps) {
     props.navigation.closeDrawer();
   };
 
-  const flatData: Array<
-    | { type: "header"; title: string; id: string }
-    | { type: "item"; conversation: Conversation; id: string }
-  > = [];
+  const handleOpenFolders = () => {
+    router.push("/(app)/folders");
+    props.navigation.closeDrawer();
+  };
 
-  for (const group of groups) {
-    flatData.push({
-      type: "header",
-      title: group.title,
-      id: `header-${group.title}`,
-    });
-    for (const conv of group.data) {
-      flatData.push({ type: "item", conversation: conv, id: conv.id });
-    }
-  }
+  const handleOpenFolder = (folder: Folder) => {
+    router.push(`/(app)/folders/${folder.id}`);
+    props.navigation.closeDrawer();
+  };
+
+  const handleRefresh = async () => {
+    await Promise.all([loadConversations(), loadFolders()]);
+    await reloadFolderMemberships();
+  };
+
+  const tileBg = dark ? "#141414" : "#f0f0f0";
+  const subText = dark ? "#a3a3a3" : "#525252";
 
   return (
     <SafeAreaView
@@ -102,12 +188,50 @@ export function ConversationList(props: DrawerContentComponentProps) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
         refreshing={isLoading}
-        onRefresh={loadConversations}
+        onRefresh={handleRefresh}
         renderItem={({ item }) => {
-          if (item.type === "header") {
+          if (item.type === "foldersButton") {
             return (
-              <Text style={styles.sectionHeader}>{item.title}</Text>
+              <Pressable
+                onPress={handleOpenFolders}
+                style={[styles.folderTile, { backgroundColor: tileBg }]}
+              >
+                <Ionicons name="folder-outline" size={18} color={colors.text} />
+                <Text
+                  style={[styles.folderTileName, { color: colors.text }]}
+                  numberOfLines={1}
+                >
+                  Folders
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={subText} />
+              </Pressable>
             );
+          }
+
+          if (item.type === "folderTile") {
+            return (
+              <Pressable
+                onPress={() => handleOpenFolder(item.folder)}
+                style={[styles.folderTile, styles.folderTileIndent]}
+              >
+                <Ionicons name="folder" size={16} color={subText} />
+                <Text
+                  style={[styles.folderTileName, { color: colors.text }]}
+                  numberOfLines={1}
+                >
+                  {item.folder.name}
+                </Text>
+                {item.count > 0 && (
+                  <Text style={[styles.folderTileCount, { color: subText }]}>
+                    {item.count}
+                  </Text>
+                )}
+              </Pressable>
+            );
+          }
+
+          if (item.type === "dateHeader") {
+            return <Text style={styles.sectionHeader}>{item.title}</Text>;
           }
 
           return (
@@ -164,6 +288,27 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+  },
+  folderTile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginVertical: 1,
+  },
+  folderTileIndent: {
+    paddingLeft: 24,
+    paddingVertical: 9,
+  },
+  folderTileName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  folderTileCount: {
+    fontSize: 12,
   },
   sectionHeader: {
     fontSize: 11,

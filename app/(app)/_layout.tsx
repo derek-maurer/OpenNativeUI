@@ -1,23 +1,27 @@
 import { useEffect } from "react";
-import { Drawer } from "expo-router/drawer";
-import { Redirect } from "expo-router";
+import { Stack, Redirect } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useTheme } from "@react-navigation/native";
 
-import { ConversationList } from "@/components/sidebar/ConversationList";
 import { useConversationStore } from "@/stores/conversationStore";
+import { useFolderStore } from "@/stores/folderStore";
 import { useModelStore } from "@/stores/modelStore";
 import { useAuthStore } from "@/stores/authStore";
 import { connectSocket, disconnectSocket } from "@/services/socket";
 
 export default function AppLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { colors } = useTheme();
   const loadConversations = useConversationStore((s) => s.loadConversations);
+  const reloadFolderMemberships = useConversationStore(
+    (s) => s.reloadFolderMemberships
+  );
+  const loadFolders = useFolderStore((s) => s.loadFolders);
   const fetchModels = useModelStore((s) => s.fetchModels);
 
   useEffect(() => {
-    loadConversations();
+    (async () => {
+      await Promise.all([loadConversations(), loadFolders()]);
+      await reloadFolderMemberships();
+    })();
     fetchModels();
     connectSocket();
 
@@ -32,27 +36,12 @@ export default function AppLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
-        drawerContent={(props) => <ConversationList {...props} />}
-        screenOptions={{
-          drawerStyle: {
-            width: 300,
-            backgroundColor: colors.card,
-          },
-          headerShown: false,
-          swipeEnabled: true,
-        }}
-      >
-        <Drawer.Screen name="index" options={{ drawerLabel: "New Chat" }} />
-        <Drawer.Screen
-          name="chat/[id]"
-          options={{ drawerItemStyle: { display: "none" } }}
-        />
-        <Drawer.Screen
-          name="settings"
-          options={{ drawerItemStyle: { display: "none" } }}
-        />
-      </Drawer>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(drawer)" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="folders/index" />
+        <Stack.Screen name="folders/[id]" />
+      </Stack>
     </GestureHandlerRootView>
   );
 }

@@ -16,6 +16,7 @@ import {
   updateServerConversation,
   buildChatPayload,
 } from "@/services/conversationApi";
+import { assignChatToFolder } from "@/services/folderApi";
 import type {
   Message,
   MessageInfo,
@@ -109,6 +110,34 @@ export function useStreamingChat() {
             effectiveId,
             idsMatch: effectiveId === conversationId,
           });
+
+          // If the user pre-selected a folder for this new chat via the
+          // options sheet, assign it now that the server ID exists. Failure
+          // here must not block the message flow.
+          const pendingFolderId = useChatStore.getState().pendingFolderId;
+          let appliedFolderId: string | null = null;
+          if (pendingFolderId) {
+            try {
+              await assignChatToFolder(effectiveId, pendingFolderId);
+              appliedFolderId = pendingFolderId;
+              console.log("[chat:send] applied pending folder", {
+                effectiveId,
+                folderId: pendingFolderId,
+              });
+            } catch (folderErr) {
+              console.error("[chat:send] folder assignment failed", {
+                effectiveId,
+                folderId: pendingFolderId,
+                error:
+                  folderErr instanceof Error
+                    ? folderErr.message
+                    : String(folderErr),
+              });
+            } finally {
+              useChatStore.getState().setPendingFolderId(null);
+            }
+          }
+
           // Add to sidebar immediately so the user sees it
           useConversationStore.getState().addConversation({
             id: effectiveId,
@@ -116,6 +145,7 @@ export function useStreamingChat() {
             model,
             createdAt: Date.now(),
             updatedAt: Date.now(),
+            folderId: appliedFolderId,
           });
         } catch (e) {
           console.error("[chat:send] create FAILED — conversation will NOT be in sidebar", {
@@ -337,6 +367,9 @@ async function syncToServer(
     console.log("[chat:sync] update succeeded — reloading sidebar", { conversationId });
     // Refresh sidebar to pick up the updated title/timestamp
     await useConversationStore.getState().loadConversations();
+    // `GET /api/v1/chats/` doesn't return folder_id, so re-patch folder
+    // memberships from the per-folder endpoint to avoid wiping them.
+    await useConversationStore.getState().reloadFolderMemberships();
     const sidebarIds = useConversationStore.getState().conversations.map((c) => c.id);
     console.log("[chat:sync] sidebar reloaded", {
       conversationId,

@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@/stores/chatStore";
 import { useModelStore } from "@/stores/modelStore";
 import { useModelPreferencesStore } from "@/stores/modelPreferencesStore";
+import { useFolderStore } from "@/stores/folderStore";
+import { useConversationStore } from "@/stores/conversationStore";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { BottomSheet } from "@/components/common/BottomSheet";
+import { FolderPickerSheet } from "@/components/folders/FolderPickerSheet";
 import { getModelCapabilities } from "@/lib/modelCapabilities";
 import type { ThinkingLevel } from "@/lib/types";
 
@@ -18,6 +22,9 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const { dark, colors } = useTheme();
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
   const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
+  const currentConversationId = useChatStore((s) => s.currentConversationId);
+  const pendingFolderId = useChatStore((s) => s.pendingFolderId);
+  const setPendingFolderId = useChatStore((s) => s.setPendingFolderId);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
   const thinkingLevel = useModelPreferencesStore((s) =>
     selectedModelId ? (s.thinkingByModel[selectedModelId] ?? null) : null,
@@ -25,10 +32,48 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const setThinkingForModel = useModelPreferencesStore(
     (s) => s.setThinkingForModel,
   );
+  const folders = useFolderStore((s) => s.folders);
+  const activeConversation = useConversationStore((s) =>
+    currentConversationId
+      ? s.conversations.find((c) => c.id === currentConversationId)
+      : undefined,
+  );
+  const moveConversationToFolder = useConversationStore(
+    (s) => s.moveConversationToFolder,
+  );
   const { pickAndUpload, pickPhotoAndUpload } = useFileUpload();
+
+  const [folderPickerVisible, setFolderPickerVisible] = useState(false);
 
   const thinkingCapability = getModelCapabilities(selectedModelId).thinking;
   const thinkingEnabled = thinkingLevel !== null;
+
+  // For an existing chat, use its persisted folderId. For a new unsent
+  // chat, use pendingFolderId from the chat store — it will be applied
+  // right after the chat is created on the server.
+  const currentFolderId = currentConversationId
+    ? (activeConversation?.folderId ?? null)
+    : pendingFolderId;
+  const currentFolderName =
+    currentFolderId
+      ? (folders.find((f) => f.id === currentFolderId)?.name ?? "Unknown")
+      : "None";
+
+  const handleFolderSelect = async (folderId: string | null) => {
+    if (currentConversationId) {
+      try {
+        await moveConversationToFolder(currentConversationId, folderId);
+      } catch (e) {
+        console.error("[chat:options] folder move failed", {
+          conversationId: currentConversationId,
+          folderId,
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
+    } else {
+      setPendingFolderId(folderId);
+    }
+  };
 
   const setThinkingLevel = (level: ThinkingLevel | null) => {
     if (!selectedModelId) return;
@@ -87,6 +132,28 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
               ]}
             />
           </View>
+        </Pressable>
+
+        {/* Folder */}
+        <Pressable
+          onPress={() => setFolderPickerVisible(true)}
+          style={[styles.row, { backgroundColor: rowBg }]}
+        >
+          <View style={styles.rowIcon}>
+            <Ionicons
+              name="folder-outline"
+              size={22}
+              color={currentFolderId ? "#10a37f" : "#737373"}
+            />
+          </View>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Folder</Text>
+          <Text
+            style={styles.rowValue}
+            numberOfLines={1}
+          >
+            {currentFolderName}
+          </Text>
+          <Ionicons name="chevron-forward" size={18} color="#737373" />
         </Pressable>
 
         {/* Attach File */}
@@ -204,6 +271,13 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
 
         <View style={{ height: 16 }} />
       </View>
+
+      <FolderPickerSheet
+        visible={folderPickerVisible}
+        onClose={() => setFolderPickerVisible(false)}
+        currentFolderId={currentFolderId}
+        onSelect={handleFolderSelect}
+      />
     </BottomSheet>
   );
 }
@@ -235,6 +309,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 8,
+  },
+  rowValue: {
+    fontSize: 14,
+    color: "#737373",
+    marginRight: 6,
+    maxWidth: 120,
   },
   toggle: {
     width: 44,

@@ -36,8 +36,11 @@ export default function NewChatScreen() {
       try {
         const conversationId = Crypto.randomUUID();
         // Capture transient state before clearing
-        const { webSearchEnabled: wasWebSearchEnabled, pendingFiles: savedFiles } =
-          useChatStore.getState();
+        const {
+          webSearchEnabled: wasWebSearchEnabled,
+          pendingFiles: savedFiles,
+          pendingFolderId: savedFolderId,
+        } = useChatStore.getState();
         clearChat();
         // Restore transient state so the chat screen can use it
         if (wasWebSearchEnabled) {
@@ -45,6 +48,9 @@ export default function NewChatScreen() {
         }
         for (const file of savedFiles) {
           useChatStore.getState().addPendingFile(file);
+        }
+        if (savedFolderId) {
+          useChatStore.getState().setPendingFolderId(savedFolderId);
         }
 
         router.replace(
