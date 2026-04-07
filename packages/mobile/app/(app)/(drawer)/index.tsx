@@ -10,6 +10,7 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { InputComposer } from "@/components/chat/InputComposer";
 import { useChatStore } from "@opennative/shared";
 import { useModelStore } from "@opennative/shared";
+import { useSettingsStore } from "@opennative/shared";
 
 export default function NewChatScreen() {
   const router = useRouter();
@@ -24,6 +25,15 @@ export default function NewChatScreen() {
       const { defaultModelId, models, setSelectedModel } = useModelStore.getState();
       if (defaultModelId && models.some((m) => m.id === defaultModelId)) {
         setSelectedModel(defaultModelId);
+      }
+      // Sync the chat's web-search option to the "web search by default"
+      // preference. The new-chat screen is a fresh slate, so its options
+      // should always reflect the current default — not whatever lingered
+      // from a previous chat that was navigated away from.
+      const { webSearchByDefault } = useSettingsStore.getState();
+      const { webSearchEnabled, toggleWebSearch } = useChatStore.getState();
+      if (webSearchByDefault !== webSearchEnabled) {
+        toggleWebSearch();
       }
     }, [])
   );

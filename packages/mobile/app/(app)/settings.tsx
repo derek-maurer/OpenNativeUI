@@ -71,6 +71,8 @@ export default function SettingsScreen() {
   const setChimeOnComplete = useSettingsStore((s) => s.setChimeOnComplete);
   const hapticOnComplete = useSettingsStore((s) => s.hapticOnComplete);
   const setHapticOnComplete = useSettingsStore((s) => s.setHapticOnComplete);
+  const webSearchByDefault = useSettingsStore((s) => s.webSearchByDefault);
+  const setWebSearchByDefault = useSettingsStore((s) => s.setWebSearchByDefault);
   const clearAll = useConversationStore((s) => s.clearAll);
   const clearChat = useChatStore((s) => s.clearChat);
 
@@ -199,6 +201,21 @@ export default function SettingsScreen() {
             <Switch
               value={hapticOnComplete}
               onValueChange={setHapticOnComplete}
+              trackColor={{ false: "#525252", true: "#10a37f" }}
+              thumbColor="#fff"
+            />
+          </View>
+          <View
+            style={[styles.divider, { backgroundColor: colors.border }]}
+          />
+          <View style={styles.row}>
+            <Ionicons name="globe-outline" size={20} color={colors.text} />
+            <Text style={[styles.rowLabel, { color: colors.text }]}>
+              Web Search by Default
+            </Text>
+            <Switch
+              value={webSearchByDefault}
+              onValueChange={setWebSearchByDefault}
               trackColor={{ false: "#525252", true: "#10a37f" }}
               thumbColor="#fff"
             />

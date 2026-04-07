@@ -12,6 +12,8 @@ interface SettingsState {
   setChimeOnComplete: (enabled: boolean) => void;
   hapticOnComplete: boolean;
   setHapticOnComplete: (enabled: boolean) => void;
+  webSearchByDefault: boolean;
+  setWebSearchByDefault: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -23,6 +25,8 @@ export const useSettingsStore = create<SettingsState>()(
       setChimeOnComplete: (enabled) => set({ chimeOnComplete: enabled }),
       hapticOnComplete: true,
       setHapticOnComplete: (enabled) => set({ hapticOnComplete: enabled }),
+      webSearchByDefault: false,
+      setWebSearchByDefault: (enabled) => set({ webSearchByDefault: enabled }),
     }),
     {
       name: STORAGE_KEYS.SETTINGS,
