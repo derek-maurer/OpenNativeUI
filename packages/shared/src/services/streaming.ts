@@ -10,7 +10,21 @@ import { API_PATHS } from "../lib/constants";
 import { getSocket, getSessionId } from "./socket";
 
 interface StreamCallbacks {
+  /**
+   * Incremental plain-text token from the model. Consumers should append
+   * this to whatever visible buffer they are maintaining. Used on the
+   * fast path when nothing non-textual (reasoning, details blocks, etc.)
+   * is active.
+   */
   onToken: (token: string) => void;
+  /**
+   * Full-content replacement. Used whenever the streaming layer needs to
+   * rewrite the entire assistant message — for example, when the backend
+   * sends a server-authored `<details type="reasoning">` block inline in
+   * `chat:completion.data.content`, or when our SSE path rebuilds a
+   * live-growing reasoning block locally from `delta.reasoning_content`.
+   */
+  onReplaceContent: (content: string) => void;
   onStatus: (status: StreamingStatus) => void;
   onSources: (sources: MessageSource[]) => void;
   onDone: () => void;
@@ -58,6 +72,15 @@ export function streamChatCompletion(
 /**
  * Socket.IO streaming — matches the Open WebUI web frontend.
  * POST initiates the task, streaming content arrives via Socket.IO events.
+ *
+ * The backend emits `chat:completion` events whose `data.content` holds the
+ * FULL serialized assistant message (including any live `<details
+ * type="reasoning" done="false">` block the middleware has built so far).
+ * Per openwebui/backend/open_webui/utils/middleware.py ~L3797 / L3954,
+ * that content is rebuilt from scratch on every delta — so we must REPLACE
+ * rather than APPEND whenever this field is present. The fallback
+ * `choices[0].delta.content` path still uses append semantics for servers
+ * that don't wrap their stream in the event_emitter middleware.
  */
 function streamViaSocket(
   serverUrl: string,
@@ -75,6 +98,7 @@ function streamViaSocket(
 
   const cleanup = () => {
     socket.off("events", handleEvent);
+    socket.off("chat-events", handleEvent);
   };
 
   const finish = () => {
@@ -119,15 +143,43 @@ function streamViaSocket(
       return;
     }
 
-    // Streaming content chunks
+    // The main event stream: every delta arrives as a `chat:completion`
+    // envelope whose `data.content` holds the full rebuilt assistant
+    // message. When the backend serializes reasoning output into a
+    // `<details>` block it is already embedded in this content string, so
+    // replacing wholesale is exactly what we want. On some edge paths the
+    // inner shape is OpenAI-native (`choices[0].delta.content`) — we treat
+    // that as an incremental token for append semantics.
+    if (type === "chat:completion") {
+      const inner = (data.data ?? data) as Record<string, unknown>;
+
+      const fullContent = inner.content;
+      if (typeof fullContent === "string") {
+        callbacks.onReplaceContent(fullContent);
+      } else {
+        const choices = inner.choices as Array<Record<string, unknown>> | undefined;
+        const delta = choices?.[0]?.delta as Record<string, unknown> | undefined;
+        const deltaContent = delta?.content;
+        if (typeof deltaContent === "string" && deltaContent.length > 0) {
+          callbacks.onToken(deltaContent);
+        }
+      }
+
+      if (inner.done === true) {
+        finish();
+        return;
+      }
+    }
+
+    // Legacy streaming envelopes kept for compatibility with older
+    // Open WebUI server versions and self-hosted forks that still emit
+    // `chat:message:delta` / `message`. New servers send `chat:completion`.
     if (type === "chat:message:delta" || type === "message") {
       const inner = (data.data ?? data) as Record<string, unknown>;
       const content = inner.content as string | undefined;
       if (content) {
         callbacks.onToken(content);
       }
-
-      // Check for done flag on delta events
       if (inner.done === true) {
         finish();
         return;
@@ -137,15 +189,10 @@ function streamViaSocket(
     // Full message replacement (end of stream in some flows)
     if (type === "chat:message" || type === "replace") {
       const inner = (data.data ?? data) as Record<string, unknown>;
-      if (inner.done === true) {
-        finish();
-        return;
+      const replacement = inner.content;
+      if (typeof replacement === "string") {
+        callbacks.onReplaceContent(replacement);
       }
-    }
-
-    // Completion event — stream is done
-    if (type === "chat:completion") {
-      const inner = (data.data ?? data) as Record<string, unknown>;
       if (inner.done === true) {
         finish();
         return;
@@ -158,8 +205,11 @@ function streamViaSocket(
     }
   };
 
-  // Listen BEFORE posting so we don't miss early events
+  // Listen BEFORE posting so we don't miss early events. Register on both
+  // `events` and `chat-events` — conduit and newer Open WebUI versions can
+  // emit on either channel and we want to catch both.
   socket.on("events", handleEvent);
+  socket.on("chat-events", handleEvent);
 
   // POST the request — server returns { status: true, task_id: ... }
   fetch(url, {
@@ -201,8 +251,70 @@ function streamViaSocket(
 }
 
 /**
+ * HTML-escape reasoning content for embedding inside a `<details>` block,
+ * matching the backend middleware's escaping of the raw text.
+ */
+function escapeReasoningForDetails(raw: string): string {
+  return raw
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Build a `<details type="reasoning">` block the same way the backend
+ * middleware does in openwebui/backend/open_webui/utils/middleware.py
+ * (the `elif item_type == 'reasoning':` branch). Each reasoning line is
+ * prefixed with `> ` to render as a blockquote after the HTML is piped
+ * through the markdown renderer.
+ */
+function buildStreamingReasoningDetails(
+  reasoning: string,
+  { done, duration }: { done: boolean; duration: number },
+): string {
+  const trimmed = reasoning.trim();
+  const escapedDisplay =
+    trimmed.length === 0
+      ? ""
+      : escapeReasoningForDetails(
+          trimmed
+            .split("\n")
+            .map((line) => (line.startsWith(">") ? line : `> ${line}`))
+            .join("\n"),
+        );
+  if (done) {
+    return (
+      `<details type="reasoning" done="true" duration="${duration}">\n` +
+      `<summary>Thought for ${duration} seconds</summary>\n` +
+      `${escapedDisplay}\n` +
+      `</details>\n`
+    );
+  }
+  return (
+    `<details type="reasoning" done="false">\n` +
+    `<summary>Thinking…</summary>\n` +
+    `${escapedDisplay}\n` +
+    `</details>\n`
+  );
+}
+
+function joinReasoningAndPrefix(prefix: string, reasoningDetails: string): string {
+  if (prefix.length === 0 || prefix.endsWith("\n")) {
+    return `${prefix}${reasoningDetails}`;
+  }
+  return `${prefix}\n${reasoningDetails}`;
+}
+
+/**
  * SSE fallback — original EventSource-based streaming.
  * Used when Socket.IO is not connected.
+ *
+ * Unlike the socket path (where the backend middleware pre-bakes reasoning
+ * into the `content` field), the SSE path talks to the raw
+ * `/api/chat/completions` stream which emits OpenAI-compatible chunks with
+ * a separate `delta.reasoning_content` field. We accumulate those into a
+ * local `<details>` block and push the whole thing via `onReplaceContent`
+ * so the rest of the pipeline stays unaware of where reasoning came from.
  */
 function streamViaSSE(
   serverUrl: string,
@@ -211,6 +323,82 @@ function streamViaSSE(
   callbacks: StreamCallbacks
 ): { abort: () => void } {
   const url = `${serverUrl.replace(/\/+$/, "")}${API_PATHS.CHAT_COMPLETIONS}`;
+
+  let renderedContent = "";
+  let inReasoningBlock = false;
+  let reasoningPrefix = "";
+  let reasoningBuffer = "";
+  let reasoningStartTime = 0;
+
+  const resetReasoning = () => {
+    inReasoningBlock = false;
+    reasoningPrefix = "";
+    reasoningBuffer = "";
+    reasoningStartTime = 0;
+  };
+
+  const appendVisibleChunk = (chunk: string) => {
+    if (!chunk) return;
+    if (inReasoningBlock) {
+      // Plain text coming after a reasoning block closes the reasoning
+      // segment — finalize it with the elapsed duration, then append the
+      // new chunk as normal prose. Mirrors conduit's
+      // appendVisibleAssistantChunk in streaming_helper.dart.
+      const duration = Math.max(
+        0,
+        Math.round((Date.now() - reasoningStartTime) / 1000),
+      );
+      renderedContent =
+        joinReasoningAndPrefix(
+          reasoningPrefix,
+          buildStreamingReasoningDetails(reasoningBuffer, {
+            done: true,
+            duration,
+          }),
+        ) + chunk;
+      resetReasoning();
+      callbacks.onReplaceContent(renderedContent);
+    } else {
+      renderedContent += chunk;
+      callbacks.onToken(chunk);
+    }
+  };
+
+  const appendReasoningChunk = (chunk: string) => {
+    if (!chunk) return;
+    if (!inReasoningBlock) {
+      inReasoningBlock = true;
+      reasoningPrefix = renderedContent;
+      reasoningBuffer = "";
+      reasoningStartTime = Date.now();
+    }
+    reasoningBuffer += chunk;
+    renderedContent = joinReasoningAndPrefix(
+      reasoningPrefix,
+      buildStreamingReasoningDetails(reasoningBuffer, {
+        done: false,
+        duration: 0,
+      }),
+    );
+    callbacks.onReplaceContent(renderedContent);
+  };
+
+  const finalizeReasoningIfOpen = () => {
+    if (!inReasoningBlock) return;
+    const duration = Math.max(
+      0,
+      Math.round((Date.now() - reasoningStartTime) / 1000),
+    );
+    renderedContent = joinReasoningAndPrefix(
+      reasoningPrefix,
+      buildStreamingReasoningDetails(reasoningBuffer, {
+        done: true,
+        duration,
+      }),
+    );
+    resetReasoning();
+    callbacks.onReplaceContent(renderedContent);
+  };
 
   const es = new EventSource(url, {
     headers: {
@@ -226,6 +414,7 @@ function streamViaSSE(
     if (!event.data) return;
 
     if (event.data === "[DONE]") {
+      finalizeReasoningIfOpen();
       es.removeAllEventListeners();
       es.close();
       callbacks.onDone();
@@ -239,11 +428,30 @@ function streamViaSSE(
       // `choices`. The old typed cast crashed on those and they got swallowed.
       const frame = JSON.parse(event.data) as Partial<ChatCompletionChunk> & {
         sources?: MessageSource[];
+        choices?: Array<{
+          delta?: {
+            content?: string;
+            reasoning_content?: string;
+            // Some providers (Anthropic-compat, Ollama) use alternate names.
+            reasoning?: string;
+            thinking?: string;
+          };
+          finish_reason?: string | null;
+        }>;
       };
 
-      const content = frame.choices?.[0]?.delta?.content;
-      if (content) {
-        callbacks.onToken(content);
+      const delta = frame.choices?.[0]?.delta;
+      if (delta) {
+        const reasoningChunk =
+          delta.reasoning_content ?? delta.reasoning ?? delta.thinking;
+        if (typeof reasoningChunk === "string" && reasoningChunk.length > 0) {
+          appendReasoningChunk(reasoningChunk);
+        }
+
+        const contentChunk = delta.content;
+        if (typeof contentChunk === "string" && contentChunk.length > 0) {
+          appendVisibleChunk(contentChunk);
+        }
       }
 
       if (Array.isArray(frame.sources) && frame.sources.length > 0) {
@@ -251,6 +459,7 @@ function streamViaSSE(
       }
 
       if (frame.choices?.[0]?.finish_reason === "stop") {
+        finalizeReasoningIfOpen();
         es.removeAllEventListeners();
         es.close();
         callbacks.onDone();

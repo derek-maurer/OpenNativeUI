@@ -42,6 +42,7 @@ export function useStreamingChat() {
       const {
         addUserMessage,
         appendStreamToken,
+        replaceStreamContent,
         setStreaming,
         setStreamingStatus,
         finalizeStream,
@@ -228,6 +229,20 @@ export function useStreamingChat() {
           tokenCount++;
           fullContent += token;
           appendStreamToken(token);
+        },
+        onReplaceContent: (content) => {
+          // First replace doubles as "first token" since the backend's
+          // reasoning path may deliver a `<details>` block before any
+          // plain-text deltas fire onToken.
+          if (firstTokenTime === null) {
+            firstTokenTime = Date.now();
+            console.log("[chat:stream] first content received", {
+              effectiveId,
+            });
+          }
+          tokenCount++;
+          fullContent = content;
+          replaceStreamContent(content);
         },
         onStatus: (status) => {
           setStreamingStatus(status.done ? null : status);

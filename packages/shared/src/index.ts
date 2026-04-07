@@ -12,6 +12,17 @@ export {
   type ThinkingCapability,
 } from "./lib/modelCapabilities";
 
+// Reasoning / thinking content parsing
+export {
+  parseReasoningSegments,
+  hasReasoningContent,
+  cleanReasoningText,
+  formatDuration,
+  type ReasoningEntry,
+  type ReasoningSegment,
+  type BlockType,
+} from "./lib/reasoningParser";
+
 // Types
 export type {
   ServerConfig,

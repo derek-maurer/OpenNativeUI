@@ -14,6 +14,7 @@ interface ChatState {
   setConversation: (id: string, messages: Message[]) => void;
   addUserMessage: (message: Message) => void;
   appendStreamToken: (token: string) => void;
+  replaceStreamContent: (content: string) => void;
   setStreaming: (value: boolean) => void;
   finalizeStream: (fullMessage: Message) => void;
   clearChat: () => void;
@@ -54,6 +55,16 @@ export const useChatStore = create<ChatState>()((set) => ({
   appendStreamToken: (token) =>
     set((state) => ({
       streamingContent: state.streamingContent + token,
+    })),
+
+  // Used when the streaming layer needs to rewrite the whole assistant
+  // message rather than append — e.g. when Open WebUI's socket path sends
+  // a full `data.content` payload that already contains a live
+  // `<details type="reasoning">` block built server-side, or when the SSE
+  // path is growing its own local reasoning block from delta chunks.
+  replaceStreamContent: (content) =>
+    set(() => ({
+      streamingContent: content,
     })),
 
   setStreaming: (value) =>

@@ -8,7 +8,15 @@ import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
 import { MessageActions } from "./MessageActions";
 import { MessageSources, flattenCitations } from "./MessageSources";
-import type { MessageInfo, AttachedFile, MessageSource } from "@opennative/shared";
+import { ThinkingBlock } from "./ThinkingBlock";
+import {
+  hasReasoningContent,
+  parseReasoningSegments,
+  type MessageInfo,
+  type AttachedFile,
+  type MessageSource,
+  type ReasoningSegment,
+} from "@opennative/shared";
 
 interface MessageBubbleProps {
   role: "user" | "assistant" | "system";
@@ -74,6 +82,17 @@ export const MessageBubble = memo(function MessageBubble({
   }, []);
 
   const citations = useMemo(() => flattenCitations(sources), [sources]);
+
+  // Split assistant content into ordered text + reasoning segments so a
+  // `<details type="reasoning">` block embedded by the backend can render
+  // as a collapsible ThinkingBlock instead of leaking raw HTML into the
+  // markdown renderer. Messages that have no reasoning markers skip the
+  // segmenter entirely and fall through to the single-Markdown fast path.
+  const segments = useMemo<ReasoningSegment[] | null>(() => {
+    if (role !== "assistant") return null;
+    if (!hasReasoningContent(content)) return null;
+    return parseReasoningSegments(content);
+  }, [content, role]);
 
   const imageFiles = files?.filter((f) => f.mimeType?.startsWith("image/")) ?? [];
 
@@ -179,81 +198,117 @@ export const MessageBubble = memo(function MessageBubble({
     },
   };
 
+  const markdownRules = {
+    fence: (node: any, _children: any, _parent: any, styles: any) => {
+      const code = node.content ?? "";
+      return (
+        <CodeBlock key={node.key} code={code} style={styles} dark={dark} />
+      );
+    },
+    // Override the leaf text rule to rewrite `[N]` tokens into
+    // pressable spans wired to the citation URL. We must preserve
+    // `inheritedStyles` so text inside bold/italic/list-item still
+    // picks up its ancestor styling. Tokens without a matching
+    // citation (or whose source has no URL) fall through as plain
+    // text. The fast-path bails out when there are no citations or
+    // the text contains no `[` at all.
+    text: (
+      node: any,
+      _children: any,
+      _parent: any,
+      styles: any,
+      inheritedStyles: any = {},
+    ) => {
+      const text: string = node.content ?? "";
+      if (citations.length === 0 || !text.includes("[")) {
+        return (
+          <Text key={node.key} style={[inheritedStyles, styles.text]}>
+            {text}
+          </Text>
+        );
+      }
+
+      const parts: ReactNode[] = [];
+      const matches = Array.from(text.matchAll(/\[(\d+)\]/g));
+      let cursor = 0;
+      matches.forEach((m, idx) => {
+        const start = m.index ?? 0;
+        if (start > cursor) {
+          parts.push(text.slice(cursor, start));
+        }
+        const n = parseInt(m[1], 10);
+        const citation = citations[n - 1];
+        if (citation) {
+          parts.push(
+            <Text
+              key={`cite-${node.key}-${idx}`}
+              style={[inheritedStyles, citationStyles.citation]}
+              onPress={() => openCitation(citation.url)}
+              accessibilityRole="link"
+              accessibilityLabel={`Source ${n}: ${citation.title}`}
+            >
+              [{n}]
+            </Text>,
+          );
+        } else {
+          parts.push(m[0]);
+        }
+        cursor = start + m[0].length;
+      });
+
+      if (cursor < text.length) {
+        parts.push(text.slice(cursor));
+      }
+
+      return (
+        <Text key={node.key} style={[inheritedStyles, styles.text]}>
+          {parts}
+        </Text>
+      );
+    },
+  };
+
+  const renderMarkdown = (body: string, key?: string) => (
+    <Markdown
+      key={key}
+      style={markdownStyles}
+      onLinkPress={handleLinkPress}
+      rules={markdownRules}
+    >
+      {body}
+    </Markdown>
+  );
+
+  // Assistant body: either the plain markdown fast path, or an ordered
+  // list of text-and-reasoning segments when the message contains
+  // `<details type="reasoning">` blocks. We keep each ThinkingBlock
+  // inline so reasoning that happens mid-response (e.g. a model that
+  // thinks, answers, then thinks again) renders in the right order.
+  let bodyContent: ReactNode;
+  if (segments && segments.length > 0) {
+    bodyContent = segments.map((segment, idx) => {
+      if (segment.kind === "reasoning") {
+        return (
+          <ThinkingBlock
+            key={`reasoning-${idx}`}
+            entry={segment.entry}
+            isStreaming={isStreaming}
+          />
+        );
+      }
+      return renderMarkdown(segment.text, `text-${idx}`);
+    });
+  } else {
+    bodyContent = renderMarkdown(content);
+  }
+
   return (
     <View style={styles.assistantRow}>
       <View style={styles.avatarContainer}>
         <Ionicons name="sparkles" size={14} color="#10a37f" />
       </View>
       <View style={styles.assistantContent}>
-        <Markdown
-          style={markdownStyles}
-          onLinkPress={handleLinkPress}
-          rules={{
-            fence: (node, _children, _parent, styles) => {
-              const code = node.content ?? "";
-              return (
-                <CodeBlock key={node.key} code={code} style={styles} dark={dark} />
-              );
-            },
-            // Override the leaf text rule to rewrite `[N]` tokens into
-            // pressable spans wired to the citation URL. We must preserve
-            // `inheritedStyles` so text inside bold/italic/list-item still
-            // picks up its ancestor styling. Tokens without a matching
-            // citation (or whose source has no URL) fall through as plain
-            // text. The fast-path bails out when there are no citations or
-            // the text contains no `[` at all.
-            text: (node, _children, _parent, styles, inheritedStyles = {}) => {
-              const text: string = node.content ?? "";
-              if (citations.length === 0 || !text.includes("[")) {
-                return (
-                  <Text key={node.key} style={[inheritedStyles, styles.text]}>
-                    {text}
-                  </Text>
-                );
-              }
-
-              const parts: ReactNode[] = [];
-              const matches = Array.from(text.matchAll(/\[(\d+)\]/g));
-              let cursor = 0;
-              matches.forEach((m, idx) => {
-                const start = m.index ?? 0;
-                if (start > cursor) {
-                  parts.push(text.slice(cursor, start));
-                }
-                const n = parseInt(m[1], 10);
-                const citation = citations[n - 1];
-                if (citation) {
-                  parts.push(
-                    <Text
-                      key={`cite-${node.key}-${idx}`}
-                      style={[inheritedStyles, citationStyles.citation]}
-                      onPress={() => openCitation(citation.url)}
-                      accessibilityRole="link"
-                      accessibilityLabel={`Source ${n}: ${citation.title}`}
-                    >
-                      [{n}]
-                    </Text>,
-                  );
-                } else {
-                  parts.push(m[0]);
-                }
-                cursor = start + m[0].length;
-              });
-
-              if (cursor < text.length) {
-                parts.push(text.slice(cursor));
-              }
-
-              return (
-                <Text key={node.key} style={[inheritedStyles, styles.text]}>
-                  {parts}
-                </Text>
-              );
-            },
-          }}
-        >
-          {content}
-        </Markdown>
+        {bodyContent}
         {isStreaming && <View style={styles.cursor} />}
         {!isStreaming && (
           <>
