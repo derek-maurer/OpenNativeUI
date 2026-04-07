@@ -10,7 +10,7 @@
     "mobile:android": "npm run android --workspace=@opennative/mobile",
     "mobile:start": "npm run start --workspace=@opennative/mobile",
     "macos:start": "npm run start --workspace=@opennative/macos",
-    "macos:run": "npm run macos:start --workspace=@opennative/macos & npm run macos-no-packager --workspace=@opennative/macos",
+    "macos:run": "npm run macos-no-packager --workspace=@opennative/macos",
     "macos:podinstall": "cd packages/macos/macos && bundle exec pod install",
     "shared:typecheck": "npm run typecheck --workspace=@opennative/shared",
     "mobile:typecheck": "npm run typecheck --workspace=@opennative/mobile",

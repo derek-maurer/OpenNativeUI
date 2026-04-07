@@ -101,6 +101,10 @@ export {
 
 export * from "./services/streaming";
 
+// Hooks
+export { useStreamingChat } from "./hooks/useStreamingChat";
+export type { UseStreamingChatOptions } from "./hooks/useStreamingChat";
+
 // Stores
 export { useAuthStore } from "./stores/authStore";
 export { useChatStore } from "./stores/chatStore";
