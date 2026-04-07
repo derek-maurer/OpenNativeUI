@@ -111,11 +111,28 @@ export interface Conversation {
   folderId?: string | null;
 }
 
+export interface FolderFileRef {
+  /** "file" for an uploaded file, "collection" for a knowledge collection. */
+  type: "file" | "collection";
+  id: string;
+  name?: string;
+}
+
+export interface FolderData {
+  system_prompt?: string;
+  files?: FolderFileRef[];
+}
+
 export interface Folder {
   id: string;
   name: string;
   parent_id: string | null;
   is_expanded: boolean;
+  /**
+   * Folder data blob (system prompt + attached files/collections).
+   * Only populated by GET /folders/{id}; the list endpoint omits it.
+   */
+  data?: FolderData | null;
   created_at: number; // seconds
   updated_at: number; // seconds
 }

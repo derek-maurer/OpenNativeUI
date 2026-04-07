@@ -1,9 +1,18 @@
 import { apiGet, apiPost, apiDelete } from "./api";
 import { API_PATHS } from "../lib/constants";
-import type { Folder } from "../lib/types";
+import type { Folder, FolderData } from "../lib/types";
 
 export async function fetchFolders(): Promise<Folder[]> {
   return apiGet<Folder[]>(API_PATHS.FOLDERS);
+}
+
+/**
+ * Fetch a single folder including its `data` blob (system_prompt, files).
+ * The list endpoint omits these fields, so call this when entering the
+ * folder detail screen.
+ */
+export async function fetchFolderById(id: string): Promise<Folder> {
+  return apiGet<Folder>(API_PATHS.FOLDER_BY_ID(id));
 }
 
 export async function createFolder(name: string): Promise<Folder> {
@@ -15,6 +24,19 @@ export async function updateFolderName(
   name: string
 ): Promise<Folder> {
   return apiPost<Folder>(API_PATHS.FOLDER_UPDATE(id), { name });
+}
+
+/**
+ * Patch the folder's `data` blob (system_prompt and/or files).
+ * The server shallow-merges top-level keys, so omitted keys are preserved
+ * but nested arrays/objects (e.g. `files`) are replaced wholesale — always
+ * send the full intended `files` array when changing it.
+ */
+export async function updateFolderData(
+  id: string,
+  data: FolderData
+): Promise<Folder> {
+  return apiPost<Folder>(API_PATHS.FOLDER_UPDATE(id), { data });
 }
 
 export async function updateFolderParent(

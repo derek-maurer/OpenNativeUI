@@ -41,6 +41,8 @@ export type {
   Message,
   Conversation,
   Folder,
+  FolderData,
+  FolderFileRef,
   AttachedFile,
   OpenWebUIMessage,
   OpenWebUIHistory,
@@ -77,10 +79,12 @@ export {
 
 export {
   fetchFolders,
+  fetchFolderById,
   createFolder,
   updateFolderName,
   updateFolderParent,
   updateFolderExpanded,
+  updateFolderData,
   deleteFolder,
   assignChatToFolder,
   fetchChatIdsInFolder,
