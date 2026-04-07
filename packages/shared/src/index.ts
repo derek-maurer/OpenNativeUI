@@ -6,11 +6,14 @@ export { registerStorage, lazyStorage, onStorageRegistered } from "./lib/storage
 // Constants
 export { API_PATHS, STORAGE_KEYS } from "./lib/constants";
 
-// Model capabilities
+// Thinking-control profiles (per model family, loaded from
+// config/thinkingModels.json — edit that file to add a new family).
 export {
-  getModelCapabilities,
-  type ModelCapabilities,
-  type ThinkingCapability,
+  getThinkingProfile,
+  resolveEffectiveThinkingValue,
+  type ThinkingProfile,
+  type ThinkingOption,
+  type ThinkingValue,
 } from "./lib/modelCapabilities";
 
 // Reasoning / thinking content parsing
@@ -43,7 +46,6 @@ export type {
   OpenWebUIHistory,
   OpenWebUIChatPayload,
   ServerConversation,
-  ThinkingLevel,
   MessageContentPart,
   ChatCompletionRequest,
   StreamingStatus,

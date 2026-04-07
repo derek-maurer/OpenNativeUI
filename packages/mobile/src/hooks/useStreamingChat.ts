@@ -9,8 +9,9 @@ import { useSettingsStore } from "@opennative/shared";
 import { useConversationStore } from "@opennative/shared";
 import { playChime } from "@/lib/chime";
 import { streamChatCompletion } from "@opennative/shared";
-import { getModelCapabilities } from "@opennative/shared";
+import { getThinkingProfile } from "@opennative/shared";
 import { getThinkingForModel } from "@opennative/shared";
+import { resolveEffectiveThinkingValue } from "@opennative/shared";
 import {
   createServerConversation,
   updateServerConversation,
@@ -53,8 +54,8 @@ export function useStreamingChat() {
       } = useChatStore.getState();
 
       const model = selectedModelId ?? "default";
-      const capabilities = getModelCapabilities(model);
-      const thinkingLevel = getThinkingForModel(model);
+      const thinkingProfile = getThinkingProfile(model);
+      const thinkingValue = getThinkingForModel(model);
 
       // OpenWebUI always generates its own chat id on POST /chats/new and
       // ignores the one we send. After create we swap this local variable
@@ -180,6 +181,39 @@ export function useStreamingChat() {
         return { role: m.role, content: m.content };
       });
 
+      // Resolve thinking control. The selected value is forwarded via the
+      // request `params` object — Open WebUI's middleware then routes the
+      // key to the right upstream field (Ollama root `think`,
+      // OpenAI top-level `reasoning_effort`, etc.) based on model owner.
+      //
+      // The resolver merges three sources in priority order:
+      //   1. The user's persisted choice for this model (always wins),
+      //   2. The profile's `defaultValue` from thinkingModels.json, and
+      //   3. The profile's `offValue` (for default-on backends like Gemma).
+      // The same resolver is used by ChatOptionsSheet/InputComposer so the
+      // visible toggle state always matches what we send on the wire.
+      const effectiveThinkingValue = resolveEffectiveThinkingValue(
+        thinkingProfile,
+        thinkingValue,
+      );
+
+      const thinkingParams =
+        thinkingProfile && effectiveThinkingValue !== null
+          ? { [thinkingProfile.paramName]: effectiveThinkingValue }
+          : undefined;
+
+      console.log("[chat:thinking] resolve", {
+        model,
+        profileId: thinkingProfile?.id ?? null,
+        paramName: thinkingProfile?.paramName ?? null,
+        storedValue: thinkingValue,
+        storedValueType: typeof thinkingValue,
+        offValue: thinkingProfile?.offValue ?? null,
+        effectiveValue: effectiveThinkingValue,
+        thinkingParams,
+        willSendParams: thinkingParams !== undefined,
+      });
+
       const requestBody: ChatCompletionRequest = {
         model,
         messages: apiMessages,
@@ -192,12 +226,7 @@ export function useStreamingChat() {
         ...(webSearchEnabled && {
           features: { web_search: true },
         }),
-        ...(thinkingLevel && capabilities.thinking.mode !== "none" && {
-          // Binary-mode models (e.g. Gemma 3+) get a boolean toggle;
-          // tiered-mode models (e.g. GPT-OSS) get the chosen effort level.
-          think:
-            capabilities.thinking.mode === "binary" ? true : thinkingLevel,
-        }),
+        ...(thinkingParams && { params: thinkingParams }),
       };
 
       clearPendingFiles();

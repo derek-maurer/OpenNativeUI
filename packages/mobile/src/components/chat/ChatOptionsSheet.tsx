@@ -10,8 +10,8 @@ import { useConversationStore } from "@opennative/shared";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { BottomSheet } from "@/components/common/BottomSheet";
 import { FolderPickerSheet } from "@/components/folders/FolderPickerSheet";
-import { getModelCapabilities } from "@opennative/shared";
-import type { ThinkingLevel } from "@opennative/shared";
+import { getThinkingProfile, resolveEffectiveThinkingValue } from "@opennative/shared";
+import type { ThinkingValue } from "@opennative/shared";
 
 interface ChatOptionsSheetProps {
   visible: boolean;
@@ -26,7 +26,7 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const pendingFolderId = useChatStore((s) => s.pendingFolderId);
   const setPendingFolderId = useChatStore((s) => s.setPendingFolderId);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
-  const thinkingLevel = useModelPreferencesStore((s) =>
+  const thinkingValue = useModelPreferencesStore((s) =>
     selectedModelId ? (s.thinkingByModel[selectedModelId] ?? null) : null,
   );
   const setThinkingForModel = useModelPreferencesStore(
@@ -45,8 +45,24 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
 
   const [folderPickerVisible, setFolderPickerVisible] = useState(false);
 
-  const thinkingCapability = getModelCapabilities(selectedModelId).thinking;
-  const thinkingEnabled = thinkingLevel !== null;
+  const thinkingProfile = getThinkingProfile(selectedModelId);
+  // The "effective" value is what the UI should reflect: explicit user
+  // choice if any, otherwise the profile's defaultValue (or offValue) from
+  // thinkingModels.json. Drives both the active-chip / toggle-on state
+  // here AND the wire payload in useStreamingChat — same resolver, so the
+  // visible state always matches what gets sent.
+  const effectiveThinkingValue = resolveEffectiveThinkingValue(
+    thinkingProfile,
+    thinkingValue,
+  );
+  // A profile with exactly one option is rendered as a toggle row; anything
+  // larger is rendered as a chip group. The single option's value is what
+  // we send when the toggle flips on; `offValue` (if set) is what we send
+  // when it flips off — needed for backends whose default is "on".
+  const isBinaryToggle = thinkingProfile?.options.length === 1;
+  const onValue = thinkingProfile?.options[0]?.value;
+  const isThinkingOn =
+    isBinaryToggle && onValue !== undefined && effectiveThinkingValue === onValue;
 
   // For an existing chat, use its persisted folderId. For a new unsent
   // chat, use pendingFolderId from the chat store — it will be applied
@@ -75,9 +91,16 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
     }
   };
 
-  const setThinkingLevel = (level: ThinkingLevel | null) => {
+  const setThinking = (value: ThinkingValue | null) => {
     if (!selectedModelId) return;
-    setThinkingForModel(selectedModelId, level);
+    console.log("[chat:thinking] store", {
+      modelId: selectedModelId,
+      value,
+      valueType: typeof value,
+      profileId: thinkingProfile?.id,
+      paramName: thinkingProfile?.paramName,
+    });
+    setThinkingForModel(selectedModelId, value);
   };
 
   const handlePickFile = async () => {
@@ -184,26 +207,35 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
           <Ionicons name="chevron-forward" size={18} color="#737373" />
         </Pressable>
 
-        {/* Thinking toggle — for models with binary on/off thinking (e.g. Gemma 3+) */}
-        {thinkingCapability.mode === "binary" && (
+        {/* Thinking — driven by the model's profile in thinkingModels.json.
+            Profiles with a single option render as a row+toggle (e.g. Gemma);
+            multi-option profiles render as a chip section (e.g. GPT-5
+            reasoning effort). Tap an active chip to clear it. */}
+        {thinkingProfile && isBinaryToggle && (
           <Pressable
-            onPress={() => setThinkingLevel(thinkingEnabled ? null : "medium")}
+            onPress={() =>
+              setThinking(
+                isThinkingOn
+                  ? (thinkingProfile.offValue ?? null)
+                  : thinkingProfile.options[0]!.value,
+              )
+            }
             style={[styles.row, { backgroundColor: rowBg }]}
           >
             <View style={styles.rowIcon}>
               <Ionicons
                 name="bulb-outline"
                 size={22}
-                color={thinkingEnabled ? "#10a37f" : "#737373"}
+                color={isThinkingOn ? "#10a37f" : "#737373"}
               />
             </View>
             <Text style={[styles.rowLabel, { color: colors.text }]}>
-              Thinking
+              {thinkingProfile.label}
             </Text>
             <View
               style={[
                 styles.toggle,
-                thinkingEnabled
+                isThinkingOn
                   ? styles.toggleOn
                   : { backgroundColor: dark ? "#404040" : "#d4d4d4" },
               ]}
@@ -211,38 +243,35 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
               <View
                 style={[
                   styles.toggleThumb,
-                  thinkingEnabled && styles.toggleThumbOn,
+                  isThinkingOn && styles.toggleThumbOn,
                 ]}
               />
             </View>
           </Pressable>
         )}
 
-        {/* Thinking Level — for models with tiered thinking effort (e.g. GPT-OSS) */}
-        {thinkingCapability.mode === "tiered" && (
+        {thinkingProfile && !isBinaryToggle && (
           <View style={[styles.thinkingSection, { backgroundColor: rowBg }]}>
             <View style={styles.thinkingHeader}>
               <View style={styles.rowIcon}>
                 <Ionicons
                   name="bulb-outline"
                   size={22}
-                  color={thinkingLevel ? "#10a37f" : "#737373"}
+                  color={effectiveThinkingValue !== null ? "#10a37f" : "#737373"}
                 />
               </View>
               <Text style={[styles.rowLabel, { color: colors.text, flex: 1 }]}>
-                Thinking Level
+                {thinkingProfile.label}
               </Text>
             </View>
 
             <View style={styles.thinkingOptions}>
-              {thinkingCapability.levels.map((level) => {
-                const active = thinkingLevel === level;
+              {thinkingProfile.options.map((option) => {
+                const active = effectiveThinkingValue === option.value;
                 return (
                   <Pressable
-                    key={level}
-                    onPress={() =>
-                      setThinkingLevel(active ? null : level)
-                    }
+                    key={String(option.value)}
+                    onPress={() => setThinking(active ? null : option.value)}
                     style={[
                       styles.thinkingChip,
                       {
@@ -260,7 +289,7 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
                         { color: active ? "#10a37f" : "#737373" },
                       ]}
                     >
-                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                      {option.label}
                     </Text>
                   </Pressable>
                 );

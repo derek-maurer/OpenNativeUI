@@ -1,0 +1,52 @@
+{
+  "_comment": "Thinking / reasoning controls per model family. Add a new entry to expose a control in the chat options sheet for any model whose id matches one of the `match` regexes (case-insensitive, tested against the model id). The first matching profile wins, so put more specific patterns before broader ones. Each option's `value` is sent verbatim under `params[paramName]` in the /api/chat/completions request body — Open WebUI then routes it to the upstream provider (Ollama `think`, OpenAI `reasoning_effort`, etc.). `defaultValue` is the value the UI starts at before the user picks anything for this model — once they pick a value it's persisted in modelPreferencesStore and overrides this default on subsequent conversations.",
+  "profiles": [
+    {
+      "id": "openai-reasoning-effort",
+      "label": "Reasoning Effort",
+      "match": ["^o\\d", "^gpt-[5-9]"],
+      "paramName": "reasoning_effort",
+      "defaultValue": "medium",
+      "options": [
+        { "value": "low", "label": "Low" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "high", "label": "High" }
+      ]
+    },
+    {
+      "id": "gpt-oss-think",
+      "label": "Thinking Level",
+      "match": ["gpt-oss"],
+      "paramName": "think",
+      "defaultValue": "medium",
+      "options": [
+        { "value": "low", "label": "Low" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "high", "label": "High" }
+      ]
+    },
+    {
+      "id": "ollama-think-tiered",
+      "label": "Thinking Level",
+      "match": ["deepseek-r1", "^qwen3"],
+      "paramName": "think",
+      "defaultValue": "medium",
+      "options": [
+        { "value": "low", "label": "Low" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "high", "label": "High" }
+      ]
+    },
+    {
+      "id": "gemma-think-binary",
+      "label": "Thinking",
+      "match": ["gemma[-]?[3-9]"],
+      "paramName": "think",
+      "defaultValue": true,
+      "options": [
+        { "value": true, "label": "On" }
+      ],
+      "offValue": false
+    }
+  ]
+}

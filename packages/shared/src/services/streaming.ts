@@ -211,6 +211,18 @@ function streamViaSocket(
   socket.on("events", handleEvent);
   socket.on("chat-events", handleEvent);
 
+  const requestPayload = {
+    ...body,
+    stream: true,
+    session_id: sessionId,
+  };
+  console.log("[chat:wire] POST (socket)", {
+    url,
+    bodyKeys: Object.keys(requestPayload),
+    params: (requestPayload as { params?: unknown }).params ?? null,
+    body: JSON.stringify(requestPayload),
+  });
+
   // POST the request — server returns { status: true, task_id: ... }
   fetch(url, {
     method: "POST",
@@ -218,11 +230,7 @@ function streamViaSocket(
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      ...body,
-      stream: true,
-      session_id: sessionId,
-    }),
+    body: JSON.stringify(requestPayload),
   })
     .then(async (res) => {
       if (!res.ok) {
@@ -400,13 +408,21 @@ function streamViaSSE(
     callbacks.onReplaceContent(renderedContent);
   };
 
+  const ssePayload = { ...body, stream: true };
+  console.log("[chat:wire] POST (sse)", {
+    url,
+    bodyKeys: Object.keys(ssePayload),
+    params: (ssePayload as { params?: unknown }).params ?? null,
+    body: JSON.stringify(ssePayload),
+  });
+
   const es = new EventSource(url, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     method: "POST",
-    body: JSON.stringify({ ...body, stream: true }),
+    body: JSON.stringify(ssePayload),
     pollingInterval: 0,
   });
 

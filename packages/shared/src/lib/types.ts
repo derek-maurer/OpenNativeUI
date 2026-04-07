@@ -176,8 +176,6 @@ export interface ServerConversation {
 }
 
 // Chat completions
-export type ThinkingLevel = "low" | "medium" | "high";
-
 export type MessageContentPart =
   | { type: "text"; text: string }
   | { type: "image_url"; image_url: { url: string } };
@@ -192,7 +190,14 @@ export interface ChatCompletionRequest {
   features?: {
     web_search?: boolean;
   };
-  think?: ThinkingLevel | boolean;
+  /**
+   * Forwarded to Open WebUI's `apply_params_to_form_data` middleware.
+   * Keys land on different upstream fields depending on the model owner —
+   * `think` is promoted to the Ollama payload root, `reasoning_effort`
+   * passes through to OpenAI/Azure top-level. See `getThinkingProfile`
+   * and `open-webui/backend/open_webui/utils/payload.py`.
+   */
+  params?: Record<string, unknown>;
 }
 
 export interface StreamingStatus {

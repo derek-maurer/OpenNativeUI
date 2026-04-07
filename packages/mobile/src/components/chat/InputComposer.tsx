@@ -12,6 +12,7 @@ import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@opennative/shared";
 import { useModelStore } from "@opennative/shared";
 import { useModelPreferencesStore } from "@opennative/shared";
+import { getThinkingProfile, resolveEffectiveThinkingValue } from "@opennative/shared";
 import { FileUploadProgress } from "@/components/files/FileUploadProgress";
 import { ChatOptionsSheet } from "@/components/chat/ChatOptionsSheet";
 
@@ -33,11 +34,24 @@ export function InputComposer({
   const pendingFiles = useChatStore((s) => s.pendingFiles);
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
-  const thinkingLevel = useModelPreferencesStore((s) =>
+  const thinkingValue = useModelPreferencesStore((s) =>
     selectedModelId ? (s.thinkingByModel[selectedModelId] ?? null) : null,
   );
+  // "Active" = thinking is effectively enabled for the current model,
+  // taking the JSON-defined defaultValue into account so the indicator
+  // lights up on first load when a profile defaults to on. An explicit
+  // "off" (e.g. Gemma's `false` to override its default-on behavior) is
+  // still treated as inactive.
+  const thinkingProfile = getThinkingProfile(selectedModelId);
+  const effectiveThinkingValue = resolveEffectiveThinkingValue(
+    thinkingProfile,
+    thinkingValue,
+  );
+  const thinkingActive =
+    effectiveThinkingValue !== null &&
+    effectiveThinkingValue !== thinkingProfile?.offValue;
 
-  const hasActiveOptions = webSearchEnabled || thinkingLevel !== null;
+  const hasActiveOptions = webSearchEnabled || thinkingActive;
 
   const canSend =
     text.trim().length > 0 || pendingFiles.some((f) => f.status === "ready");
