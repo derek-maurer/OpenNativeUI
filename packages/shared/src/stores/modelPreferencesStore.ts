@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getStorage } from "../lib/storage";
+import { lazyStorage, onStorageRegistered } from "../lib/storage";
 import { STORAGE_KEYS } from "../lib/constants";
 import type { ThinkingLevel } from "../lib/types";
 
@@ -28,10 +28,14 @@ export const useModelPreferencesStore = create<ModelPreferencesState>()(
     }),
     {
       name: STORAGE_KEYS.MODEL_PREFERENCES,
-      storage: createJSONStorage(() => getStorage()),
+      storage: createJSONStorage(() => lazyStorage),
     },
   ),
 );
+
+onStorageRegistered(() => {
+  useModelPreferencesStore.persist.rehydrate();
+});
 
 /** Convenience selector — returns the saved thinking level for a model, or null. */
 export function getThinkingForModel(

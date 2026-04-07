@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getStorage } from "../lib/storage";
+import { lazyStorage, onStorageRegistered } from "../lib/storage";
 import { STORAGE_KEYS } from "../lib/constants";
 import type { UserInfo } from "../lib/types";
 
@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: STORAGE_KEYS.AUTH,
-      storage: createJSONStorage(() => getStorage()),
+      storage: createJSONStorage(() => lazyStorage),
       partialize: (state) => ({
         serverUrl: state.serverUrl,
         token: state.token,
@@ -54,3 +54,9 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// If the store was constructed before the platform registered storage,
+// rehydrate as soon as it becomes available.
+onStorageRegistered(() => {
+  useAuthStore.persist.rehydrate();
+});

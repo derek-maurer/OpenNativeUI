@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getStorage } from "../lib/storage";
+import { lazyStorage, onStorageRegistered } from "../lib/storage";
 import { apiGet } from "../services/api";
 import { API_PATHS, STORAGE_KEYS } from "../lib/constants";
 import type { Model, ModelsResponse } from "../lib/types";
@@ -46,7 +46,7 @@ export const useModelStore = create<ModelState>()(
     }),
     {
       name: STORAGE_KEYS.MODELS,
-      storage: createJSONStorage(() => getStorage()),
+      storage: createJSONStorage(() => lazyStorage),
       partialize: (state) => ({
         selectedModelId: state.selectedModelId,
         defaultModelId: state.defaultModelId,
@@ -54,3 +54,7 @@ export const useModelStore = create<ModelState>()(
     }
   )
 );
+
+onStorageRegistered(() => {
+  useModelStore.persist.rehydrate();
+});

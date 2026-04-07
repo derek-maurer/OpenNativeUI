@@ -144,10 +144,26 @@ export function useFileUpload() {
 
       const asset = result.assets[0];
 
-      // Convert to JPEG to avoid HEIC compatibility issues
+      // Downscale large photos and convert to JPEG (avoids HEIC issues and
+      // keeps the inline base64 payload sent to the model from ballooning).
+      // 1568px on the long edge matches what major vision models downscale to.
+      const MAX_EDGE = 1568;
+      const longEdge = Math.max(asset.width ?? 0, asset.height ?? 0);
+      const actions: ImageManipulator.Action[] =
+        longEdge > MAX_EDGE
+          ? [
+              {
+                resize:
+                  (asset.width ?? 0) >= (asset.height ?? 0)
+                    ? { width: MAX_EDGE }
+                    : { height: MAX_EDGE },
+              },
+            ]
+          : [];
+
       const manipulated = await ImageManipulator.manipulateAsync(
         asset.uri,
-        [],
+        actions,
         { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
       );
 

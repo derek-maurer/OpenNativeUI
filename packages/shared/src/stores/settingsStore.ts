@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { getStorage } from "../lib/storage";
+import { lazyStorage, onStorageRegistered } from "../lib/storage";
 import { STORAGE_KEYS } from "../lib/constants";
 
 type ThemeMode = "light" | "dark" | "system";
@@ -26,7 +26,11 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: STORAGE_KEYS.SETTINGS,
-      storage: createJSONStorage(() => getStorage()),
+      storage: createJSONStorage(() => lazyStorage),
     }
   )
 );
+
+onStorageRegistered(() => {
+  useSettingsStore.persist.rehydrate();
+});

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import * as Speech from "expo-speech";
-import type { MessageInfo } from "@opennative/shared";
+import * as Clipboard from "expo-clipboard";
+import { useToast } from "@/components/ui/Toast";
+import {
+  parseReasoningSegments,
+  hasReasoningContent,
+  type MessageInfo,
+} from "@opennative/shared";
 
 interface MessageActionsProps {
   content: string;
@@ -24,10 +30,25 @@ const ANIM_DURATION = 300;
 
 export function MessageActions({ content, info }: MessageActionsProps) {
   const { colors, dark } = useTheme();
+  const toast = useToast();
   const [infoVisible, setInfoVisible] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const sheetTranslateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  // Strip out any reasoning/thinking blocks so the copied text matches what
+  // the user actually sees as the answer. Falls back to the raw content
+  // when the message has no reasoning markers (the fast path).
+  const plainContent = useMemo(() => {
+    if (!hasReasoningContent(content)) return content;
+    const segments = parseReasoningSegments(content);
+    if (!segments) return content;
+    return segments
+      .filter((s) => s.kind === "text")
+      .map((s) => (s as { kind: "text"; text: string }).text)
+      .join("")
+      .trim();
+  }, [content]);
 
   const openSheet = useCallback(() => {
     setInfoVisible(true);
@@ -60,6 +81,11 @@ export function MessageActions({ content, info }: MessageActionsProps) {
       }),
     ]).start(() => setInfoVisible(false));
   }, [backdropOpacity, sheetTranslateY]);
+
+  const handleCopy = useCallback(async () => {
+    await Clipboard.setStringAsync(plainContent);
+    toast.show("Copied to clipboard");
+  }, [plainContent, toast]);
 
   const handleSpeak = useCallback(() => {
     if (isSpeaking) {
@@ -114,6 +140,16 @@ export function MessageActions({ content, info }: MessageActionsProps) {
           size={18}
           color={isSpeaking ? "#10a37f" : buttonColor}
         />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={handleCopy}
+        style={styles.button}
+        activeOpacity={0.6}
+        hitSlop={8}
+        accessibilityLabel="Copy message"
+      >
+        <Ionicons name="copy-outline" size={17} color={buttonColor} />
       </TouchableOpacity>
 
       {info && (

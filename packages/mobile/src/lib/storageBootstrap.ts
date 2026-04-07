@@ -1,17 +1,14 @@
 /**
- * Side-effect module: registers MMKV as @opennative/shared's persistent
- * storage backend. Must be imported *before* any file that touches the
- * shared barrel (`@opennative/shared`), so that the stores' persist
- * middleware finds a registered storage when rehydration runs.
+ * Side-effect module: registers MMKV as the persistent storage backend
+ * for @opennative/shared's Zustand stores.
  *
- * We import `registerStorage` via a relative path directly into the
- * shared package's source, intentionally bypassing the barrel. Going
- * through the barrel would cause all stores to evaluate (and schedule
- * their rehydration microtasks) *before* we got a chance to register
- * the storage — producing "storage is currently unavailable" warnings
- * from Zustand persist.
+ * Stores are constructed against a lazy storage adapter (see
+ * shared/src/lib/storage.ts), so this bootstrap can run at any point
+ * during startup. Stores that are created before registration will be
+ * re-hydrated as soon as `registerStorage` fires their queued
+ * onStorageRegistered callbacks.
  */
-import { registerStorage } from "../../../shared/src/lib/storage";
+import { registerStorage } from "@opennative/shared";
 import { zustandMMKVStorage } from "./mmkv";
 
 registerStorage(zustandMMKVStorage);

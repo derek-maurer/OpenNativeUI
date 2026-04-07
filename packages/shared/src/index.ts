@@ -1,6 +1,7 @@
 // Storage abstraction — platform packages must register a concrete
-// StateStorage impl before any persisted store is accessed.
-export { registerStorage, getStorage } from "./lib/storage";
+// StateStorage impl at startup. Stores resolve the backend lazily, so
+// registration order relative to store construction is not load-bearing.
+export { registerStorage, lazyStorage, onStorageRegistered } from "./lib/storage";
 
 // Constants
 export { API_PATHS, STORAGE_KEYS } from "./lib/constants";
