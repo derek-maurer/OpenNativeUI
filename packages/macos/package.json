@@ -5,6 +5,7 @@
   "scripts": {
     "start": "react-native start",
     "macos": "react-native run-macos",
+    "macos-no-packager": "react-native run-macos --no-packager",
     "build:macos": "react-native build-macos",
     "pods": "cd macos && bundle exec pod install",
     "typecheck": "tsc --noEmit",
