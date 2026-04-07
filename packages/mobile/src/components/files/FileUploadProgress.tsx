@@ -15,7 +15,7 @@ function fileExtension(name: string) {
 }
 
 export function FileUploadProgress() {
-  const { dark } = useTheme();
+  const { colors, dark } = useTheme();
   const pendingFiles = useChatStore((s) => s.pendingFiles);
   const removePendingFile = useChatStore((s) => s.removePendingFile);
 
@@ -28,6 +28,11 @@ export function FileUploadProgress() {
       horizontal
       showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      style={{
+        backgroundColor: colors.background,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: colors.border,
+      }}
       contentContainerStyle={styles.row}
     >
       {pendingFiles.map((file) => {

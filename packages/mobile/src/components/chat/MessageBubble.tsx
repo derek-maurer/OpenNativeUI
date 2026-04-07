@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, type ReactNode } from "react";
+import { memo, useCallback, useMemo, useState, type ReactNode } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
@@ -67,6 +67,7 @@ export const MessageBubble = memo(function MessageBubble({
   sources,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
+  const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({});
 
   const handleLinkPress = useCallback((url: string) => {
     WebBrowser.openBrowserAsync(url, {
@@ -114,8 +115,18 @@ export const MessageBubble = memo(function MessageBubble({
                   source={{ uri: f.dataUrl ?? f.uri }}
                   style={[
                     styles.inlineImage,
-                    imageFiles.length === 1 && styles.inlineImageSingle,
+                    { aspectRatio: aspectRatios[f.id] ?? 1 },
                   ]}
+                  onLoad={(e) => {
+                    const src = e.nativeEvent.source;
+                    if (src?.width && src?.height) {
+                      setAspectRatios((prev) =>
+                        prev[f.id]
+                          ? prev
+                          : { ...prev, [f.id]: src.width / src.height },
+                      );
+                    }
+                  }}
                 />
               ))}
             </View>
@@ -336,25 +347,18 @@ const styles = StyleSheet.create({
     maxWidth: "85%",
   },
   userBubbleWithImages: {
+    width: "85%",
     paddingHorizontal: 4,
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingVertical: 4,
     overflow: "hidden",
   },
   imageGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: 4,
     marginBottom: 4,
   },
   inlineImage: {
-    width: 120,
-    height: 120,
+    width: "100%",
     borderRadius: 16,
-  },
-  inlineImageSingle: {
-    width: 200,
-    height: 200,
   },
   userText: {
     fontSize: 16,
