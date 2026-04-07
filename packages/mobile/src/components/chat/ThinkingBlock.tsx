@@ -114,8 +114,10 @@ export const ThinkingBlock = memo(function ThinkingBlock({
 
   const surfaceColor = dark ? "#1a1a1a" : "#f4f4f4";
   const borderColor = dark ? "#2a2a2a" : "#e5e5e5";
-  const mutedTextColor = dark ? "#9a9a9a" : "#5f5f5f";
-  const iconColor = dark ? "#b5b5b5" : "#555";
+  const mutedTextColor = dark ? "#c8c8c8" : "#5f5f5f";
+  const iconColor = dark ? "#c8c8c8" : "#555";
+  const codeSurfaceColor = dark ? "#252525" : "#ececec";
+  const codeBorderColor = dark ? "#333" : "#dcdcdc";
 
   const markdownStyles = {
     body: {
@@ -128,17 +130,32 @@ export const ThinkingBlock = memo(function ThinkingBlock({
       marginBottom: 6,
     },
     code_inline: {
-      backgroundColor: dark ? "#2f2f2f" : "#eaeaea",
-      color: colors.text,
+      backgroundColor: codeSurfaceColor,
+      borderColor: codeBorderColor,
+      borderWidth: StyleSheet.hairlineWidth,
+      color: mutedTextColor,
       paddingHorizontal: 4,
       paddingVertical: 1,
       borderRadius: 4,
       fontSize: 13,
       fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     },
+    code_block: {
+      backgroundColor: codeSurfaceColor,
+      borderColor: codeBorderColor,
+      borderWidth: StyleSheet.hairlineWidth,
+      color: mutedTextColor,
+      padding: 8,
+      borderRadius: 6,
+      fontSize: 13,
+      marginVertical: 6,
+      fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    },
     fence: {
-      backgroundColor: dark ? "#111" : "#ececec",
-      color: colors.text,
+      backgroundColor: codeSurfaceColor,
+      borderColor: codeBorderColor,
+      borderWidth: StyleSheet.hairlineWidth,
+      color: mutedTextColor,
       padding: 8,
       borderRadius: 6,
       fontSize: 13,
