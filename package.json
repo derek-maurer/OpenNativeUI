@@ -9,8 +9,17 @@
     "mobile:ios": "npm run ios --workspace=@opennative/mobile",
     "mobile:android": "npm run android --workspace=@opennative/mobile",
     "mobile:start": "npm run start --workspace=@opennative/mobile",
+    "macos:start": "npm run start --workspace=@opennative/macos",
+    "macos:run": "npm run macos --workspace=@opennative/macos",
     "shared:typecheck": "npm run typecheck --workspace=@opennative/shared",
     "mobile:typecheck": "npm run typecheck --workspace=@opennative/mobile",
-    "typecheck": "npm run shared:typecheck && npm run mobile:typecheck"
+    "macos:typecheck": "npm run typecheck --workspace=@opennative/macos",
+    "typecheck": "npm run shared:typecheck && npm run mobile:typecheck && npm run macos:typecheck"
+  },
+  "devDependencies": {},
+  "overrides": {
+    "react": "19.1.4",
+    "react-native": "0.81.6",
+    "react-native-safe-area-context": "5.7.0"
   }
 }
