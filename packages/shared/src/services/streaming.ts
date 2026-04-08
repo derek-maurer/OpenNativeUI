@@ -1,5 +1,5 @@
-import EventSource from "react-native-sse";
 import type { Socket } from "socket.io-client";
+import { createSSEConnection } from "../lib/sse";
 import type {
   ChatCompletionRequest,
   ChatCompletionChunk,
@@ -416,14 +416,12 @@ function streamViaSSE(
     body: JSON.stringify(ssePayload),
   });
 
-  const es = new EventSource(url, {
+  const es = createSSEConnection(url, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    method: "POST",
     body: JSON.stringify(ssePayload),
-    pollingInterval: 0,
   });
 
   es.addEventListener("message", (event: any) => {

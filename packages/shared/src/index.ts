@@ -3,6 +3,10 @@
 // registration order relative to store construction is not load-bearing.
 export { registerStorage, lazyStorage, onStorageRegistered } from "./lib/storage";
 
+// SSE factory abstraction — platform packages must register a concrete SSE
+// factory at startup before any streaming call is made.
+export { registerSSEFactory, type SSEConnection, type SSEFactory } from "./lib/sse";
+
 // Constants
 export { API_PATHS, STORAGE_KEYS } from "./lib/constants";
 

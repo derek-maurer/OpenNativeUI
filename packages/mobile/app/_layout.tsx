@@ -2,6 +2,8 @@ import "../global.css";
 // Must run before any @opennative/shared barrel import — registers MMKV
 // as the shared package's storage backend. See storageBootstrap.ts.
 import "@/lib/storageBootstrap";
+// Registers react-native-sse as the SSE factory for streaming.
+import "@/lib/sseBootstrap";
 
 import { useEffect } from "react";
 import { useColorScheme as useSystemColorScheme } from "react-native";

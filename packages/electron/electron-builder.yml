@@ -1,0 +1,17 @@
+appId: com.opennativeui.electron
+productName: OpenNativeUI
+directories:
+  output: dist-app
+  buildResources: build
+files:
+  - out/**
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  hardenedRuntime: true
+dmg:
+  sign: false

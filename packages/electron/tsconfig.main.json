@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/main/**/*"],
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "out/main",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true
+  }
+}

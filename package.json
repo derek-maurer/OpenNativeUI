@@ -9,13 +9,13 @@
     "mobile:ios": "npm run ios --workspace=@opennative/mobile",
     "mobile:android": "npm run android --workspace=@opennative/mobile",
     "mobile:start": "npm run start --workspace=@opennative/mobile",
-    "macos:start": "npm run start --workspace=@opennative/macos",
-    "macos:run": "npm run macos-no-packager --workspace=@opennative/macos",
-    "macos:podinstall": "cd packages/macos/macos && bundle exec pod install",
+    "electron:dev": "npm run dev --workspace=@opennative/electron",
+    "electron:build": "npm run build --workspace=@opennative/electron",
+    "electron:package": "npm run package --workspace=@opennative/electron",
     "shared:typecheck": "npm run typecheck --workspace=@opennative/shared",
     "mobile:typecheck": "npm run typecheck --workspace=@opennative/mobile",
-    "macos:typecheck": "npm run typecheck --workspace=@opennative/macos",
-    "typecheck": "npm run shared:typecheck && npm run mobile:typecheck && npm run macos:typecheck"
+    "electron:typecheck": "npm run typecheck --workspace=@opennative/electron",
+    "typecheck": "npm run shared:typecheck && npm run mobile:typecheck && npm run electron:typecheck"
   },
   "devDependencies": {},
   "overrides": {
