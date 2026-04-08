@@ -26,8 +26,12 @@ function generateId(): string {
 }
 
 export function MainLayout() {
-  const [view, setView] = useState<View>({ type: "empty" });
+  const [view, setView] = useState<View>(() => {
+    const id = generateId();
+    return { type: "chat", conversationId: id, isNew: true };
+  });
   const loadConversations = useConversationStore((s) => s.loadConversations);
+  const reloadFolderMemberships = useConversationStore((s) => s.reloadFolderMemberships);
   const loadFolders = useFolderStore((s) => s.loadFolders);
   const fetchModels = useModelStore((s) => s.fetchModels);
   const setSelectedModel = useModelStore((s) => s.setSelectedModel);
@@ -41,7 +45,7 @@ export function MainLayout() {
   // Boot: load data and connect socket
   useEffect(() => {
     loadConversations();
-    loadFolders();
+    loadFolders().then(() => reloadFolderMemberships());
     fetchModels();
     connectSocket();
     return () => { disconnectSocket(); };

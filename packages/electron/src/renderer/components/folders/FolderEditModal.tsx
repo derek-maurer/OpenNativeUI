@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFolderStore } from "@opennative/shared";
 import { Folder } from "lucide-react";
 import { Modal } from "../ui/Modal";
@@ -19,6 +19,12 @@ export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalP
   const existingFolder = folderId ? folders.find((f) => f.id === folderId) : undefined;
   const [name, setName] = useState(existingFolder?.name ?? "");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      setName(existingFolder?.name ?? "");
+    }
+  }, [visible]);
 
   const handleSubmit = async () => {
     const trimmed = name.trim();
