@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "react-native start",
+    "start": "react-native start --port 8082",
     "macos": "react-native run-macos",
     "macos-no-packager": "react-native run-macos --no-packager",
     "build:macos": "react-native build-macos",

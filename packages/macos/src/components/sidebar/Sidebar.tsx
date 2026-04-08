@@ -140,12 +140,14 @@ export function Sidebar({
       {/* New chat button */}
       <Pressable
         onPress={onNewChat}
-        style={[styles.newChatButton, { backgroundColor: dark ? "#1a1a1a" : "#f0f0f0" }]}
+        style={styles.newChatButton}
         accessibilityLabel="New chat"
       >
-        <SFSymbol name="square.and.pencil" size={15} color={colors.text} />
+        <SFSymbol name="square.and.pencil" size={16} color={colors.text} />
         <Text style={[styles.newChatText, { color: colors.text }]}>New chat</Text>
       </Pressable>
+
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       {/* Conversation list */}
       <FlatList
@@ -166,8 +168,7 @@ export function Sidebar({
               onLongPress={() => handleLongPress(conversation)}
               style={[
                 styles.row,
-                { backgroundColor: dark ? "#0d0d0d" : "#f9f9f9" },
-                isActive && { backgroundColor: dark ? "#1e1e1e" : "#e0e0e0" },
+                isActive && { backgroundColor: dark ? "#2a2a2a" : "#e0e0e0" },
               ]}
             >
               <Text
@@ -243,15 +244,13 @@ const styles = StyleSheet.create({
   newChatButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginHorizontal: 10,
-    marginTop: 10,
-    marginBottom: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 10,
+    gap: 9,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginTop: 4,
+    marginBottom: 2,
   },
-  newChatText: { fontSize: 14, fontWeight: "500" },
+  newChatText: { fontSize: 14, fontWeight: "600" },
   sectionHeader: {
     fontSize: 11,
     fontWeight: "600",
@@ -269,6 +268,7 @@ const styles = StyleSheet.create({
     marginVertical: 1,
   },
   rowTitle: { fontSize: 13 },
+  divider: { height: StyleSheet.hairlineWidth, marginBottom: 4 },
   emptyList: { paddingHorizontal: 12, paddingVertical: 32, alignItems: "center" },
   settingsRow: {
     flexDirection: "row",

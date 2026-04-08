@@ -12,8 +12,17 @@
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
   self.dependencyProvider = [RCTAppDependencyProvider new];
-  
-  return [super applicationDidFinishLaunching:notification];
+
+  [super applicationDidFinishLaunching:notification];
+
+  // Extend the React Native content view under the titlebar so the app
+  // background fills the full window — no separate titlebar background.
+  NSWindow *window = [NSApplication sharedApplication].windows.firstObject;
+  if (window) {
+    window.styleMask |= NSWindowStyleMaskFullSizeContentView;
+    window.titlebarAppearsTransparent = YES;
+    window.titleVisibility = NSWindowTitleHidden;
+  }
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
@@ -24,7 +33,12 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+  // Use port 8082 to avoid collision with the mobile Expo Metro server on 8081.
+  return [RCTBundleURLProvider jsBundleURLForBundleRoot:@"index"
+                                           packagerHost:@"localhost:8082"
+                                              enableDev:YES
+                                     enableMinification:NO
+                                        inlineSourceMap:NO];
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
