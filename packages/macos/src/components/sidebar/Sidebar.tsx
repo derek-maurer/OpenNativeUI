@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
+import { SFSymbol } from "@/components/ui/SFSymbol";
 
 import {
   useChatStore,
@@ -17,7 +18,6 @@ import {
   useFolderStore,
   type Conversation,
 } from "@opennative/shared";
-import { ModelSelector } from "@/components/chat/ModelSelector";
 
 interface SidebarProps {
   selectedConversationId: string | null;
@@ -137,17 +137,15 @@ export function Sidebar({
       style={[styles.container, { backgroundColor: colors.card }]}
       edges={["top", "bottom"]}
     >
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <ModelSelector />
-        <Pressable
-          onPress={onNewChat}
-          style={[styles.iconButton, { backgroundColor: dark ? "#2a2a2a" : "#e5e5e5" }]}
-          accessibilityLabel="New chat"
-        >
-          <Text style={[styles.iconButtonText, { color: colors.text }]}>✏</Text>
-        </Pressable>
-      </View>
+      {/* New chat button */}
+      <Pressable
+        onPress={onNewChat}
+        style={[styles.newChatButton, { backgroundColor: dark ? "#1a1a1a" : "#f0f0f0" }]}
+        accessibilityLabel="New chat"
+      >
+        <SFSymbol name="square.and.pencil" size={15} color={colors.text} />
+        <Text style={[styles.newChatText, { color: colors.text }]}>New chat</Text>
+      </Pressable>
 
       {/* Conversation list */}
       <FlatList
@@ -197,7 +195,7 @@ export function Sidebar({
         onPress={onSettings}
         style={[styles.settingsRow, { borderTopColor: colors.border }]}
       >
-        <Text style={styles.settingsIcon}>⚙</Text>
+        <SFSymbol name="gearshape" size={16} color="#737373" />
         <Text style={[styles.settingsText, { color: colors.text }]}>Settings</Text>
       </Pressable>
 
@@ -242,22 +240,18 @@ export function Sidebar({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
+  newChatButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
     gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginHorizontal: 10,
+    marginTop: 10,
+    marginBottom: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 10,
   },
-  iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconButtonText: { fontSize: 15 },
+  newChatText: { fontSize: 14, fontWeight: "500" },
   sectionHeader: {
     fontSize: 11,
     fontWeight: "600",
@@ -284,7 +278,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  settingsIcon: { fontSize: 16, color: "#737373" },
   settingsText: { fontSize: 14 },
   overlay: { flex: 1, alignItems: "center", justifyContent: "center" },
   renameSheet: {

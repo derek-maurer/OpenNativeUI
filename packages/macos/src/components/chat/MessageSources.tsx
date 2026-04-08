@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import type { MessageSource } from "@opennative/shared";
+import { SFSymbol } from "@/components/ui/SFSymbol";
 
 export interface Citation {
   url: string;
@@ -105,7 +106,7 @@ export function MessageSources({ citations }: MessageSourcesProps) {
             <View style={styles.sheetHeader}>
               <Text style={[styles.sheetTitle, { color: colors.text }]}>Sources</Text>
               <Pressable onPress={() => setOpen(false)} style={styles.closeButton}>
-                <Text style={[styles.closeButtonText, { color: colors.text }]}>✕</Text>
+                <SFSymbol name="xmark" size={14} color={colors.text} />
               </Pressable>
             </View>
             <ScrollView contentContainerStyle={styles.listContent}>
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
   },
   sheetTitle: { fontSize: 17, fontWeight: "600" },
   closeButton: { padding: 4 },
-  closeButtonText: { fontSize: 16 },
   listContent: { paddingHorizontal: 20, paddingBottom: 20 },
   row: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(128,128,128,0.2)" },
   rowTitle: { fontSize: 14, lineHeight: 20, marginBottom: 4 },

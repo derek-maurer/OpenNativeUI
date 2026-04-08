@@ -9,7 +9,7 @@
     "build:macos": "react-native build-macos",
     "pods": "cd macos && bundle exec pod install",
     "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package --patch-dir patches"
+    "postinstall": "node scripts/patch-codegen.js"
   },
   "dependencies": {
     "@opennative/shared": "*",
@@ -19,16 +19,15 @@
     "react": "19.1.4",
     "react-native": "0.81.6",
     "react-native-macos": "0.81.6",
+    "react-native-markdown-display": "^7.0.2",
     "react-native-mmkv": "^4.3.0",
     "react-native-nitro-modules": "^0.35.3",
-    "react-native-markdown-display": "^7.0.2",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.16.0",
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "babel-plugin-module-resolver": "^5.0.0",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "20.0.0",
@@ -37,7 +36,7 @@
     "@react-native/metro-config": "0.81.2",
     "@react-native/typescript-config": "0.81.2",
     "@types/react": "~19.1.0",
-    "patch-package": "^8.0.1",
+    "babel-plugin-module-resolver": "^5.0.0",
     "typescript": "~5.9.2"
   },
   "engines": {

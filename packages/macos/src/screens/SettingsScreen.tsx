@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
+import { SFSymbol } from "@/components/ui/SFSymbol";
 
 import {
   disconnectSocket,
@@ -48,7 +49,7 @@ function SettingsRow({
       {value ? (
         <Text style={styles.rowValue} numberOfLines={1}>{value}</Text>
       ) : onPress ? (
-        <Text style={[styles.rowChevron, { color: "#525252" }]}>›</Text>
+        <SFSymbol name="chevron.right" size={14} color="#525252" />
       ) : null}
     </Pressable>
   );
@@ -125,7 +126,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Pressable onPress={onClose} style={styles.closeButton}>
-          <Text style={[styles.closeButtonText, { color: colors.text }]}>✕</Text>
+          <SFSymbol name="xmark" size={15} color={colors.text} />
         </Pressable>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
         <View style={{ width: 32 }} />
@@ -256,7 +257,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   closeButton: { width: 32, height: 32, alignItems: "center", justifyContent: "center" },
-  closeButtonText: { fontSize: 18 },
   headerTitle: { fontSize: 17, fontWeight: "600" },
   scrollContent: { paddingVertical: 20, maxWidth: 600, alignSelf: "center", width: "100%" },
   sectionTitle: {
@@ -273,7 +273,6 @@ const styles = StyleSheet.create({
   rowIcon: { fontSize: 16, width: 22, textAlign: "center" },
   rowLabel: { flex: 1, fontSize: 15 },
   rowValue: { fontSize: 13, color: "#737373", maxWidth: 200 },
-  rowChevron: { fontSize: 20 },
   divider: { height: StyleSheet.hairlineWidth, marginLeft: 50 },
   footer: { alignItems: "center", marginTop: 32, gap: 4, paddingBottom: 20 },
   footerText: { fontSize: 12, color: "#525252" },

@@ -8,111 +8,136 @@ import {
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { useModelStore } from "@opennative/shared";
+import { SFSymbol } from "@/components/ui/SFSymbol";
 
-export function ModelSelector() {
-  const [visible, setVisible] = useState(false);
+// ─── Trigger chip (rendered inside the input container) ──────────────────────
+
+interface ModelSelectorTriggerProps {
+  onPress: () => void;
+}
+
+export function ModelSelectorTrigger({ onPress }: ModelSelectorTriggerProps) {
+  const { colors } = useTheme();
+  const models = useModelStore((s) => s.models);
+  const selectedModelId = useModelStore((s) => s.selectedModelId);
+  const isLoading = useModelStore((s) => s.isLoading);
+
+  const selectedModel = models.find((m) => m.id === selectedModelId);
+  const displayName = selectedModel?.name ?? selectedModel?.id ?? "Select model";
+
+  return (
+    <Pressable onPress={onPress} style={styles.trigger}>
+      <Text style={[styles.triggerText, { color: colors.text }]} numberOfLines={1}>
+        {isLoading ? "Loading…" : displayName}
+      </Text>
+      <SFSymbol name="chevron.down" size={11} color="#737373" />
+    </Pressable>
+  );
+}
+
+// ─── Full-screen picker overlay (rendered at ChatScreen level) ────────────────
+
+interface ModelPickerOverlayProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+export function ModelPickerOverlay({ visible, onClose }: ModelPickerOverlayProps) {
   const { dark, colors } = useTheme();
   const models = useModelStore((s) => s.models);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
   const setSelectedModel = useModelStore((s) => s.setSelectedModel);
   const isLoading = useModelStore((s) => s.isLoading);
 
-  const selectedModel = models.find((m) => m.id === selectedModelId);
-  const displayName = selectedModel?.name ?? selectedModel?.id ?? "Select model";
+  if (!visible) return null;
 
   const overlayBg = dark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)";
 
   return (
-    <>
+    <Pressable
+      style={[StyleSheet.absoluteFillObject, styles.overlay, { backgroundColor: overlayBg }]}
+      onPress={onClose}
+    >
       <Pressable
-        onPress={() => setVisible(true)}
-        style={[styles.chip, { backgroundColor: dark ? "#1a1a1a" : "#f0f0f0" }]}
+        style={[styles.sheet, { backgroundColor: dark ? "#1a1a1a" : "#fff" }]}
+        onPress={(e) => e.stopPropagation()}
       >
-        <Text style={[styles.chipText, { color: colors.text }]} numberOfLines={1}>
-          {isLoading ? "Loading…" : displayName}
-        </Text>
-        <Text style={styles.chevron}>▾</Text>
-      </Pressable>
-
-      {visible && (
-        <Pressable
-          style={[StyleSheet.absoluteFillObject, styles.overlay, { backgroundColor: overlayBg }]}
-          onPress={() => setVisible(false)}
-        >
-          <Pressable
-            style={[styles.sheet, { backgroundColor: dark ? "#1a1a1a" : "#fff" }]}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.sheetTitle, { color: colors.text }]}>Select Model</Text>
-            </View>
-            <FlatList
-              data={models}
-              keyExtractor={(item) => item.id}
-              style={{ maxHeight: 400 }}
-              contentContainerStyle={{ paddingBottom: 8 }}
-              renderItem={({ item }) => {
-                const isSelected = item.id === selectedModelId;
-                return (
-                  <Pressable
-                    onPress={() => {
-                      setSelectedModel(item.id);
-                      setVisible(false);
-                    }}
+        <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>Select Model</Text>
+        </View>
+        <FlatList
+          data={models}
+          keyExtractor={(item) => item.id}
+          style={{ maxHeight: 400 }}
+          contentContainerStyle={{ paddingBottom: 8 }}
+          renderItem={({ item }) => {
+            const isSelected = item.id === selectedModelId;
+            return (
+              <Pressable
+                onPress={() => {
+                  setSelectedModel(item.id);
+                  onClose();
+                }}
+                style={[
+                  styles.modelRow,
+                  isSelected && { backgroundColor: "rgba(16,163,127,0.1)" },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
                     style={[
-                      styles.modelRow,
-                      isSelected && { backgroundColor: "rgba(16,163,127,0.1)" },
+                      styles.modelName,
+                      { color: isSelected ? "#10a37f" : colors.text },
+                      isSelected && { fontWeight: "600" },
                     ]}
+                    numberOfLines={1}
                   >
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={[
-                          styles.modelName,
-                          { color: isSelected ? "#10a37f" : colors.text },
-                          isSelected && { fontWeight: "600" },
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {item.name || item.id}
-                      </Text>
-                      {item.owned_by ? (
-                        <Text style={styles.modelOwner}>{item.owned_by}</Text>
-                      ) : null}
-                    </View>
-                    {isSelected && (
-                      <Text style={styles.checkmark}>✓</Text>
-                    )}
-                  </Pressable>
-                );
-              }}
-              ListEmptyComponent={
-                <View style={styles.emptyList}>
-                  <Text style={{ color: "#737373" }}>
-                    {isLoading ? "Loading models…" : "No models available"}
+                    {item.name || item.id}
                   </Text>
+                  {item.owned_by ? (
+                    <Text style={styles.modelOwner}>{item.owned_by}</Text>
+                  ) : null}
                 </View>
-              }
-            />
-          </Pressable>
-        </Pressable>
-      )}
+                {isSelected && <Text style={styles.checkmark}>✓</Text>}
+              </Pressable>
+            );
+          }}
+          ListEmptyComponent={
+            <View style={styles.emptyList}>
+              <Text style={{ color: "#737373" }}>
+                {isLoading ? "Loading models…" : "No models available"}
+              </Text>
+            </View>
+          }
+        />
+      </Pressable>
+    </Pressable>
+  );
+}
+
+// ─── Self-contained (kept for any existing usage) ─────────────────────────────
+
+export function ModelSelector() {
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <ModelSelectorTrigger onPress={() => setVisible(true)} />
+      <ModelPickerOverlay visible={visible} onClose={() => setVisible(false)} />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  chip: {
+  trigger: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    maxWidth: 260,
+    gap: 5,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    flex: 1,
   },
-  chipText: { fontSize: 14, fontWeight: "500", flex: 1 },
-  chevron: { color: "#737373", fontSize: 12 },
-  overlay: { flex: 1, alignItems: "center", justifyContent: "center" },
+  triggerText: { fontSize: 13, fontWeight: "500", flex: 1 },
+  overlay: { flex: 1, alignItems: "center", justifyContent: "center", zIndex: 999 },
   sheet: {
     width: 360,
     borderRadius: 12,

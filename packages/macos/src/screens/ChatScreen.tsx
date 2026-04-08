@@ -11,6 +11,8 @@ import {
 } from "@opennative/shared";
 import { MessageList } from "@/components/chat/MessageList";
 import { InputComposer } from "@/components/chat/InputComposer";
+import { ModelPickerOverlay } from "@/components/chat/ModelSelector";
+import { ChatOptionsMenu } from "@/components/chat/ChatOptionsMenu";
 
 interface ChatScreenProps {
   conversationId: string;
@@ -21,9 +23,9 @@ interface ChatScreenProps {
 export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreenProps) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(!isNew);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [modelPickerVisible, setModelPickerVisible] = useState(false);
   const processedIdRef = useRef<string | null>(null);
-  // For new chats, the first sendMessage call must pass isNew=true so the
-  // server conversation is created. Subsequent messages pass false.
   const isFirstMessageRef = useRef(isNew);
 
   const setConversation = useChatStore((s) => s.setConversation);
@@ -40,9 +42,6 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
 
     const loadMessages = async () => {
       if (isNew) {
-        // setConversation was already called synchronously in MainLayout's
-        // handleNewChat before this component mounted — skip it here to avoid
-        // a race where it would wipe a message the user sent very quickly.
         setLoading(false);
         if (initialMessage) {
           isFirstMessageRef.current = false;
@@ -95,7 +94,21 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
             isStreaming={isStreaming}
             streamingStatus={streamingStatus}
           />
-          <InputComposer onSend={handleSend} isStreaming={isStreaming} onStop={abort} />
+          <InputComposer
+            onSend={handleSend}
+            isStreaming={isStreaming}
+            onStop={abort}
+            onOpenMenu={() => setMenuVisible((v) => !v)}
+            onOpenModelPicker={() => setModelPickerVisible(true)}
+          />
+          <ChatOptionsMenu
+            visible={menuVisible}
+            onClose={() => setMenuVisible(false)}
+          />
+          <ModelPickerOverlay
+            visible={modelPickerVisible}
+            onClose={() => setModelPickerVisible(false)}
+          />
         </>
       )}
     </View>
