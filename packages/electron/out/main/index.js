@@ -2,6 +2,7 @@
 const electron = require("electron");
 const path = require("path");
 const fs = require("fs");
+electron.app.setName("ONI");
 function getMimeType(ext) {
   const map = {
     jpg: "image/jpeg",
@@ -77,7 +78,13 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 }
-electron.app.whenReady().then(createWindow);
+electron.app.whenReady().then(() => {
+  if (process.platform === "darwin" && electron.app.dock) {
+    const iconPath = path.join(__dirname, "../../build/icon.png");
+    electron.app.dock.setIcon(iconPath);
+  }
+  createWindow();
+});
 electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     electron.app.quit();

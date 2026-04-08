@@ -2,6 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog, nativeTheme } from "electron";
 import path from "path";
 import fs from "fs";
 
+app.setName("ONI");
+
 function getMimeType(ext: string): string {
   const map: Record<string, string> = {
     jpg: "image/jpeg",
@@ -89,7 +91,14 @@ function createWindow(): void {
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Set dock icon (macOS dev mode — production builds use electron-builder)
+  if (process.platform === "darwin" && app.dock) {
+    const iconPath = path.join(__dirname, "../../build/icon.png");
+    app.dock.setIcon(iconPath);
+  }
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

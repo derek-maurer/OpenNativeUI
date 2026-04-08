@@ -1,5 +1,5 @@
 appId: com.opennativeui.electron
-productName: OpenNativeUI
+productName: ONI
 directories:
   output: dist-app
   buildResources: build

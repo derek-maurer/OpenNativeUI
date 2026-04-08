@@ -23,10 +23,14 @@ export function App() {
     applyThemeClass(theme, systemTheme);
   }, [theme, systemTheme]);
 
-  // Validate existing token on startup
+  // Validate existing token on startup — only logout on auth errors, not transient network failures
   useEffect(() => {
     if (isAuthenticated) {
-      validateToken().catch(() => useAuthStore.getState().logout());
+      validateToken().catch((err) => {
+        if (err?.status === 401 || err?.status === 403) {
+          useAuthStore.getState().logout();
+        }
+      });
     }
   }, []);
 

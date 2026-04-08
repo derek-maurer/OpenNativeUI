@@ -65,7 +65,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
         <div className="relative">
           <button
             onClick={() => setShowOptions((v) => !v)}
-            className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
               plusActive || showOptions
                 ? "border-primary bg-primary/20 text-primary"
                 : "border-neutral-700 text-neutral-400 hover:border-neutral-600 hover:text-white"
@@ -81,28 +81,30 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
           />
         </div>
 
-        {/* Text input */}
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={handleInput}
-          onKeyDown={handleKeyDown}
-          placeholder="Message…"
-          maxLength={10000}
-          rows={1}
-          disabled={disabled}
-          className="flex-1 resize-none rounded-xl bg-[#1a1a1a] border border-neutral-700 px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition-colors disabled:opacity-50"
-          style={{ minHeight: "36px", maxHeight: "160px" }}
-        />
-
-        {/* Model selector */}
-        <ModelSelectorTrigger onPress={() => setShowModelPicker(true)} />
+        {/* Unified text input + model selector container */}
+        <div className="flex flex-1 items-end rounded-xl bg-[#1a1a1a] border border-neutral-700 focus-within:border-neutral-600 transition-colors">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            placeholder="Message…"
+            maxLength={10000}
+            rows={1}
+            disabled={disabled}
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none disabled:opacity-50"
+            style={{ minHeight: "36px", maxHeight: "160px" }}
+          />
+          <div className="flex items-center self-end px-1 pb-1">
+            <ModelSelectorTrigger inline onPress={() => setShowModelPicker(true)} />
+          </div>
+        </div>
 
         {/* Send / Stop */}
         {isStreaming ? (
           <button
             onClick={onAbort}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
           >
             <Square size={14} />
           </button>
@@ -110,7 +112,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
           <button
             onClick={handleSend}
             disabled={!text.trim() || disabled}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowUp size={16} />
           </button>

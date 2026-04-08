@@ -68,9 +68,10 @@ export function ModelPickerOverlay({
 
 interface ModelSelectorTriggerProps {
   onPress: () => void;
+  inline?: boolean;
 }
 
-export function ModelSelectorTrigger({ onPress }: ModelSelectorTriggerProps) {
+export function ModelSelectorTrigger({ onPress, inline }: ModelSelectorTriggerProps) {
   const selectedModelId = useModelStore((s) => s.selectedModelId);
   const models = useModelStore((s) => s.models);
   const isLoading = useModelStore((s) => s.isLoading);
@@ -83,7 +84,11 @@ export function ModelSelectorTrigger({ onPress }: ModelSelectorTriggerProps) {
   return (
     <button
       onClick={onPress}
-      className="flex items-center gap-1 rounded-lg bg-neutral-700/50 border border-neutral-600 px-2.5 py-1 hover:bg-neutral-700 transition-colors max-w-[160px]"
+      className={
+        inline
+          ? "flex items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-700/60 transition-colors max-w-[160px]"
+          : "flex items-center gap-1 rounded-lg bg-neutral-700/50 border border-neutral-600 px-2.5 py-1 hover:bg-neutral-700 transition-colors max-w-[160px]"
+      }
     >
       <span className="truncate text-xs text-neutral-300">{label}</span>
       <ChevronDown size={12} className="shrink-0 text-neutral-400" />

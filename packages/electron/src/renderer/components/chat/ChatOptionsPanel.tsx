@@ -62,41 +62,50 @@ export function ChatOptionsPanel({
       {/* Thinking (if model supports it) */}
       {profile && (
         <div className="flex flex-col gap-1.5 rounded-xl px-3 py-2.5">
-          <div className="flex items-center gap-2.5">
-            <Lightbulb size={16} className="text-neutral-400" />
-            <span className="text-sm text-white">Thinking</span>
-          </div>
-          {profile.type === "binary" ? (
-            <div className="flex justify-end">
+          {profile.offValue !== undefined ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Lightbulb size={16} className="text-neutral-400" />
+                <span className="text-sm text-white">Thinking</span>
+              </div>
               <Toggle
-                value={currentThinking === true || currentThinking === "on"}
+                value={resolveEffectiveThinkingValue(profile, currentThinking) !== profile.offValue}
                 onChange={(v) => {
                   if (selectedModelId) {
-                    setThinkingForModel(selectedModelId, v ? "on" : "off");
+                    setThinkingForModel(
+                      selectedModelId,
+                      v ? (profile.options[0]?.value ?? true) : (profile.offValue ?? null),
+                    );
                   }
                 }}
               />
             </div>
           ) : (
-            <div className="flex gap-1.5 flex-wrap mt-1">
-              {profile.options?.map((opt) => {
-                const resolved = resolveEffectiveThinkingValue(profile, currentThinking);
-                const isSelected = resolved === opt.value;
-                return (
-                  <button
-                    key={String(opt.value)}
-                    onClick={() => selectedModelId && setThinkingForModel(selectedModelId, opt.value)}
-                    className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
-                      isSelected
-                        ? "border-primary bg-primary/20 text-primary"
-                        : "border-neutral-600 text-neutral-400 hover:border-neutral-500"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
+            <>
+              <div className="flex items-center gap-2.5">
+                <Lightbulb size={16} className="text-neutral-400" />
+                <span className="text-sm text-white">Thinking</span>
+              </div>
+              <div className="flex gap-1.5 flex-wrap mt-1">
+                {profile.options?.map((opt) => {
+                  const resolved = resolveEffectiveThinkingValue(profile, currentThinking);
+                  const isSelected = resolved === opt.value;
+                  return (
+                    <button
+                      key={String(opt.value)}
+                      onClick={() => selectedModelId && setThinkingForModel(selectedModelId, opt.value)}
+                      className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                        isSelected
+                          ? "border-primary bg-primary/20 text-primary"
+                          : "border-neutral-600 text-neutral-400 hover:border-neutral-500"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
