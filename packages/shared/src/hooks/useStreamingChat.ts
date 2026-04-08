@@ -1,5 +1,13 @@
 import { useCallback, useRef } from "react";
 
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 import { useChatStore } from "../stores/chatStore";
 import { useAuthStore } from "../stores/authStore";
 import { useModelStore } from "../stores/modelStore";
@@ -62,7 +70,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
       let effectiveId = conversationId;
 
       const userMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         conversationId,
         role: "user",
         content,
@@ -217,7 +225,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
           };
 
           const assistantMessage: Message = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             conversationId: effectiveId,
             role: "assistant",
             content: fullContent,
@@ -244,7 +252,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
           });
           if (fullContent) {
             const partialMessage: Message = {
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               conversationId: effectiveId,
               role: "assistant",
               content: fullContent + "\n\n*[Stream interrupted]*",
