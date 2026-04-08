@@ -30,6 +30,7 @@ export function MessageList({
 }: MessageListProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const isAtBottomRef = useRef(true);
   const { dark } = useTheme();
 
   const displayData: Array<Message | { id: string; type: "streaming" }> = [
@@ -41,7 +42,7 @@ export function MessageList({
   }
 
   useEffect(() => {
-    if (displayData.length > 0) {
+    if (displayData.length > 0 && isAtBottomRef.current) {
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -54,7 +55,9 @@ export function MessageList({
         e.nativeEvent;
       const distanceFromBottom =
         contentSize.height - layoutMeasurement.height - contentOffset.y;
-      setIsAtBottom(distanceFromBottom <= BOTTOM_THRESHOLD);
+      const atBottom = distanceFromBottom <= BOTTOM_THRESHOLD;
+      isAtBottomRef.current = atBottom;
+      setIsAtBottom(atBottom);
     },
     []
   );
