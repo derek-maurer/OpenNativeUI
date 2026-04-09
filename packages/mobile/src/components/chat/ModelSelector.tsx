@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   Pressable,
   FlatList,
   StyleSheet,
@@ -13,6 +14,7 @@ import { BottomSheet } from "@/components/common/BottomSheet";
 
 export function ModelSelector() {
   const [visible, setVisible] = useState(false);
+  const [query, setQuery] = useState("");
   const { dark, colors } = useTheme();
   const models = useModelStore((s) => s.models);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
@@ -22,6 +24,19 @@ export function ModelSelector() {
   const selectedModel = models.find((m) => m.id === selectedModelId);
   const displayName =
     selectedModel?.name ?? selectedModel?.id ?? "Select model";
+
+  const filtered = query.trim()
+    ? models.filter(
+        (m) =>
+          m.name.toLowerCase().includes(query.toLowerCase()) ||
+          (m.owned_by ?? "").toLowerCase().includes(query.toLowerCase())
+      )
+    : models;
+
+  const handleClose = () => {
+    setVisible(false);
+    setQuery("");
+  };
 
   return (
     <>
@@ -43,7 +58,7 @@ export function ModelSelector() {
 
       <BottomSheet
         visible={visible}
-        onClose={() => setVisible(false)}
+        onClose={handleClose}
         backgroundColor={dark ? "#1a1a1a" : "#fff"}
         maxHeight="60%"
       >
@@ -58,8 +73,26 @@ export function ModelSelector() {
           </Text>
         </View>
 
+        <View style={[styles.searchBar, { borderBottomColor: colors.border, backgroundColor: dark ? "#111" : "#f5f5f5" }]}>
+          <Ionicons name="search-outline" size={16} color="#737373" style={{ marginRight: 8 }} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Filter models…"
+            placeholderTextColor="#737373"
+            style={[styles.searchInput, { color: colors.text }]}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {query.length > 0 && (
+            <Pressable onPress={() => setQuery("")} hitSlop={8}>
+              <Ionicons name="close-circle" size={16} color="#737373" />
+            </Pressable>
+          )}
+        </View>
+
         <FlatList
-          data={models}
+          data={filtered}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 32 }}
           renderItem={({ item }) => {
@@ -68,7 +101,7 @@ export function ModelSelector() {
               <Pressable
                 onPress={() => {
                   setSelectedModel(item.id);
-                  setVisible(false);
+                  handleClose();
                 }}
                 style={[
                   styles.modelRow,
@@ -105,7 +138,7 @@ export function ModelSelector() {
           ListEmptyComponent={
             <View style={styles.emptyList}>
               <Text style={{ color: "#737373" }}>
-                {isLoading ? "Loading models..." : "No models available"}
+                {isLoading ? "Loading models..." : query.trim() ? `No models match "${query}"` : "No models available"}
               </Text>
             </View>
           }
@@ -158,5 +191,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 32,
     alignItems: "center",
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 2,
   },
 });

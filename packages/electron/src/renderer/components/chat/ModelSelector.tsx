@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useModelStore } from "@opennative/shared";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Search } from "lucide-react";
 import { Modal } from "../ui/Modal";
 
 interface ModelPickerOverlayProps {
@@ -19,8 +19,26 @@ export function ModelPickerOverlay({
   const models = useModelStore((s) => s.models);
   const storeSelectedId = useModelStore((s) => s.selectedModelId);
   const setSelectedModel = useModelStore((s) => s.setSelectedModel);
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const effectiveSelected = selectedModelId !== undefined ? selectedModelId : storeSelectedId;
+
+  const filtered = query.trim()
+    ? models.filter(
+        (m) =>
+          m.name.toLowerCase().includes(query.toLowerCase()) ||
+          (m.owned_by ?? "").toLowerCase().includes(query.toLowerCase())
+      )
+    : models;
+
+  // Reset search and focus input when opened
+  useEffect(() => {
+    if (visible) {
+      setQuery("");
+      requestAnimationFrame(() => searchRef.current?.focus());
+    }
+  }, [visible]);
 
   const handleSelect = (id: string | null) => {
     if (onSelect) {
@@ -36,15 +54,28 @@ export function ModelPickerOverlay({
       <div className="px-4 py-3 border-b border-neutral-700">
         <h3 className="text-sm font-semibold text-white">Select Model</h3>
       </div>
-      <div className="max-h-96 overflow-y-auto p-2">
-        <button
-          onClick={() => handleSelect(null)}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
-        >
-          <span className="flex-1 text-sm text-neutral-400">None</span>
-          {effectiveSelected === null && <Check size={14} className="text-primary" />}
-        </button>
-        {models.map((model) => (
+      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-neutral-800">
+        <Search size={14} className="text-neutral-500 shrink-0" />
+        <input
+          ref={searchRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filter models…"
+          className="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 focus:outline-none"
+        />
+      </div>
+      <div className="max-h-80 overflow-y-auto p-2">
+        {!query.trim() && (
+          <button
+            onClick={() => handleSelect(null)}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
+          >
+            <span className="flex-1 text-sm text-neutral-400">None</span>
+            {effectiveSelected === null && <Check size={14} className="text-primary" />}
+          </button>
+        )}
+        {filtered.map((model) => (
           <button
             key={model.id}
             onClick={() => handleSelect(model.id)}
@@ -61,6 +92,9 @@ export function ModelPickerOverlay({
             )}
           </button>
         ))}
+        {filtered.length === 0 && (
+          <p className="px-3 py-6 text-center text-xs text-neutral-600">No models match "{query}"</p>
+        )}
       </div>
     </Modal>
   );
