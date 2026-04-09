@@ -9,6 +9,7 @@ import {
   disconnectSocket,
 } from "@opennative/shared";
 import { Sidebar } from "../components/sidebar/Sidebar";
+import { ConversationSearchModal } from "../components/sidebar/ConversationSearchModal";
 import { ChatScreen } from "../screens/ChatScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { MessageSquare } from "lucide-react";
@@ -37,6 +38,7 @@ export function MainLayout() {
   });
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const loadConversations = useConversationStore((s) => s.loadConversations);
   const reloadFolderMemberships = useConversationStore((s) => s.reloadFolderMemberships);
@@ -151,6 +153,13 @@ export function MainLayout() {
         setView({ type: "settings" });
         return;
       }
+
+      // Cmd+K — open conversation search
+      if (e.key === "k" && !e.shiftKey) {
+        e.preventDefault();
+        setIsSearchOpen((v) => !v);
+        return;
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => { document.removeEventListener("keydown", onKeyDown); };
@@ -160,6 +169,14 @@ export function MainLayout() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-[#0d0d0d]">
+      <ConversationSearchModal
+        visible={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelect={(id) => {
+          handleSelectConversation(id);
+          setIsSearchOpen(false);
+        }}
+      />
       {/* Sidebar */}
       <div
         className="shrink-0 border-r border-neutral-800"
@@ -171,6 +188,7 @@ export function MainLayout() {
           onNewChat={handleNewChat}
           onSelectConversation={handleSelectConversation}
           onOpenSettings={() => setView({ type: "settings" })}
+          onOpenSearch={() => setIsSearchOpen(true)}
         />
       </div>
 

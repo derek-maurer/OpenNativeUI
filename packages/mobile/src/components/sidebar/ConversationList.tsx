@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   Pressable,
   FlatList,
   StyleSheet,
@@ -116,6 +117,10 @@ export function ConversationList(props: DrawerContentComponentProps) {
   const isCollapsed = useSidebarStore((s) => s.isCollapsed);
   const toggleCollapsed = useSidebarStore((s) => s.toggleCollapsed);
 
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<TextInput>(null);
+
   const isDesktop = Platform.OS === "web";
 
   // Resize handle — PanResponder tracks horizontal drag to update drawer width.
@@ -138,6 +143,23 @@ export function ConversationList(props: DrawerContentComponentProps) {
     conversations,
     MAX_RECENT_FOLDERS
   );
+
+  const searchResults = searchQuery.trim()
+    ? conversations.filter((c) =>
+        (c.title ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : conversations;
+
+  const handleOpenSearch = () => {
+    setSearchOpen(true);
+    setSearchQuery("");
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  };
+
+  const handleCloseSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
 
   const flatData: Row[] = [];
 
@@ -256,6 +278,12 @@ export function ConversationList(props: DrawerContentComponentProps) {
         </Text>
         <View style={styles.headerActions}>
           <Pressable
+            onPress={handleOpenSearch}
+            style={{ ...styles.actionButton, backgroundColor: iconBtnBg }}
+          >
+            <Ionicons name="search-outline" size={20} color={colors.text} />
+          </Pressable>
+          <Pressable
             onPress={handleNewChat}
             style={{ ...styles.actionButton, backgroundColor: iconBtnBg }}
           >
@@ -272,9 +300,29 @@ export function ConversationList(props: DrawerContentComponentProps) {
         </View>
       </View>
 
+      {/* Search bar */}
+      {searchOpen && (
+        <View style={[styles.searchBar, { borderBottomColor: colors.border, backgroundColor: dark ? "#1a1a1a" : "#f0f0f0" }]}>
+          <Ionicons name="search-outline" size={16} color={subText} style={{ marginRight: 8 }} />
+          <TextInput
+            ref={searchInputRef}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search conversations…"
+            placeholderTextColor={subText}
+            style={[styles.searchInput, { color: colors.text }]}
+            autoFocus
+            returnKeyType="search"
+          />
+          <Pressable onPress={handleCloseSearch} hitSlop={8}>
+            <Ionicons name="close-outline" size={20} color={subText} />
+          </Pressable>
+        </View>
+      )}
+
       {/* Conversation list */}
       <FlatList
-        data={flatData}
+        data={searchOpen ? searchResults.map((c) => ({ type: "item" as const, conversation: c, id: c.id })) : flatData}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 8 }}
         refreshing={isLoading}
@@ -335,7 +383,9 @@ export function ConversationList(props: DrawerContentComponentProps) {
         ListEmptyComponent={
           <View style={styles.emptyList}>
             <Text style={{ color: "#737373", fontSize: 14 }}>
-              No conversations yet
+              {searchOpen && searchQuery.trim()
+                ? "No conversations found"
+                : "No conversations yet"}
             </Text>
           </View>
         }
@@ -487,5 +537,19 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  // ── Search bar ────────────────────────────────────────────────────────────────
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    paddingVertical: 4,
   },
 });

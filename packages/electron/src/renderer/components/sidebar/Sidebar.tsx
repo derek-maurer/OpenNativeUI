@@ -13,6 +13,7 @@ import {
   FolderPlus,
   MessageSquare,
   Pencil,
+  Search,
   Settings,
   SquarePen,
   Trash2,
@@ -31,6 +32,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
   onOpenSettings: () => void;
+  onOpenSearch: () => void;
 }
 
 function groupByDate(conversations: Conversation[]): Record<string, Conversation[]> {
@@ -54,7 +56,7 @@ function groupByDate(conversations: Conversation[]): Record<string, Conversation
   return groups;
 }
 
-export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConversation, onOpenSettings }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConversation, onOpenSettings, onOpenSearch }: SidebarProps) {
   const conversations = useConversationStore((s) => s.conversations);
   const removeConversation = useConversationStore((s) => s.removeConversation);
   const renameConversation = useConversationStore((s) => s.renameConversation);
@@ -184,6 +186,14 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
             >
               <SquarePen size={16} />
+            </button>
+          </Tooltip>
+          <Tooltip label="Search" shortcut="⌘K" side="right">
+            <button
+              onClick={onOpenSearch}
+              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <Search size={16} />
             </button>
           </Tooltip>
           <Tooltip label="Folders" side="right">
@@ -398,6 +408,14 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
       <div className="app-drag flex items-center justify-between px-3 pt-9 pb-2">
         <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider select-none">Chats</span>
         <div className="app-no-drag flex items-center gap-1">
+          <Tooltip label="Search" shortcut="⌘K">
+            <button
+              onClick={onOpenSearch}
+              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <Search size={15} />
+            </button>
+          </Tooltip>
           <Tooltip label="New Folder">
             <button
               onClick={() => setShowFolderEdit(true)}
