@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useConversationStore,
   useFolderStore,
@@ -25,11 +25,19 @@ function generateId(): string {
   });
 }
 
+const COLLAPSED_WIDTH = 52;
+const DEFAULT_WIDTH = 260;
+const MIN_WIDTH = 200;
+const MAX_WIDTH = 400;
+
 export function MainLayout() {
   const [view, setView] = useState<View>(() => {
     const id = generateId();
     return { type: "chat", conversationId: id, isNew: true };
   });
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+
   const loadConversations = useConversationStore((s) => s.loadConversations);
   const reloadFolderMemberships = useConversationStore((s) => s.reloadFolderMemberships);
   const loadFolders = useFolderStore((s) => s.loadFolders);
@@ -66,9 +74,37 @@ export function MainLayout() {
     }
   }, [models.length]);
 
+  // ── Resize handle ───────────────────────────────────────────────────────────
+  const isResizing = useRef(false);
+  const resizeStartX = useRef(0);
+  const resizeStartWidth = useRef(0);
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    if (isCollapsed) return;
+    isResizing.current = true;
+    resizeStartX.current = e.clientX;
+    resizeStartWidth.current = sidebarWidth;
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const delta = e.clientX - resizeStartX.current;
+      const next = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, resizeStartWidth.current + delta));
+      setSidebarWidth(next);
+    };
+    const onMouseUp = () => { isResizing.current = false; };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
   const handleNewChat = () => {
     clearChat();
-    // Re-apply defaults for new conversation (clearChat resets webSearchEnabled to false)
     if (webSearchByDefault) {
       toggleWebSearch();
     }
@@ -83,16 +119,29 @@ export function MainLayout() {
     setView({ type: "chat", conversationId: id, isNew: false });
   };
 
+  const currentWidth = isCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
+
   return (
     <div className="flex h-full w-full overflow-hidden bg-[#0d0d0d]">
       {/* Sidebar */}
-      <div className="w-[260px] shrink-0 border-r border-neutral-800">
+      <div
+        className="shrink-0 border-r border-neutral-800"
+        style={{ width: currentWidth }}
+      >
         <Sidebar
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => setIsCollapsed((v) => !v)}
           onNewChat={handleNewChat}
           onSelectConversation={handleSelectConversation}
           onOpenSettings={() => setView({ type: "settings" })}
         />
       </div>
+
+      {/* Resize handle */}
+      <div
+        className={`w-1 shrink-0 hover:bg-neutral-600 active:bg-neutral-500 transition-colors ${isCollapsed ? "cursor-default" : "cursor-col-resize"}`}
+        onMouseDown={handleResizeMouseDown}
+      />
 
       {/* Content */}
       <div className="flex flex-1 flex-col overflow-hidden">

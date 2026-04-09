@@ -6,6 +6,8 @@ import {
 } from "@opennative/shared";
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Folder,
   FolderOpen,
   FolderPlus,
@@ -19,10 +21,13 @@ import { useEffect, useMemo, useState } from "react";
 import { FolderDataModal } from "../folders/FolderDataModal";
 import { FolderEditModal } from "../folders/FolderEditModal";
 import { Modal } from "../ui/Modal";
+import { Tooltip } from "../ui/Tooltip";
 import { useToast } from "../ui/Toast";
 import { ConversationItem } from "./ConversationItem";
 
 interface SidebarProps {
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
   onOpenSettings: () => void;
@@ -49,7 +54,7 @@ function groupByDate(conversations: Conversation[]): Record<string, Conversation
   return groups;
 }
 
-export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConversation, onOpenSettings }: SidebarProps) {
   const conversations = useConversationStore((s) => s.conversations);
   const removeConversation = useConversationStore((s) => s.removeConversation);
   const renameConversation = useConversationStore((s) => s.renameConversation);
@@ -155,6 +160,57 @@ export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: Sid
   const groups = groupByDate(conversations);
   const groupLabels = ["Today", "Yesterday", "Previous 7 Days", "Older"] as const;
 
+  // ── Collapsed (icon-only) mode ────────────────────────────────────────────
+  if (isCollapsed) {
+    return (
+      <div className="flex h-full flex-col items-center bg-[#111111] no-select">
+        {/* Expand button */}
+        <div className="app-drag flex w-full items-center justify-center pt-9 pb-2">
+          <Tooltip label="Expand sidebar" side="right">
+            <button
+              onClick={onToggleCollapse}
+              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Action icons */}
+        <div className="flex flex-col items-center gap-1 px-1 w-full">
+          <Tooltip label="New Chat" side="right">
+            <button
+              onClick={onNewChat}
+              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <SquarePen size={16} />
+            </button>
+          </Tooltip>
+          <Tooltip label="Folders" side="right">
+            <button
+              onClick={() => setFoldersExpanded((v) => !v)}
+              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <Folder size={16} />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Settings */}
+        <div className="mt-auto w-full flex items-center justify-center border-t border-neutral-800 py-3">
+          <Tooltip label="Settings" side="right">
+            <button
+              onClick={onOpenSettings}
+              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <Settings size={16} />
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+    );
+  }
+
   // ── Folder detail view ────────────────────────────────────────────────────
   if (selectedFolderId && selectedFolder) {
     const systemPrompt = selectedFolder.data?.system_prompt;
@@ -165,26 +221,28 @@ export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: Sid
       <div className="flex h-full flex-col bg-[#111111] no-select">
         {/* Header */}
         <div className="app-drag flex items-center gap-1 px-3 pt-9 pb-2">
-          <button
-            onClick={() => setSelectedFolderId(null)}
-            className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
-            title="Back"
-          >
-            <ArrowLeft size={15} />
-          </button>
+          <Tooltip label="Back">
+            <button
+              onClick={() => setSelectedFolderId(null)}
+              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
+            >
+              <ArrowLeft size={15} />
+            </button>
+          </Tooltip>
           <div className="flex-1 flex items-center gap-1.5 min-w-0">
             <Folder size={13} className="shrink-0 text-neutral-400" />
             <span className="text-xs font-semibold text-neutral-300 uppercase tracking-wider truncate select-none">
               {selectedFolder.name}
             </span>
           </div>
-          <button
-            onClick={() => setShowFolderData(true)}
-            className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
-            title="Edit folder"
-          >
-            <Pencil size={13} />
-          </button>
+          <Tooltip label="Edit folder">
+            <button
+              onClick={() => setShowFolderData(true)}
+              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
+            >
+              <Pencil size={13} />
+            </button>
+          </Tooltip>
         </div>
 
         {/* System prompt / files info card */}
@@ -339,20 +397,30 @@ export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: Sid
       <div className="app-drag flex items-center justify-between px-3 pt-9 pb-2">
         <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider select-none">Chats</span>
         <div className="app-no-drag flex items-center gap-1">
-          <button
-            onClick={() => setShowFolderEdit(true)}
-            className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
-            title="New Folder"
-          >
-            <FolderPlus size={15} />
-          </button>
-          <button
-            onClick={onNewChat}
-            className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
-            title="New Chat"
-          >
-            <SquarePen size={15} />
-          </button>
+          <Tooltip label="New Folder">
+            <button
+              onClick={() => setShowFolderEdit(true)}
+              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <FolderPlus size={15} />
+            </button>
+          </Tooltip>
+          <Tooltip label="New Chat">
+            <button
+              onClick={onNewChat}
+              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <SquarePen size={15} />
+            </button>
+          </Tooltip>
+          <Tooltip label="Collapse sidebar">
+            <button
+              onClick={onToggleCollapse}
+              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+            >
+              <ChevronLeft size={15} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 

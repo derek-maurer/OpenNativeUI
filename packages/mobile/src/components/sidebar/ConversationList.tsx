@@ -1,4 +1,13 @@
-import { View, Text, Pressable, FlatList, StyleSheet } from "react-native";
+import { useRef } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  FlatList,
+  StyleSheet,
+  PanResponder,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +19,7 @@ import { useChatStore } from "@opennative/shared";
 import { useFolderStore } from "@opennative/shared";
 import { ConversationItem } from "./ConversationItem";
 import type { Conversation, Folder } from "@opennative/shared";
+import { useSidebarStore } from "@/stores/sidebarStore";
 
 const MAX_RECENT_FOLDERS = 3;
 
@@ -103,6 +113,26 @@ export function ConversationList(props: DrawerContentComponentProps) {
   const currentConversationId = useChatStore((s) => s.currentConversationId);
   const clearChat = useChatStore((s) => s.clearChat);
 
+  const isCollapsed = useSidebarStore((s) => s.isCollapsed);
+  const toggleCollapsed = useSidebarStore((s) => s.toggleCollapsed);
+
+  const isDesktop = Platform.OS === "web";
+
+  // Resize handle — PanResponder tracks horizontal drag to update drawer width.
+  const dragStartWidth = useRef(0);
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        dragStartWidth.current = useSidebarStore.getState().drawerWidth;
+      },
+      onPanResponderMove: (_e, g) => {
+        useSidebarStore.getState().setDrawerWidth(dragStartWidth.current + g.dx);
+      },
+    })
+  ).current;
+
   const recentFolders = getRecentFolders(
     folders,
     conversations,
@@ -111,7 +141,6 @@ export function ConversationList(props: DrawerContentComponentProps) {
 
   const flatData: Row[] = [];
 
-  // Folders section at the top
   flatData.push({ type: "foldersButton", id: "folders-button" });
   for (const { folder, count } of recentFolders) {
     flatData.push({
@@ -122,7 +151,6 @@ export function ConversationList(props: DrawerContentComponentProps) {
     });
   }
 
-  // All conversations in flat date groups below (unfiltered)
   const dateGroups = groupByDate(conversations);
   for (const group of dateGroups) {
     flatData.push({
@@ -161,12 +189,64 @@ export function ConversationList(props: DrawerContentComponentProps) {
     await reloadFolderMemberships();
   };
 
+  const handleSettings = () => {
+    router.push("/(app)/settings");
+    props.navigation.closeDrawer();
+  };
+
   const tileBg = dark ? "#141414" : "#f0f0f0";
   const subText = dark ? "#a3a3a3" : "#525252";
+  const bgColor = dark ? "#0d0d0d" : "#f9f9f9";
+  const iconBtnBg = dark ? "#2a2a2a" : "#e5e5e5";
 
+  // ── Collapsed (icon-only) mode ──────────────────────────────────────────────
+  if (isCollapsed) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: bgColor }]}
+        edges={["top", "bottom"]}
+      >
+        {/* Expand button */}
+        <View style={[styles.collapsedHeader, { borderBottomColor: colors.border }]}>
+          <Pressable
+            onPress={toggleCollapsed}
+            style={[styles.iconButton, { backgroundColor: iconBtnBg }]}
+          >
+            <Ionicons name="chevron-forward" size={18} color={colors.text} />
+          </Pressable>
+        </View>
+
+        {/* Action icons */}
+        <View style={styles.collapsedBody}>
+          <Pressable
+            onPress={handleNewChat}
+            style={[styles.iconButton, { backgroundColor: iconBtnBg }]}
+          >
+            <Ionicons name="create-outline" size={20} color={colors.text} />
+          </Pressable>
+          <Pressable
+            onPress={handleOpenFolders}
+            style={[styles.iconButton, { backgroundColor: iconBtnBg }]}
+          >
+            <Ionicons name="folder-outline" size={20} color={colors.text} />
+          </Pressable>
+        </View>
+
+        {/* Settings */}
+        <Pressable
+          onPress={handleSettings}
+          style={[styles.collapsedFooter, { borderTopColor: colors.border }]}
+        >
+          <Ionicons name="settings-outline" size={20} color={colors.text} />
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Expanded mode ───────────────────────────────────────────────────────────
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: dark ? "#0d0d0d" : "#f9f9f9" }]}
+      style={[styles.container, { backgroundColor: bgColor }]}
       edges={["top", "bottom"]}
     >
       {/* Header */}
@@ -174,12 +254,22 @@ export function ConversationList(props: DrawerContentComponentProps) {
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           OpenNativeUI
         </Text>
-        <Pressable
-          onPress={handleNewChat}
-          style={{ ...styles.newChatButton, backgroundColor: dark ? "#2a2a2a" : "#e5e5e5" }}
-        >
-          <Ionicons name="create-outline" size={20} color={colors.text} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={handleNewChat}
+            style={{ ...styles.actionButton, backgroundColor: iconBtnBg }}
+          >
+            <Ionicons name="create-outline" size={20} color={colors.text} />
+          </Pressable>
+          {isDesktop && (
+            <Pressable
+              onPress={toggleCollapsed}
+              style={{ ...styles.actionButton, backgroundColor: iconBtnBg }}
+            >
+              <Ionicons name="chevron-back" size={18} color={colors.text} />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       {/* Conversation list */}
@@ -253,10 +343,7 @@ export function ConversationList(props: DrawerContentComponentProps) {
 
       {/* Settings link */}
       <Pressable
-        onPress={() => {
-          router.push("/(app)/settings");
-          props.navigation.closeDrawer();
-        }}
+        onPress={handleSettings}
         style={[styles.settingsRow, { borderTopColor: colors.border }]}
       >
         <Ionicons name="settings-outline" size={20} color={colors.text} />
@@ -264,12 +351,22 @@ export function ConversationList(props: DrawerContentComponentProps) {
           Settings
         </Text>
       </Pressable>
+
+      {/* Resize handle — desktop only */}
+      {isDesktop && (
+        <View
+          style={[styles.resizeHandle, { cursor: "col-resize" } as object]}
+          {...panResponder.panHandlers}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  // ── Expanded header ─────────────────────────────────────────────────────────
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -282,13 +379,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
   },
-  newChatButton: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  actionButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
+
+  // ── Folder tiles ────────────────────────────────────────────────────────────
   folderTile: {
     flexDirection: "row",
     alignItems: "center",
@@ -310,6 +414,8 @@ const styles = StyleSheet.create({
   folderTileCount: {
     fontSize: 12,
   },
+
+  // ── Section header / empty ───────────────────────────────────────────────────
   sectionHeader: {
     fontSize: 11,
     fontWeight: "600",
@@ -325,6 +431,8 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
     alignItems: "center",
   },
+
+  // ── Settings row ─────────────────────────────────────────────────────────────
   settingsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -335,5 +443,49 @@ const styles = StyleSheet.create({
   },
   settingsText: {
     fontSize: 16,
+  },
+
+  // ── Resize handle ─────────────────────────────────────────────────────────────
+  resizeHandle: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    zIndex: 10,
+  },
+
+  // ── Collapsed mode ────────────────────────────────────────────────────────────
+  collapsedHeader: {
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  collapsedBody: {
+    flex: 1,
+    alignItems: "center",
+    paddingTop: 12,
+    gap: 8,
+  },
+  collapsedFooter: {
+    alignItems: "center",
+    paddingVertical: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // ── Kept for backward compat (no longer used directly) ────────────────────────
+  newChatButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
