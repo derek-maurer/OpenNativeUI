@@ -44,7 +44,7 @@ function CodeBlock({
   // Inline code — no language class
   if (!className?.includes("language-")) {
     return (
-      <code className="rounded bg-neutral-700/60 px-1.5 py-0.5 text-xs font-mono text-neutral-200">
+      <code className="rounded bg-hover px-1.5 py-0.5 text-xs font-mono text-fg">
         {children}
       </code>
     );
@@ -52,10 +52,10 @@ function CodeBlock({
 
   // Block code — rendered by the `pre` override below, so we own the full container
   return (
-    <div className="group relative my-3 rounded-xl border border-neutral-600 bg-neutral-800 overflow-hidden">
+    <div className="group relative my-3 rounded-xl border border-line-strong bg-surface overflow-hidden">
       <button
         onClick={handleCopy}
-        className="absolute top-2.5 right-2.5 z-10 rounded-lg bg-neutral-700/70 p-1.5 text-neutral-400 opacity-0 group-hover:opacity-100 hover:bg-neutral-600 hover:text-white transition-all"
+        className="absolute top-2.5 right-2.5 z-10 rounded-lg bg-hover p-1.5 text-secondary opacity-0 group-hover:opacity-100 hover:bg-hover hover:text-fg transition-all"
         title={copied ? "Copied!" : "Copy"}
       >
         {copied ? <Check size={13} /> : <Copy size={13} />}
@@ -137,7 +137,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
         <div className="max-w-[75%]">
           {/* User text */}
           {message.content && (
-            <div className="rounded-2xl rounded-br-sm bg-[#2a2a2a] px-4 py-2.5 text-sm text-white selectable">
+            <div className="rounded-2xl rounded-br-sm bg-bubble px-4 py-2.5 text-sm text-fg selectable">
               {message.content}
             </div>
           )}
@@ -148,7 +148,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
               key={i}
               src={file.dataUrl ?? file.uri}
               alt={file.name ?? "attachment"}
-              className="mt-2 max-w-full rounded-xl border border-neutral-700"
+              className="mt-2 max-w-full rounded-xl border border-line-strong"
             />
           ))}
         </div>

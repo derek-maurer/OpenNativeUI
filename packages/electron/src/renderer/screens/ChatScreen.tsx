@@ -74,7 +74,7 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
     <div className="flex h-full flex-col">
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 size={24} className="animate-spin text-neutral-500" />
+          <Loader2 size={24} className="animate-spin text-muted" />
         </div>
       ) : (
         <MessageList onSuggest={handleSend} />

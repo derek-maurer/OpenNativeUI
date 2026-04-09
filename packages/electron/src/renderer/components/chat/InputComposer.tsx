@@ -59,7 +59,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
   const plusActive = webSearchEnabled;
 
   return (
-    <div className="relative border-t border-neutral-800 bg-[#0d0d0d]">
+    <div className="relative border-t border-line bg-base">
       <FileUploadProgress />
 
       <div className="flex items-end gap-2 px-4 py-3">
@@ -70,7 +70,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
             className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
               plusActive || showOptions
                 ? "border-primary bg-primary/20 text-primary"
-                : "border-neutral-700 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                : "border-line-strong text-secondary hover:border-line-strong hover:text-fg"
             }`}
           >
             <Plus size={16} />
@@ -84,7 +84,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
         </div>
 
         {/* Unified text input + model selector container */}
-        <div className="flex flex-1 items-end rounded-xl bg-[#1a1a1a] border border-neutral-700 focus-within:border-neutral-600 transition-colors">
+        <div className="flex flex-1 items-end rounded-xl bg-surface border border-line-strong focus-within:border-muted transition-colors">
           <textarea
             ref={textareaRef}
             value={text}
@@ -94,7 +94,7 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
             maxLength={10000}
             rows={1}
             disabled={disabled}
-            className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none disabled:opacity-50"
+            className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-fg placeholder-muted focus:outline-none disabled:opacity-50"
             style={{ minHeight: "36px", maxHeight: "160px" }}
           />
           <div className="flex items-center self-end px-1 pb-1">

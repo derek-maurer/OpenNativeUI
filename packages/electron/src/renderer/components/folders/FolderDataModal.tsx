@@ -158,11 +158,11 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
   return (
     <Modal visible={visible} onClose={onClose} width="max-w-md">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
-        <h3 className="text-sm font-semibold text-white">Edit Folder</h3>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-line-strong">
+        <h3 className="text-sm font-semibold text-fg">Edit Folder</h3>
         <button
           onClick={onClose}
-          className="rounded-lg p-1 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors"
+          className="rounded-lg p-1 text-secondary hover:text-fg hover:bg-hover transition-colors"
         >
           <X size={16} />
         </button>
@@ -171,7 +171,7 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
       <div className="overflow-y-auto max-h-[70vh] p-4 flex flex-col gap-4">
         {/* Folder name */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+          <label className="text-xs font-medium text-secondary uppercase tracking-wide">
             Folder Name
           </label>
           <input
@@ -179,13 +179,13 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Folder name"
-            className="w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600"
+            className="w-full rounded-xl bg-surface border border-line-strong px-3 py-2.5 text-sm text-fg placeholder-muted focus:outline-none focus:border-muted"
           />
         </div>
 
         {/* System prompt */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+          <label className="text-xs font-medium text-secondary uppercase tracking-wide">
             System Prompt
           </label>
           <textarea
@@ -193,13 +193,13 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
             onChange={(e) => setSystemPrompt(e.target.value)}
             placeholder="Write your model system prompt content here..."
             rows={5}
-            className="w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 resize-none"
+            className="w-full rounded-xl bg-surface border border-line-strong px-3 py-2.5 text-sm text-fg placeholder-muted focus:outline-none focus:border-muted resize-none"
           />
         </div>
 
         {/* Files */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-neutral-400 uppercase tracking-wide">
+          <label className="text-xs font-medium text-secondary uppercase tracking-wide">
             Files
           </label>
 
@@ -208,16 +208,16 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
               {files.map((file) => (
                 <div
                   key={file.id}
-                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 bg-neutral-800 ${
-                    file.error ? "border border-red-500/40" : "border border-neutral-700"
+                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 bg-surface ${
+                    file.error ? "border border-red-500/40" : "border border-line-strong"
                   }`}
                 >
                   {file.type === "collection" ? (
-                    <Image size={14} className="shrink-0 text-neutral-400" />
+                    <Image size={14} className="shrink-0 text-secondary" />
                   ) : (
-                    <FileText size={14} className={`shrink-0 ${file.error ? "text-red-400" : "text-neutral-400"}`} />
+                    <FileText size={14} className={`shrink-0 ${file.error ? "text-red-400" : "text-secondary"}`} />
                   )}
-                  <span className={`flex-1 truncate text-sm ${file.error ? "text-red-400" : "text-white"}`}>
+                  <span className={`flex-1 truncate text-sm ${file.error ? "text-red-400" : "text-fg"}`}>
                     {file.name ?? file.id}
                   </span>
                   {file.pending ? (
@@ -225,7 +225,7 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
                   ) : (
                     <button
                       onClick={() => handleRemoveFile(file.id)}
-                      className="shrink-0 text-neutral-500 hover:text-white transition-colors"
+                      className="shrink-0 text-muted hover:text-fg transition-colors"
                     >
                       <XCircle size={16} />
                     </button>
@@ -247,7 +247,7 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3 py-2.5 text-sm text-neutral-400 hover:text-white hover:border-neutral-600 hover:bg-neutral-800/60 transition-colors"
+            className="flex items-center justify-center gap-2 rounded-xl border border-line-strong px-3 py-2.5 text-sm text-secondary hover:text-fg hover:border-muted hover:bg-hover transition-colors"
           >
             <Paperclip size={14} />
             Attach Files
@@ -256,10 +256,10 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
       </div>
 
       {/* Footer */}
-      <div className="flex gap-2 justify-end px-4 py-3 border-t border-neutral-700">
+      <div className="flex gap-2 justify-end px-4 py-3 border-t border-line-strong">
         <button
           onClick={onClose}
-          className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors"
+          className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-secondary hover:text-fg transition-colors"
         >
           Cancel
         </button>

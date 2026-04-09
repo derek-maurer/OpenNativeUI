@@ -178,7 +178,7 @@ export function MainLayout() {
   const currentWidth = isCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-[#0d0d0d]">
+    <div className="flex h-full w-full overflow-hidden bg-base">
       <ConversationSearchModal
         visible={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -189,7 +189,7 @@ export function MainLayout() {
       />
       {/* Sidebar */}
       <div
-        className="shrink-0 border-r border-neutral-800"
+        className="shrink-0 border-r border-line"
         style={{ width: currentWidth }}
       >
         <Sidebar
@@ -216,7 +216,7 @@ export function MainLayout() {
         )}
 
         {view.type === "empty" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-neutral-600">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-dim">
             <MessageSquare size={40} strokeWidth={1} />
             <p className="text-sm">Select a conversation or start a new chat</p>
           </div>

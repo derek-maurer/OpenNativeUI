@@ -100,14 +100,14 @@ export function MessageActions({ content, info }: MessageActionsProps) {
           </ActionButton>
 
           {infoOpen && (
-            <div className="absolute left-0 top-7 z-50 w-52 rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl p-3">
+            <div className="absolute left-0 top-7 z-50 w-52 rounded-xl border border-line-strong bg-surface shadow-xl p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-neutral-200">
+                <span className="text-xs font-semibold text-fg">
                   Message Info
                 </span>
                 <button
                   onClick={() => setInfoOpen(false)}
-                  className="text-neutral-500 hover:text-neutral-300 transition-colors"
+                  className="text-muted hover:text-fg transition-colors"
                 >
                   <X size={12} />
                 </button>
@@ -165,7 +165,7 @@ function ActionButton({
         "flex items-center justify-center rounded-md p-1 transition-colors",
         active
           ? "text-primary bg-primary/10"
-          : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-700/50",
+          : "text-muted hover:text-fg hover:bg-hover",
       ].join(" ")}
     >
       {children}
@@ -196,9 +196,9 @@ function pickBestVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | n
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-neutral-800 last:border-0">
-      <span className="text-xs text-neutral-500">{label}</span>
-      <span className="text-xs font-medium text-neutral-200">{value}</span>
+    <div className="flex justify-between items-center py-1.5 border-b border-line last:border-0">
+      <span className="text-xs text-muted">{label}</span>
+      <span className="text-xs font-medium text-fg">{value}</span>
     </div>
   );
 }

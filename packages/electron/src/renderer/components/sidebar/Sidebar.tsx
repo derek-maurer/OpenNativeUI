@@ -165,13 +165,13 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
   // ── Collapsed (icon-only) mode ────────────────────────────────────────────
   if (isCollapsed) {
     return (
-      <div className="flex h-full flex-col items-center bg-[#111111] no-select">
+      <div className="flex h-full flex-col items-center bg-sidebar no-select">
         {/* Expand button */}
         <div className="app-drag flex w-full items-center justify-center pt-9 pb-2">
           <Tooltip label="Expand sidebar" side="right">
             <button
               onClick={onToggleCollapse}
-              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="app-no-drag rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <ChevronRight size={15} />
             </button>
@@ -183,7 +183,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="New Chat" shortcut="⇧⌘O" side="right">
             <button
               onClick={onNewChat}
-              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-2 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <SquarePen size={16} />
             </button>
@@ -191,7 +191,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="Search" shortcut="⌘K" side="right">
             <button
               onClick={onOpenSearch}
-              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-2 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <Search size={16} />
             </button>
@@ -199,7 +199,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="Folders" side="right">
             <button
               onClick={() => setFoldersExpanded((v) => !v)}
-              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-2 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <Folder size={16} />
             </button>
@@ -207,11 +207,11 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
         </div>
 
         {/* Settings */}
-        <div className="mt-auto w-full flex items-center justify-center border-t border-neutral-800 py-3">
+        <div className="mt-auto w-full flex items-center justify-center border-t border-line py-3">
           <Tooltip label="Settings" shortcut="⌘," side="right">
             <button
               onClick={onOpenSettings}
-              className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-2 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <Settings size={16} />
             </button>
@@ -228,27 +228,27 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
     const folderGroups = groupByDate(folderConversations);
 
     return (
-      <div className="flex h-full flex-col bg-[#111111] no-select">
+      <div className="flex h-full flex-col bg-sidebar no-select">
         {/* Header */}
         <div className="app-drag flex items-center gap-1 px-3 pt-9 pb-2">
           <Tooltip label="Back">
             <button
               onClick={() => setSelectedFolderId(null)}
-              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
+              className="app-no-drag rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors shrink-0"
             >
               <ArrowLeft size={15} />
             </button>
           </Tooltip>
           <div className="flex-1 flex items-center gap-1.5 min-w-0">
-            <Folder size={13} className="shrink-0 text-neutral-400" />
-            <span className="text-xs font-semibold text-neutral-300 uppercase tracking-wider truncate select-none">
+            <Folder size={13} className="shrink-0 text-secondary" />
+            <span className="text-xs font-semibold text-fg uppercase tracking-wider truncate select-none">
               {selectedFolder.name}
             </span>
           </div>
           <Tooltip label="Edit folder">
             <button
               onClick={() => setShowFolderData(true)}
-              className="app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0"
+              className="app-no-drag rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors shrink-0"
             >
               <Pencil size={13} />
             </button>
@@ -258,28 +258,28 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
         {/* System prompt / files info card */}
         {(systemPrompt || attachedFiles.length > 0) && (
           <div
-            className="mx-2 mb-2 rounded-xl bg-neutral-800/60 border border-neutral-700/50 p-3 cursor-pointer hover:bg-neutral-800 transition-colors"
+            className="mx-2 mb-2 rounded-xl bg-hover border border-line p-3 cursor-pointer hover:bg-hover transition-colors"
             onClick={() => setShowFolderData(true)}
           >
             {systemPrompt && (
               <div className="flex items-start gap-2 mb-2">
-                <MessageSquare size={13} className="shrink-0 text-neutral-500 mt-0.5" />
+                <MessageSquare size={13} className="shrink-0 text-muted mt-0.5" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">
+                  <p className="text-[10px] font-semibold text-muted uppercase tracking-wide mb-0.5">
                     System Prompt
                   </p>
-                  <p className="text-xs text-neutral-300 line-clamp-2">{systemPrompt}</p>
+                  <p className="text-xs text-fg line-clamp-2">{systemPrompt}</p>
                 </div>
               </div>
             )}
             {attachedFiles.length > 0 && (
               <div className="flex items-start gap-2">
-                <Folder size={13} className="shrink-0 text-neutral-500 mt-0.5" />
+                <Folder size={13} className="shrink-0 text-muted mt-0.5" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-0.5">
+                  <p className="text-[10px] font-semibold text-muted uppercase tracking-wide mb-0.5">
                     {attachedFiles.length} {attachedFiles.length === 1 ? "file" : "files"}
                   </p>
-                  <p className="text-xs text-neutral-400 truncate">
+                  <p className="text-xs text-secondary truncate">
                     {attachedFiles.map((f) => f.name ?? f.id).join(", ")}
                   </p>
                 </div>
@@ -292,9 +292,9 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
         <div className="flex-1 overflow-y-auto px-2">
           {folderConversations.length === 0 ? (
             <div className="flex flex-col items-center px-4 py-12 gap-2 text-center">
-              <FolderOpen size={32} className="text-neutral-700" />
-              <p className="text-xs text-neutral-500 mt-1">No conversations in this folder</p>
-              <p className="text-[11px] text-neutral-600">
+              <FolderOpen size={32} className="text-dim" />
+              <p className="text-xs text-muted mt-1">No conversations in this folder</p>
+              <p className="text-[11px] text-dim">
                 Right-click a conversation and choose "Move to Folder"
               </p>
             </div>
@@ -304,7 +304,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               if (!group.length) return null;
               return (
                 <div key={label} className="mb-2">
-                  <p className="px-3 py-1 text-[11px] font-medium text-neutral-500">{label}</p>
+                  <p className="px-3 py-1 text-[11px] font-medium text-muted">{label}</p>
                   {group.map((conv) => (
                     <ConversationItem
                       key={conv.id}
@@ -323,21 +323,21 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
         </div>
 
         {/* Settings button */}
-        <div className="flex items-center px-2 h-[63px] border-t border-neutral-800">
+        <div className="flex items-center px-2 h-[63px] border-t border-line">
           <button
             onClick={onOpenSettings}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-secondary hover:bg-hover hover:text-fg transition-colors"
           >
             <Settings size={16} />
             <span className="text-sm">Settings</span>
-            <span className="ml-auto font-mono text-[11px] text-neutral-600">⌘,</span>
+            <span className="ml-auto font-mono text-[11px] text-dim">⌘,</span>
           </button>
         </div>
 
         {/* Rename conversation modal */}
         <Modal visible={!!renamingId} onClose={() => setRenamingId(null)}>
-          <div className="px-4 py-3 border-b border-neutral-700">
-            <h3 className="text-sm font-semibold text-white">Rename Chat</h3>
+          <div className="px-4 py-3 border-b border-line-strong">
+            <h3 className="text-sm font-semibold text-fg">Rename Chat</h3>
           </div>
           <div className="p-4 flex flex-col gap-3">
             <input
@@ -346,12 +346,12 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               onChange={(e) => setRenameText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitRename()}
               autoFocus
-              className="w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600"
+              className="w-full rounded-xl bg-surface border border-line-strong px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-muted"
             />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setRenamingId(null)}
-                className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors"
+                className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-secondary hover:text-fg transition-colors"
               >
                 Cancel
               </button>
@@ -367,13 +367,13 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
 
         {/* Move to folder modal */}
         <Modal visible={!!movingConvId} onClose={() => setMovingConvId(null)} width="max-w-sm">
-          <div className="px-4 py-3 border-b border-neutral-700">
-            <h3 className="text-sm font-semibold text-white">Move to Folder</h3>
+          <div className="px-4 py-3 border-b border-line-strong">
+            <h3 className="text-sm font-semibold text-fg">Move to Folder</h3>
           </div>
           <div className="max-h-64 overflow-y-auto p-2">
             <button
               onClick={() => handleFolderSelect(null)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-400 hover:bg-neutral-700 transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary hover:bg-hover transition-colors"
             >
               Remove from folder
             </button>
@@ -381,10 +381,10 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               <button
                 key={folder.id}
                 onClick={() => handleFolderSelect(folder.id)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-hover transition-colors"
               >
-                <Folder size={14} className="text-neutral-400" />
-                <span className="text-sm text-white">{folder.name}</span>
+                <Folder size={14} className="text-secondary" />
+                <span className="text-sm text-fg">{folder.name}</span>
               </button>
             ))}
           </div>
@@ -403,15 +403,15 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
 
   // ── Main view ─────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full flex-col bg-[#111111] no-select">
+    <div className="flex h-full flex-col bg-sidebar no-select">
       {/* Top bar */}
       <div className="app-drag flex items-center justify-between px-3 pt-9 pb-2">
-        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider select-none">Chats</span>
+        <span className="text-xs font-semibold text-muted uppercase tracking-wider select-none">Chats</span>
         <div className="app-no-drag flex items-center gap-1">
           <Tooltip label="Search" shortcut="⌘K">
             <button
               onClick={onOpenSearch}
-              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <Search size={15} />
             </button>
@@ -419,7 +419,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="New Folder">
             <button
               onClick={() => setShowFolderEdit(true)}
-              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <FolderPlus size={15} />
             </button>
@@ -427,7 +427,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="New Chat" shortcut="⇧⌘O">
             <button
               onClick={onNewChat}
-              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <SquarePen size={15} />
             </button>
@@ -435,7 +435,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           <Tooltip label="Collapse sidebar" shortcut="⌘.">
             <button
               onClick={onToggleCollapse}
-              className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
+              className="rounded-lg p-1.5 text-muted hover:text-fg hover:bg-hover transition-colors"
             >
               <ChevronLeft size={15} />
             </button>
@@ -453,12 +453,12 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
                 key={folder.id}
                 onClick={() => setSelectedFolderId(folder.id)}
                 onContextMenu={(e) => handleFolderContextMenu(e, folder.id)}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-neutral-400 hover:bg-neutral-800/60 hover:text-white transition-colors group"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-secondary hover:bg-hover hover:text-fg transition-colors group"
               >
                 <Folder size={14} className="shrink-0" />
                 <span className="flex-1 truncate text-xs text-left">{folder.name}</span>
                 {count > 0 && (
-                  <span className="text-[10px] text-neutral-600 group-hover:text-neutral-500 shrink-0">
+                  <span className="text-[10px] text-dim group-hover:text-muted shrink-0">
                     {count}
                   </span>
                 )}
@@ -468,14 +468,14 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           {hasMoreFolders && (
             <button
               onClick={() => setFoldersExpanded((v) => !v)}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-neutral-600 hover:text-neutral-400 transition-colors text-xs"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-dim hover:text-secondary transition-colors text-xs"
             >
               {foldersExpanded
                 ? `Show less`
                 : `${folders.length - FOLDERS_LIMIT} more folder${folders.length - FOLDERS_LIMIT === 1 ? "" : "s"}`}
             </button>
           )}
-          <div className="mt-1 h-px bg-neutral-800 mx-3" />
+          <div className="mt-1 h-px bg-line mx-3" />
         </div>
       )}
 
@@ -486,7 +486,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           if (!group.length) return null;
           return (
             <div key={label} className="mb-2">
-              <p className="px-3 py-1 text-[11px] font-medium text-neutral-500">{label}</p>
+              <p className="px-3 py-1 text-[11px] font-medium text-muted">{label}</p>
               {group.map((conv) => (
                 <ConversationItem
                   key={conv.id}
@@ -502,26 +502,26 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           );
         })}
         {conversations.length === 0 && (
-          <p className="px-3 py-8 text-center text-xs text-neutral-600">No conversations yet.</p>
+          <p className="px-3 py-8 text-center text-xs text-dim">No conversations yet.</p>
         )}
       </div>
 
       {/* Settings button */}
-      <div className="flex items-center px-2 h-[63px] border-t border-neutral-800">
+      <div className="flex items-center px-2 h-[63px] border-t border-line">
         <button
           onClick={onOpenSettings}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-secondary hover:bg-hover hover:text-fg transition-colors"
         >
           <Settings size={16} />
           <span className="text-sm">Settings</span>
-          <span className="ml-auto font-mono text-[11px] text-neutral-600">⌘,</span>
+          <span className="ml-auto font-mono text-[11px] text-dim">⌘,</span>
         </button>
       </div>
 
       {/* Rename conversation modal */}
       <Modal visible={!!renamingId} onClose={() => setRenamingId(null)}>
-        <div className="px-4 py-3 border-b border-neutral-700">
-          <h3 className="text-sm font-semibold text-white">Rename Chat</h3>
+        <div className="px-4 py-3 border-b border-line-strong">
+          <h3 className="text-sm font-semibold text-fg">Rename Chat</h3>
         </div>
         <div className="p-4 flex flex-col gap-3">
           <input
@@ -530,12 +530,12 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
             onChange={(e) => setRenameText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submitRename()}
             autoFocus
-            className="w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600"
+            className="w-full rounded-xl bg-surface border border-line-strong px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-muted"
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setRenamingId(null)}
-              className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors"
+              className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-secondary hover:text-fg transition-colors"
             >
               Cancel
             </button>
@@ -551,13 +551,13 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
 
       {/* Move to folder modal */}
       <Modal visible={!!movingConvId} onClose={() => setMovingConvId(null)} width="max-w-sm">
-        <div className="px-4 py-3 border-b border-neutral-700">
-          <h3 className="text-sm font-semibold text-white">Move to Folder</h3>
+        <div className="px-4 py-3 border-b border-line-strong">
+          <h3 className="text-sm font-semibold text-fg">Move to Folder</h3>
         </div>
         <div className="max-h-64 overflow-y-auto p-2">
           <button
             onClick={() => handleFolderSelect(null)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-400 hover:bg-neutral-700 transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-secondary hover:bg-hover transition-colors"
           >
             Remove from folder
           </button>
@@ -565,10 +565,10 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
             <button
               key={folder.id}
               onClick={() => handleFolderSelect(folder.id)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-hover transition-colors"
             >
-              <Folder size={14} className="text-neutral-400" />
-              <span className="text-sm text-white">{folder.name}</span>
+              <Folder size={14} className="text-secondary" />
+              <span className="text-sm text-fg">{folder.name}</span>
             </button>
           ))}
         </div>
@@ -597,7 +597,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
             onContextMenu={(e) => { e.preventDefault(); setFolderContextMenu(null); }}
           />
           <div
-            className="fixed z-50 w-44 rounded-xl bg-[#1a1a1a] border border-neutral-700 shadow-2xl py-1"
+            className="fixed z-50 w-44 rounded-xl bg-surface border border-line-strong shadow-2xl py-1"
             style={{ left: folderContextMenu.x, top: folderContextMenu.y }}
           >
             <button
@@ -605,18 +605,18 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
                 setRenamingFolderId(folderContextMenu.folderId);
                 setFolderContextMenu(null);
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover transition-colors"
             >
               <Pencil size={14} />
               Rename
             </button>
-            <div className="my-1 h-px bg-neutral-700" />
+            <div className="my-1 h-px bg-line-strong" />
             <button
               onClick={() => {
                 handleDeleteFolder(folderContextMenu.folderId);
                 setFolderContextMenu(null);
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-neutral-700 transition-colors"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-hover transition-colors"
             >
               <Trash2 size={14} />
               Delete

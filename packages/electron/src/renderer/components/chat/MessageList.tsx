@@ -87,7 +87,7 @@ export function MessageList({ onSuggest }: MessageListProps) {
       {!isAtBottom && (
         <button
           onClick={() => scrollToBottom()}
-          className="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-700 border border-neutral-600 text-white shadow-lg hover:bg-neutral-600 transition-colors"
+          className="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-surface border border-line-strong text-fg shadow-lg hover:bg-hover transition-colors"
         >
           <ChevronDown size={16} />
         </button>

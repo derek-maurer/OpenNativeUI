@@ -25,19 +25,19 @@ export function ThinkingBlock({ entry }: ThinkingBlockProps) {
     entry.blockType === "code_interpreter" ? "Code Interpreter" : durationText;
 
   return (
-    <div className="my-2 rounded-xl border border-neutral-700 bg-neutral-800/50 overflow-hidden">
+    <div className="my-2 rounded-xl border border-line-strong bg-surface overflow-hidden">
       <button
-        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-neutral-700/30 transition-colors"
+        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-hover transition-colors"
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded ? (
-          <ChevronDown size={14} className="shrink-0 text-neutral-400" />
+          <ChevronDown size={14} className="shrink-0 text-secondary" />
         ) : (
-          <ChevronRight size={14} className="shrink-0 text-neutral-400" />
+          <ChevronRight size={14} className="shrink-0 text-secondary" />
         )}
         <span
           className={`text-xs font-medium ${
-            inProgress ? "text-neutral-300 animate-pulse" : "text-neutral-400"
+            inProgress ? "text-fg animate-pulse" : "text-secondary"
           }`}
         >
           {headerLabel}
@@ -53,7 +53,7 @@ export function ThinkingBlock({ entry }: ThinkingBlockProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-3 pt-1 text-xs text-neutral-400 selectable max-h-64 overflow-y-auto markdown">
+            <div className="px-4 pb-3 pt-1 text-xs text-secondary selectable max-h-64 overflow-y-auto markdown">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {cleanedText}
               </ReactMarkdown>

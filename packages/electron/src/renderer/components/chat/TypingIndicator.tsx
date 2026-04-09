@@ -14,7 +14,7 @@ export function TypingIndicator({ description }: TypingIndicatorProps) {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="block h-2 w-2 rounded-full bg-neutral-400"
+              className="block h-2 w-2 rounded-full bg-secondary"
               style={{
                 animation: "bounceDot 1.4s infinite ease-in-out",
                 animationDelay: `${i * 0.2}s`,
@@ -23,7 +23,7 @@ export function TypingIndicator({ description }: TypingIndicatorProps) {
           ))}
         </div>
         {description ? (
-          <span className="text-xs text-neutral-400">{description}</span>
+          <span className="text-xs text-secondary">{description}</span>
         ) : null}
       </div>
     </div>

@@ -48,14 +48,14 @@ export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalP
 
   return (
     <Modal visible={visible} onClose={onClose} width="max-w-sm">
-      <div className="px-4 py-3 border-b border-neutral-700">
-        <h3 className="text-sm font-semibold text-white">
+      <div className="px-4 py-3 border-b border-line-strong">
+        <h3 className="text-sm font-semibold text-fg">
           {existingFolder ? "Rename Folder" : "New Folder"}
         </h3>
       </div>
       <div className="p-4 flex flex-col gap-3">
-        <div className="flex items-center gap-2 rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5">
-          <Folder size={16} className="shrink-0 text-neutral-400" />
+        <div className="flex items-center gap-2 rounded-xl bg-surface border border-line-strong px-3 py-2.5">
+          <Folder size={16} className="shrink-0 text-secondary" />
           <input
             type="text"
             value={name}
@@ -63,13 +63,13 @@ export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalP
             onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSubmit()}
             placeholder="Folder name"
             autoFocus
-            className="flex-1 bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-fg placeholder-muted focus:outline-none"
           />
         </div>
         <div className="flex gap-2 justify-end">
           <button
             onClick={onClose}
-            className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors"
+            className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-secondary hover:text-fg transition-colors"
           >
             Cancel
           </button>

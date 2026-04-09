@@ -40,7 +40,7 @@ export function MessageSources({ sources }: MessageSourcesProps) {
     <>
       <button
         onClick={() => setModalVisible(true)}
-        className="mt-2 flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-800/50 px-3 py-2 hover:bg-neutral-700/50 transition-colors"
+        className="mt-2 flex items-center gap-1.5 rounded-xl border border-line-strong bg-surface px-3 py-2 hover:bg-hover transition-colors"
       >
         {/* Stacked favicon preview */}
         <div className="flex -space-x-1.5">
@@ -51,7 +51,7 @@ export function MessageSources({ sources }: MessageSourcesProps) {
                 key={i}
                 src={faviconUrl(url)}
                 alt=""
-                className="h-4 w-4 rounded-sm border border-neutral-700 bg-neutral-800"
+                className="h-4 w-4 rounded-sm border border-line bg-surface"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
@@ -59,17 +59,17 @@ export function MessageSources({ sources }: MessageSourcesProps) {
             );
           })}
         </div>
-        <span className="text-xs text-neutral-400">
+        <span className="text-xs text-secondary">
           {citations.length} source{citations.length !== 1 ? "s" : ""}
         </span>
       </button>
 
       <Modal visible={modalVisible} onClose={() => setModalVisible(false)} width="max-w-md">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
-          <h3 className="text-sm font-semibold text-white">Sources</h3>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-line-strong">
+          <h3 className="text-sm font-semibold text-fg">Sources</h3>
           <button
             onClick={() => setModalVisible(false)}
-            className="text-neutral-400 hover:text-white transition-colors"
+            className="text-secondary hover:text-fg transition-colors"
           >
             <X size={16} />
           </button>
@@ -84,15 +84,15 @@ export function MessageSources({ sources }: MessageSourcesProps) {
                 key={i}
                 onClick={() => url && window.electronAPI.openExternal(url)}
                 disabled={!url}
-                className="flex items-start gap-3 rounded-xl bg-neutral-800 border border-neutral-700 p-3 text-left hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-default"
+                className="flex items-start gap-3 rounded-xl bg-surface border border-line-strong p-3 text-left hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-default"
               >
-                <span className="mt-0.5 shrink-0 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-neutral-400 border border-neutral-600">
+                <span className="mt-0.5 shrink-0 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-secondary border border-line-strong">
                   {i + 1}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{title}</p>
+                  <p className="text-sm font-medium text-fg truncate">{title}</p>
                   {domain && (
-                    <p className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
                       <img
                         src={faviconUrl(url)}
                         alt=""

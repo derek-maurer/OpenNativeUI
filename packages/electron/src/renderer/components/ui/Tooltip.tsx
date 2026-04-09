@@ -19,11 +19,11 @@ export function Tooltip({ label, shortcut, children, side = "bottom" }: TooltipP
     <div className="relative group/tip inline-flex">
       {children}
       <span
-        className={`absolute ${positions[side]} flex items-center gap-1.5 px-2 py-1 text-xs text-white bg-neutral-800 border border-neutral-700/60 rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-100 delay-300`}
+        className={`absolute ${positions[side]} flex items-center gap-1.5 px-2 py-1 text-xs text-fg bg-surface border border-line rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 opacity-0 group-hover/tip:opacity-100 transition-opacity duration-100 delay-300`}
       >
         {label}
         {shortcut && (
-          <span className="font-mono text-[10px] text-neutral-400">{shortcut}</span>
+          <span className="font-mono text-[10px] text-secondary">{shortcut}</span>
         )}
       </span>
     </div>

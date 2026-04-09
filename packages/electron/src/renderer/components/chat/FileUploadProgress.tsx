@@ -12,7 +12,7 @@ export function FileUploadProgress() {
       {pendingFiles.map((file) => (
         <div
           key={file.id}
-          className="flex shrink-0 items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800 px-3 py-2 max-w-[200px]"
+          className="flex shrink-0 items-center gap-2 rounded-xl border border-line-strong bg-surface px-3 py-2 max-w-[200px]"
         >
           {/* Preview or icon */}
           {file.dataUrl ? (
@@ -22,12 +22,12 @@ export function FileUploadProgress() {
               className="h-8 w-8 rounded-lg object-cover shrink-0"
             />
           ) : (
-            <File size={16} className="shrink-0 text-neutral-400" />
+            <File size={16} className="shrink-0 text-secondary" />
           )}
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs text-white">{file.name}</p>
-            <p className="text-[10px] text-neutral-400">
+            <p className="truncate text-xs text-fg">{file.name}</p>
+            <p className="text-[10px] text-secondary">
               {file.status === "uploading"
                 ? "Uploading…"
                 : file.status === "processing"
@@ -40,7 +40,7 @@ export function FileUploadProgress() {
 
           {/* Status icon */}
           {file.status === "uploading" || file.status === "processing" ? (
-            <Loader2 size={12} className="shrink-0 animate-spin text-neutral-400" />
+            <Loader2 size={12} className="shrink-0 animate-spin text-secondary" />
           ) : file.status === "error" ? (
             <AlertCircle size={12} className="shrink-0 text-red-400" />
           ) : null}
@@ -49,7 +49,7 @@ export function FileUploadProgress() {
           {(file.status === "ready" || file.status === "error") && (
             <button
               onClick={() => removePendingFile(file.id)}
-              className="shrink-0 text-neutral-500 hover:text-white transition-colors"
+              className="shrink-0 text-muted hover:text-fg transition-colors"
             >
               <X size={12} />
             </button>

@@ -51,27 +51,27 @@ export function ModelPickerOverlay({
 
   return (
     <Modal visible={visible} onClose={onClose} width="max-w-[360px]">
-      <div className="px-4 py-3 border-b border-neutral-700">
-        <h3 className="text-sm font-semibold text-white">Select Model</h3>
+      <div className="px-4 py-3 border-b border-line-strong">
+        <h3 className="text-sm font-semibold text-fg">Select Model</h3>
       </div>
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-neutral-800">
-        <Search size={14} className="text-neutral-500 shrink-0" />
+      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-line">
+        <Search size={14} className="text-muted shrink-0" />
         <input
           ref={searchRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Filter models…"
-          className="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 focus:outline-none"
+          className="flex-1 bg-transparent text-sm text-fg placeholder-dim focus:outline-none"
         />
       </div>
       <div className="max-h-80 overflow-y-auto p-2">
         {!query.trim() && (
           <button
             onClick={() => handleSelect(null)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-hover transition-colors"
           >
-            <span className="flex-1 text-sm text-neutral-400">None</span>
+            <span className="flex-1 text-sm text-secondary">None</span>
             {effectiveSelected === null && <Check size={14} className="text-primary" />}
           </button>
         )}
@@ -79,12 +79,12 @@ export function ModelPickerOverlay({
           <button
             key={model.id}
             onClick={() => handleSelect(model.id)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-hover transition-colors"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm text-white">{model.name}</p>
+              <p className="truncate text-sm text-fg">{model.name}</p>
               {model.owned_by && (
-                <p className="truncate text-xs text-neutral-400">{model.owned_by}</p>
+                <p className="truncate text-xs text-secondary">{model.owned_by}</p>
               )}
             </div>
             {effectiveSelected === model.id && (
@@ -93,7 +93,7 @@ export function ModelPickerOverlay({
           </button>
         ))}
         {filtered.length === 0 && (
-          <p className="px-3 py-6 text-center text-xs text-neutral-600">No models match "{query}"</p>
+          <p className="px-3 py-6 text-center text-xs text-dim">No models match "{query}"</p>
         )}
       </div>
     </Modal>
@@ -120,12 +120,12 @@ export function ModelSelectorTrigger({ onPress, inline }: ModelSelectorTriggerPr
       onClick={onPress}
       className={
         inline
-          ? "flex items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-700/60 transition-colors max-w-[160px]"
-          : "flex items-center gap-1 rounded-lg bg-neutral-700/50 border border-neutral-600 px-2.5 py-1 hover:bg-neutral-700 transition-colors max-w-[160px]"
+          ? "flex items-center gap-1 rounded-md px-2 py-1 hover:bg-hover transition-colors max-w-[160px]"
+          : "flex items-center gap-1 rounded-lg bg-hover border border-line px-2.5 py-1 hover:bg-hover transition-colors max-w-[160px]"
       }
     >
-      <span className="truncate text-xs text-neutral-300">{label}</span>
-      <ChevronDown size={12} className="shrink-0 text-neutral-400" />
+      <span className="truncate text-xs text-fg">{label}</span>
+      <ChevronDown size={12} className="shrink-0 text-secondary" />
     </button>
   );
 }

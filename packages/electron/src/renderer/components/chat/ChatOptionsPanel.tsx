@@ -48,13 +48,13 @@ export function ChatOptionsPanel({
   return (
     <div
       ref={panelRef}
-      className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl bg-[#1a1a1a] border border-neutral-700 shadow-2xl p-3 flex flex-col gap-1 z-20"
+      className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl bg-surface border border-line-strong shadow-2xl p-3 flex flex-col gap-1 z-20"
     >
       {/* Web Search */}
-      <div className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-neutral-700/30 transition-colors">
+      <div className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-hover transition-colors">
         <div className="flex items-center gap-2.5">
-          <Globe size={16} className="text-neutral-400" />
-          <span className="text-sm text-white">Web Search</span>
+          <Globe size={16} className="text-secondary" />
+          <span className="text-sm text-fg">Web Search</span>
         </div>
         <Toggle value={webSearchEnabled} onChange={toggleWebSearch} />
       </div>
@@ -65,8 +65,8 @@ export function ChatOptionsPanel({
           {profile.offValue !== undefined ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Lightbulb size={16} className="text-neutral-400" />
-                <span className="text-sm text-white">Thinking</span>
+                <Lightbulb size={16} className="text-secondary" />
+                <span className="text-sm text-fg">Thinking</span>
               </div>
               <Toggle
                 value={resolveEffectiveThinkingValue(profile, currentThinking) !== profile.offValue}
@@ -83,8 +83,8 @@ export function ChatOptionsPanel({
           ) : (
             <>
               <div className="flex items-center gap-2.5">
-                <Lightbulb size={16} className="text-neutral-400" />
-                <span className="text-sm text-white">Thinking</span>
+                <Lightbulb size={16} className="text-secondary" />
+                <span className="text-sm text-fg">Thinking</span>
               </div>
               <div className="flex gap-1.5 flex-wrap mt-1">
                 {profile.options?.map((opt) => {
@@ -97,7 +97,7 @@ export function ChatOptionsPanel({
                       className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
                         isSelected
                           ? "border-primary bg-primary/20 text-primary"
-                          : "border-neutral-600 text-neutral-400 hover:border-neutral-500"
+                          : "border-line-strong text-secondary hover:border-muted"
                       }`}
                     >
                       {opt.label}
@@ -111,24 +111,24 @@ export function ChatOptionsPanel({
       )}
 
       {/* Divider */}
-      <div className="h-px bg-neutral-700 my-0.5" />
+      <div className="h-px bg-line-strong my-0.5" />
 
       {/* Attach File */}
       <button
         onClick={() => { onAttachFile(); onClose(); }}
-        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-neutral-700/30 transition-colors text-left"
+        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-hover transition-colors text-left"
       >
-        <Paperclip size={16} className="text-neutral-400" />
-        <span className="text-sm text-white">Attach File</span>
+        <Paperclip size={16} className="text-secondary" />
+        <span className="text-sm text-fg">Attach File</span>
       </button>
 
       {/* Assign to Folder */}
       <button
         onClick={() => { onOpenFolderPicker(); onClose(); }}
-        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-neutral-700/30 transition-colors text-left"
+        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-hover transition-colors text-left"
       >
-        <FolderOpen size={16} className="text-neutral-400" />
-        <span className="text-sm text-white">Add to Folder</span>
+        <FolderOpen size={16} className="text-secondary" />
+        <span className="text-sm text-fg">Add to Folder</span>
       </button>
     </div>
   );

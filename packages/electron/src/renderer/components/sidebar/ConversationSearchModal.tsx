@@ -79,12 +79,12 @@ export function ConversationSearchModal({ visible, onClose, onSelect }: Props) {
       }}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl bg-[#1a1a1a] border border-neutral-700 shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg rounded-2xl bg-surface border border-line-strong shadow-2xl overflow-hidden"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-neutral-800">
-          <Search size={15} className="text-neutral-500 shrink-0" />
+        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line">
+          <Search size={15} className="text-muted shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -94,15 +94,15 @@ export function ConversationSearchModal({ visible, onClose, onSelect }: Props) {
               setActiveIndex(0);
             }}
             placeholder="Search conversations…"
-            className="flex-1 bg-transparent text-sm text-white placeholder-neutral-600 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-fg placeholder-dim focus:outline-none"
           />
-          <span className="text-[11px] text-neutral-600 font-mono shrink-0">esc</span>
+          <span className="text-[11px] text-dim font-mono shrink-0">esc</span>
         </div>
 
         {/* Results */}
         <div ref={listRef} className="max-h-80 overflow-y-auto py-1">
           {filtered.length === 0 ? (
-            <p className="px-4 py-8 text-center text-xs text-neutral-600">
+            <p className="px-4 py-8 text-center text-xs text-dim">
               {query ? "No conversations found" : "No conversations yet"}
             </p>
           ) : (
@@ -111,8 +111,8 @@ export function ConversationSearchModal({ visible, onClose, onSelect }: Props) {
                 key={conv.id}
                 className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                   i === activeIndex
-                    ? "bg-neutral-700/60 text-white"
-                    : "text-neutral-300 hover:bg-neutral-800"
+                    ? "bg-hover text-fg"
+                    : "text-fg hover:bg-hover"
                 }`}
                 onMouseEnter={() => setActiveIndex(i)}
                 onClick={() => {
@@ -120,7 +120,7 @@ export function ConversationSearchModal({ visible, onClose, onSelect }: Props) {
                   onClose();
                 }}
               >
-                <MessageSquare size={14} className="shrink-0 text-neutral-500" />
+                <MessageSquare size={14} className="shrink-0 text-muted" />
                 <span className="flex-1 truncate text-sm">
                   {conv.title || "New conversation"}
                 </span>

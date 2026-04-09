@@ -31,7 +31,7 @@ export function Modal({ visible, onClose, children, width = "max-w-sm" }: ModalP
     >
       <div
         ref={panelRef}
-        className={`relative w-full ${width} rounded-2xl bg-[#1a1a1a] border border-neutral-800 shadow-2xl overflow-hidden`}
+        className={`relative w-full ${width} rounded-2xl bg-surface border border-line shadow-2xl overflow-hidden`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {children}

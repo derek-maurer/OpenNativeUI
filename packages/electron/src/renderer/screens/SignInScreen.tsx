@@ -45,12 +45,12 @@ export function SignInScreen() {
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[#0d0d0d]">
+    <div className="flex h-full w-full items-center justify-center bg-base">
       <div className="w-full max-w-sm px-6">
         {/* Logo / Title */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-white">ONI</h1>
-          <p className="mt-1 text-sm text-neutral-400">Connect to your Open WebUI server</p>
+          <h1 className="text-2xl font-bold text-fg">ONI</h1>
+          <p className="mt-1 text-sm text-secondary">Connect to your Open WebUI server</p>
         </div>
 
         {/* Form */}
@@ -61,7 +61,7 @@ export function SignInScreen() {
             value={serverUrl}
             onChange={(e) => setServerUrl(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full rounded-xl bg-[#1a1a1a] border border-neutral-700 px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition-colors"
+            className="w-full rounded-xl bg-surface border border-line-strong px-4 py-3 text-sm text-fg placeholder-muted focus:outline-none focus:border-primary transition-colors"
           />
 
           <input
@@ -70,7 +70,7 @@ export function SignInScreen() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full rounded-xl bg-[#1a1a1a] border border-neutral-700 px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition-colors"
+            className="w-full rounded-xl bg-surface border border-line-strong px-4 py-3 text-sm text-fg placeholder-muted focus:outline-none focus:border-primary transition-colors"
           />
 
           <div className="relative">
@@ -80,12 +80,12 @@ export function SignInScreen() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full rounded-xl bg-[#1a1a1a] border border-neutral-700 px-4 py-3 pr-12 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition-colors"
+              className="w-full rounded-xl bg-surface border border-line-strong px-4 py-3 pr-12 text-sm text-fg placeholder-muted focus:outline-none focus:border-primary transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-secondary transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>

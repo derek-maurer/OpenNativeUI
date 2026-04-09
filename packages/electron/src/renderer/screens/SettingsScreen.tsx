@@ -95,7 +95,7 @@ function HotkeyRecorder({ value, onChange }: HotkeyRecorderProps) {
         className={`rounded-lg px-3 py-1.5 text-xs font-mono min-w-[100px] text-center transition-colors ${
           recording
             ? "bg-primary/20 border border-primary/50 text-primary animate-pulse"
-            : "bg-neutral-800 border border-neutral-700 text-white"
+            : "bg-surface border border-line-strong text-fg"
         }`}
       >
         {recording ? "Press keys…" : formatHotkey(displayed)}
@@ -110,10 +110,10 @@ function HotkeyRecorder({ value, onChange }: HotkeyRecorderProps) {
           >
             {saving ? "Saving…" : "Save"}
           </button>
-          <span className="text-neutral-700">·</span>
+          <span className="text-dim">·</span>
           <button
             onClick={handleCancel}
-            className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+            className="text-xs text-muted hover:text-secondary transition-colors"
           >
             Cancel
           </button>
@@ -121,14 +121,14 @@ function HotkeyRecorder({ value, onChange }: HotkeyRecorderProps) {
       ) : !recording ? (
         <button
           onClick={() => { setPending(null); setRecording(true); }}
-          className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+          className="text-xs text-muted hover:text-secondary transition-colors"
         >
           Change
         </button>
       ) : (
         <button
           onClick={handleCancel}
-          className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+          className="text-xs text-muted hover:text-secondary transition-colors"
         >
           Cancel
         </button>
@@ -193,13 +193,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
   ] as const;
 
   return (
-    <div className="flex h-full flex-col bg-[#0d0d0d] overflow-y-auto">
+    <div className="flex h-full flex-col bg-base overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-neutral-800 px-6 pt-10 pb-4">
-        <h1 className="text-lg font-semibold text-white">Settings</h1>
+      <div className="flex items-center justify-between border-b border-line px-6 pt-10 pb-4">
+        <h1 className="text-lg font-semibold text-fg">Settings</h1>
         <button
           onClick={onClose}
-          className="rounded-lg p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+          className="rounded-lg p-1.5 text-secondary hover:text-fg hover:bg-hover transition-colors"
         >
           <X size={18} />
         </button>
@@ -208,12 +208,12 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       <div className="flex-1 px-6 py-4 flex flex-col gap-6 max-w-lg">
         {/* Appearance */}
         <section>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Appearance
           </p>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden divide-y divide-neutral-800">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden divide-y divide-line">
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-white">Theme</span>
+              <span className="text-sm text-fg">Theme</span>
               <div className="flex gap-1">
                 {themeOptions.map((opt) => (
                   <button
@@ -222,7 +222,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
                       theme === opt.value
                         ? "bg-primary text-white"
-                        : "text-neutral-400 hover:text-white"
+                        : "text-secondary hover:text-fg"
                     }`}
                   >
                     {opt.label}
@@ -235,14 +235,14 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
         {/* Quick Access */}
         <section>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Quick Access
           </p>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden divide-y divide-neutral-800">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden divide-y divide-line">
             <div className="flex items-center justify-between px-4 py-3.5">
               <div>
-                <span className="text-sm text-white">Chat Bar Hotkey</span>
-                <p className="text-xs text-neutral-500 mt-0.5">
+                <span className="text-sm text-fg">Chat Bar Hotkey</span>
+                <p className="text-xs text-muted mt-0.5">
                   Open the floating chat bar from anywhere
                 </p>
               </div>
@@ -253,17 +253,17 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
         {/* Chat */}
         <section>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Chat
           </p>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden divide-y divide-neutral-800">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden divide-y divide-line">
             {/* Default model */}
             <button
               onClick={() => setShowDefaultModelPicker(true)}
-              className="flex w-full items-center justify-between px-4 py-3.5 hover:bg-neutral-700/30 transition-colors"
+              className="flex w-full items-center justify-between px-4 py-3.5 hover:bg-hover transition-colors"
             >
-              <span className="text-sm text-white">Default Model</span>
-              <div className="flex items-center gap-1.5 text-neutral-400">
+              <span className="text-sm text-fg">Default Model</span>
+              <div className="flex items-center gap-1.5 text-secondary">
                 <span className="text-xs truncate max-w-[140px]">
                   {defaultModel?.name ?? "None"}
                 </span>
@@ -273,13 +273,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
             {/* Web search by default */}
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-white">Web Search by Default</span>
+              <span className="text-sm text-fg">Web Search by Default</span>
               <Toggle value={webSearchByDefault} onChange={setWebSearchByDefault} />
             </div>
 
             {/* Chime on response */}
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-white">Chime on Response</span>
+              <span className="text-sm text-fg">Chime on Response</span>
               <Toggle value={chimeOnComplete} onChange={setChimeOnComplete} />
             </div>
           </div>
@@ -287,30 +287,30 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
         {/* Server */}
         <section>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Server
           </p>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden divide-y divide-neutral-800">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden divide-y divide-line">
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-neutral-400">URL</span>
-              <span className="text-xs text-neutral-500 truncate max-w-[200px]">{serverUrl}</span>
+              <span className="text-sm text-secondary">URL</span>
+              <span className="text-xs text-muted truncate max-w-[200px]">{serverUrl}</span>
             </div>
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-neutral-400">Account</span>
-              <span className="text-xs text-neutral-500 truncate max-w-[200px]">{user?.email}</span>
+              <span className="text-sm text-secondary">Account</span>
+              <span className="text-xs text-muted truncate max-w-[200px]">{user?.email}</span>
             </div>
           </div>
         </section>
 
         {/* Data */}
         <section>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
             Data
           </p>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden divide-y divide-neutral-800">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden divide-y divide-line">
             <button
               onClick={handleClearHistory}
-              className="flex w-full items-center px-4 py-3.5 text-left hover:bg-neutral-700/30 transition-colors"
+              className="flex w-full items-center px-4 py-3.5 text-left hover:bg-hover transition-colors"
             >
               <span className="text-sm text-red-400">Clear All History</span>
             </button>
@@ -319,10 +319,10 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
         {/* Account */}
         <section>
-          <div className="rounded-2xl bg-[#1a1a1a] border border-neutral-800 overflow-hidden">
+          <div className="rounded-2xl bg-surface border border-line overflow-hidden">
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center px-4 py-3.5 text-left hover:bg-neutral-700/30 transition-colors"
+              className="flex w-full items-center px-4 py-3.5 text-left hover:bg-hover transition-colors"
             >
               <span className="text-sm text-red-400">Sign Out</span>
             </button>
