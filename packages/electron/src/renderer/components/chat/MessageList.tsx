@@ -40,40 +40,43 @@ export function MessageList() {
         ref={containerRef}
         className="h-full overflow-y-auto py-4"
         onScroll={handleScroll}
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {displayMessages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg}
-            isStreaming={false}
-          />
-        ))}
+        <div className="min-h-full flex flex-col justify-end">
+          {displayMessages.map((msg) => (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              isStreaming={false}
+            />
+          ))}
 
-        {showStreamingBubble && (
-          <MessageBubble
-            message={{
-              id: "__streaming__",
-              conversationId: "",
-              role: "assistant",
-              content: streamingContent,
-              createdAt: Date.now(),
-            }}
-            isStreaming
-          />
-        )}
+          {showStreamingBubble && (
+            <MessageBubble
+              message={{
+                id: "__streaming__",
+                conversationId: "",
+                role: "assistant",
+                content: streamingContent,
+                createdAt: Date.now(),
+              }}
+              isStreaming
+            />
+          )}
 
-        {isStreaming && !streamingContent && (
-          <TypingIndicator
-            description={
-              streamingStatus && !streamingStatus.done
-                ? streamingStatus.description
-                : undefined
-            }
-          />
-        )}
+          {isStreaming && !streamingContent && (
+            <TypingIndicator
+              description={
+                streamingStatus && !streamingStatus.done
+                  ? streamingStatus.description
+                  : undefined
+              }
+            />
+          )}
 
-        {/* Scroll anchor */}
-        <div className="h-4" />
+          {/* Scroll anchor */}
+          <div className="h-4" />
+        </div>
       </div>
 
       {/* Scroll-to-bottom button */}

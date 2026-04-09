@@ -31,6 +31,7 @@ function createWindow(): void {
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 12, y: 14 },
     backgroundColor: "#0d0d0d",
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
@@ -80,6 +81,10 @@ function createWindow(): void {
       "theme:changed",
       nativeTheme.shouldUseDarkColors ? "dark" : "light"
     );
+  });
+
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
   });
 
   // Load app

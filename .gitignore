@@ -21,3 +21,5 @@ yarn-error.*
 # user's unrelated clones at repo root
 open-webui
 conduit
+
+packages/electron/dist-app

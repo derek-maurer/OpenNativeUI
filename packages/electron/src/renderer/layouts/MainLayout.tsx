@@ -68,6 +68,13 @@ export function MainLayout() {
 
   const handleNewChat = () => {
     clearChat();
+    // Re-apply defaults for new conversation (clearChat resets webSearchEnabled to false)
+    if (webSearchByDefault) {
+      toggleWebSearch();
+    }
+    if (defaultModelId && models.some((m) => m.id === defaultModelId)) {
+      setSelectedModel(defaultModelId);
+    }
     const id = generateId();
     setView({ type: "chat", conversationId: id, isNew: true });
   };

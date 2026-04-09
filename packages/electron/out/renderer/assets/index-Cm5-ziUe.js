@@ -19791,35 +19791,81 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$p = [
+const __iconNode$t = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$t);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$s = [
   ["path", { d: "m5 12 7-7 7 7", key: "hav0vg" }],
   ["path", { d: "M12 19V5", key: "x0mq9r" }]
 ];
-const ArrowUp = createLucideIcon("arrow-up", __iconNode$p);
+const ArrowUp = createLucideIcon("arrow-up", __iconNode$s);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$o = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$o);
+const __iconNode$r = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$r);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$n = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$n);
+const __iconNode$q = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$q);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$m = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-const ChevronRight = createLucideIcon("chevron-right", __iconNode$m);
+const __iconNode$p = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+const ChevronRight = createLucideIcon("chevron-right", __iconNode$p);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$o = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
+  ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
+];
+const CircleAlert = createLucideIcon("circle-alert", __iconNode$o);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$n = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "M8 12h8", key: "1wcyev" }]
+];
+const CircleMinus = createLucideIcon("circle-minus", __iconNode$n);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$m = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m15 9-6 6", key: "1uzhvr" }],
+  ["path", { d: "m9 9 6 6", key: "z0biqf" }]
+];
+const CircleX = createLucideIcon("circle-x", __iconNode$m);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -19827,11 +19873,10 @@ const ChevronRight = createLucideIcon("chevron-right", __iconNode$m);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$l = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
-  ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
+  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
+  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
 ];
-const CircleAlert = createLucideIcon("circle-alert", __iconNode$l);
+const Copy = createLucideIcon("copy", __iconNode$l);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -19839,10 +19884,11 @@ const CircleAlert = createLucideIcon("circle-alert", __iconNode$l);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$k = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "M8 12h8", key: "1wcyev" }]
+  ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
+  ["path", { d: "M10 14 21 3", key: "gplh6r" }],
+  ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
 ];
-const CircleMinus = createLucideIcon("circle-minus", __iconNode$k);
+const ExternalLink = createLucideIcon("external-link", __iconNode$k);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -19850,29 +19896,6 @@ const CircleMinus = createLucideIcon("circle-minus", __iconNode$k);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$j = [
-  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
-  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
-];
-const Copy = createLucideIcon("copy", __iconNode$j);
-/**
- * @license lucide-react v0.503.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$i = [
-  ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
-  ["path", { d: "M10 14 21 3", key: "gplh6r" }],
-  ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
-];
-const ExternalLink = createLucideIcon("external-link", __iconNode$i);
-/**
- * @license lucide-react v0.503.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$h = [
   [
     "path",
     {
@@ -19890,14 +19913,14 @@ const __iconNode$h = [
   ],
   ["path", { d: "m2 2 20 20", key: "1ooewy" }]
 ];
-const EyeOff = createLucideIcon("eye-off", __iconNode$h);
+const EyeOff = createLucideIcon("eye-off", __iconNode$j);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$g = [
+const __iconNode$i = [
   [
     "path",
     {
@@ -19907,7 +19930,32 @@ const __iconNode$g = [
   ],
   ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
 ];
-const Eye = createLucideIcon("eye", __iconNode$g);
+const Eye = createLucideIcon("eye", __iconNode$i);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$h = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+const FileText = createLucideIcon("file-text", __iconNode$h);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$g = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }]
+];
+const File$1 = createLucideIcon("file", __iconNode$g);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -19915,17 +19963,6 @@ const Eye = createLucideIcon("eye", __iconNode$g);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$f = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }]
-];
-const File$1 = createLucideIcon("file", __iconNode$f);
-/**
- * @license lucide-react v0.503.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$e = [
   [
     "path",
     {
@@ -19934,14 +19971,14 @@ const __iconNode$e = [
     }
   ]
 ];
-const FolderOpen = createLucideIcon("folder-open", __iconNode$e);
+const FolderOpen = createLucideIcon("folder-open", __iconNode$f);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$d = [
+const __iconNode$e = [
   ["path", { d: "M12 10v6", key: "1bos4e" }],
   ["path", { d: "M9 13h6", key: "1uhe8q" }],
   [
@@ -19952,14 +19989,14 @@ const __iconNode$d = [
     }
   ]
 ];
-const FolderPlus = createLucideIcon("folder-plus", __iconNode$d);
+const FolderPlus = createLucideIcon("folder-plus", __iconNode$e);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$c = [
+const __iconNode$d = [
   [
     "path",
     {
@@ -19968,7 +20005,19 @@ const __iconNode$c = [
     }
   ]
 ];
-const Folder = createLucideIcon("folder", __iconNode$c);
+const Folder = createLucideIcon("folder", __iconNode$d);
+/**
+ * @license lucide-react v0.503.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$c = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20", key: "13o1zl" }],
+  ["path", { d: "M2 12h20", key: "9i4pu4" }]
+];
+const Globe = createLucideIcon("globe", __iconNode$c);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -19976,11 +20025,11 @@ const Folder = createLucideIcon("folder", __iconNode$c);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$b = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20", key: "13o1zl" }],
-  ["path", { d: "M2 12h20", key: "9i4pu4" }]
+  ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2", key: "1m3agn" }],
+  ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }],
+  ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", key: "1xmnt7" }]
 ];
-const Globe = createLucideIcon("globe", __iconNode$b);
+const Image$1 = createLucideIcon("image", __iconNode$b);
 /**
  * @license lucide-react v0.503.0 - ISC
  *
@@ -20237,6 +20286,372 @@ function SignInScreen() {
     ] })
   ] }) });
 }
+var reactDomExports = requireReactDom();
+function Modal({ visible, onClose, children, width = "max-w-sm" }) {
+  const panelRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (!visible) return;
+    const handleKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [visible, onClose]);
+  if (!visible) return null;
+  return reactDomExports.createPortal(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "fixed inset-0 z-50 flex items-center justify-center bg-black/60",
+        onMouseDown: (e) => {
+          if (e.target === e.currentTarget) onClose();
+        },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            ref: panelRef,
+            className: `relative w-full ${width} rounded-2xl bg-[#1a1a1a] border border-neutral-800 shadow-2xl overflow-hidden`,
+            onMouseDown: (e) => e.stopPropagation(),
+            children
+          }
+        )
+      }
+    ),
+    document.body
+  );
+}
+const ToastContext = reactExports.createContext({
+  showToast: () => {
+  }
+});
+function useToast() {
+  return reactExports.useContext(ToastContext);
+}
+function ToastProvider({ children }) {
+  const [toasts, setToasts] = reactExports.useState([]);
+  const timerRefs = reactExports.useRef(/* @__PURE__ */ new Map());
+  const dismiss = reactExports.useCallback((id2) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id2));
+    const timer = timerRefs.current.get(id2);
+    if (timer) {
+      clearTimeout(timer);
+      timerRefs.current.delete(id2);
+    }
+  }, []);
+  const showToast = reactExports.useCallback(
+    (message, type = "info") => {
+      const id2 = Math.random().toString(36).slice(2);
+      setToasts((prev) => [...prev, { id: id2, message, type }]);
+      const timer = setTimeout(() => dismiss(id2), 3500);
+      timerRefs.current.set(id2, timer);
+    },
+    [dismiss]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToastContext.Provider, { value: { showToast }, children: [
+    children,
+    reactDomExports.createPortal(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center pointer-events-none", children: toasts.map((toast) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium max-w-xs animate-fade-in ${toast.type === "error" ? "bg-red-900 text-red-100 border border-red-700" : toast.type === "success" ? "bg-green-900 text-green-100 border border-green-700" : "bg-neutral-800 text-white border border-neutral-700"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1", children: toast.message }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => dismiss(toast.id),
+                className: "opacity-60 hover:opacity-100 transition-opacity",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { size: 14 })
+              }
+            )
+          ]
+        },
+        toast.id
+      )) }),
+      document.body
+    )
+  ] });
+}
+async function uploadFileBrowser(file, serverUrl, token) {
+  const base = serverUrl.replace(/\/+$/, "");
+  const formData = new FormData();
+  formData.append("file", file, file.name);
+  const res = await fetch(`${base}/api/v1/files/`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
+  if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+  return res.json();
+}
+function FolderDataModal({ visible, onClose, folder }) {
+  const renameFolder = useFolderStore((s) => s.renameFolder);
+  const updateFolderData2 = useFolderStore((s) => s.updateFolderData);
+  const { showToast } = useToast();
+  const fileInputRef = reactExports.useRef(null);
+  const [name2, setName] = reactExports.useState("");
+  const [systemPrompt, setSystemPrompt] = reactExports.useState("");
+  const [files, setFiles] = reactExports.useState([]);
+  const [saving, setSaving] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (!visible || !folder) return;
+    setName(folder.name);
+    setSystemPrompt(folder.data?.system_prompt ?? "");
+    setFiles(folder.data?.files ?? []);
+  }, [visible, folder?.id, folder?.name, folder?.data]);
+  const hasPendingUploads = files.some((f) => f.pending);
+  const handleFileChange = reactExports.useCallback(
+    async (e) => {
+      const picked = Array.from(e.target.files ?? []);
+      e.target.value = "";
+      if (!picked.length) return;
+      const { serverUrl, token } = useAuthStore.getState();
+      for (const file of picked) {
+        const placeholderId = `local-${Date.now()}-${Math.random()}`;
+        setFiles((prev) => [
+          ...prev,
+          { type: "file", id: placeholderId, name: file.name, pending: true }
+        ]);
+        const isImage = file.type.startsWith("image/");
+        try {
+          const { id: serverId } = await uploadFileBrowser(file, serverUrl, token ?? "");
+          setFiles(
+            (prev) => prev.map(
+              (f) => f.id === placeholderId ? { type: "file", id: serverId, name: file.name, pending: !isImage } : f
+            )
+          );
+          if (!isImage) {
+            try {
+              await pollUntilReady(serverId);
+            } catch {
+            }
+            setFiles(
+              (prev) => prev.map((f) => f.id === serverId ? { ...f, pending: false } : f)
+            );
+          }
+        } catch (err) {
+          console.error("[FolderDataModal] upload failed:", err);
+          setFiles(
+            (prev) => prev.map(
+              (f) => f.id === placeholderId ? { ...f, pending: false, error: true } : f
+            )
+          );
+        }
+      }
+    },
+    []
+  );
+  const handleRemoveFile = reactExports.useCallback((id2) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id2));
+  }, []);
+  const handleSave = async () => {
+    if (!folder) return;
+    if (hasPendingUploads) {
+      showToast("Wait for uploads to finish before saving", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      const trimmedName = name2.trim();
+      if (trimmedName && trimmedName !== folder.name) {
+        await renameFolder(folder.id, trimmedName);
+      }
+      const cleanFiles = files.filter((f) => !f.error && !f.pending).map(({ type, id: id2, name: name22 }) => ({ type, id: id2, name: name22 }));
+      const trimmedPrompt = systemPrompt.trim();
+      const dataPatch = {
+        files: cleanFiles
+      };
+      if (trimmedPrompt) {
+        dataPatch.system_prompt = trimmedPrompt;
+      }
+      await updateFolderData2(folder.id, dataPatch);
+      showToast("Folder saved", "success");
+      onClose();
+    } catch (err) {
+      console.error("[FolderDataModal] save failed:", err);
+      showToast("Failed to save folder", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+  if (!folder) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Modal, { visible, onClose, width: "max-w-md", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-b border-neutral-700", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-white", children: "Edit Folder" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: onClose,
+          className: "rounded-lg p-1 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { size: 16 })
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "overflow-y-auto max-h-[70vh] p-4 flex flex-col gap-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-xs font-medium text-neutral-400 uppercase tracking-wide", children: "Folder Name" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "text",
+            value: name2,
+            onChange: (e) => setName(e.target.value),
+            placeholder: "Folder name",
+            className: "w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-xs font-medium text-neutral-400 uppercase tracking-wide", children: "System Prompt" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "textarea",
+          {
+            value: systemPrompt,
+            onChange: (e) => setSystemPrompt(e.target.value),
+            placeholder: "Write your model system prompt content here...",
+            rows: 5,
+            className: "w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 resize-none"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-xs font-medium text-neutral-400 uppercase tracking-wide", children: "Files" }),
+        files.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col gap-1.5", children: files.map((file) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: `flex items-center gap-2.5 rounded-xl px-3 py-2.5 bg-neutral-800 ${file.error ? "border border-red-500/40" : "border border-neutral-700"}`,
+            children: [
+              file.type === "collection" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Image$1, { size: 14, className: "shrink-0 text-neutral-400" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { size: 14, className: `shrink-0 ${file.error ? "text-red-400" : "text-neutral-400"}` }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `flex-1 truncate text-sm ${file.error ? "text-red-400" : "text-white"}`, children: file.name ?? file.id }),
+              file.pending ? /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { size: 14, className: "shrink-0 text-primary animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: () => handleRemoveFile(file.id),
+                  className: "shrink-0 text-neutral-500 hover:text-white transition-colors",
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(CircleX, { size: 16 })
+                }
+              )
+            ]
+          },
+          file.id
+        )) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            ref: fileInputRef,
+            type: "file",
+            multiple: true,
+            accept: ".pdf,.txt,.md,.csv,.docx,image/jpeg,image/png,image/webp,image/gif",
+            className: "hidden",
+            onChange: handleFileChange
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            onClick: () => fileInputRef.current?.click(),
+            className: "flex items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3 py-2.5 text-sm text-neutral-400 hover:text-white hover:border-neutral-600 hover:bg-neutral-800/60 transition-colors",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Paperclip, { size: 14 }),
+              "Attach Files"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end px-4 py-3 border-t border-neutral-700", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: onClose,
+          className: "rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors",
+          children: "Cancel"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: handleSave,
+          disabled: saving || hasPendingUploads,
+          className: "rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
+          children: saving ? "Saving…" : "Save"
+        }
+      )
+    ] })
+  ] });
+}
+function FolderEditModal({ visible, onClose, folderId }) {
+  const folders = useFolderStore((s) => s.folders);
+  const createFolder2 = useFolderStore((s) => s.createFolder);
+  const updateFolderName2 = useFolderStore((s) => s.updateFolderName);
+  const { showToast } = useToast();
+  const existingFolder = folderId ? folders.find((f) => f.id === folderId) : void 0;
+  const [name2, setName] = reactExports.useState(existingFolder?.name ?? "");
+  const [isLoading, setIsLoading] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (visible) {
+      setName(existingFolder?.name ?? "");
+    }
+  }, [visible]);
+  const handleSubmit = async () => {
+    const trimmed = name2.trim();
+    if (!trimmed) return;
+    setIsLoading(true);
+    try {
+      if (existingFolder) {
+        await updateFolderName2(existingFolder.id, trimmed);
+        showToast("Folder renamed", "success");
+      } else {
+        await createFolder2(trimmed);
+        showToast("Folder created", "success");
+      }
+      onClose();
+    } catch {
+      showToast("Failed to save folder", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Modal, { visible, onClose, width: "max-w-sm", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-4 py-3 border-b border-neutral-700", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-white", children: existingFolder ? "Rename Folder" : "New Folder" }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex flex-col gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 16, className: "shrink-0 text-neutral-400" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "text",
+            value: name2,
+            onChange: (e) => setName(e.target.value),
+            onKeyDown: (e) => e.key === "Enter" && !isLoading && handleSubmit(),
+            placeholder: "Folder name",
+            autoFocus: true,
+            className: "flex-1 bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: onClose,
+            className: "rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors",
+            children: "Cancel"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: handleSubmit,
+            disabled: !name2.trim() || isLoading,
+            className: "rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
+            children: isLoading ? "Saving…" : existingFolder ? "Rename" : "Create"
+          }
+        )
+      ] })
+    ] })
+  ] });
+}
 function ConversationItem({
   conversation,
   isSelected,
@@ -20360,159 +20775,6 @@ function ConversationItem({
     ] })
   ] });
 }
-var reactDomExports = requireReactDom();
-function Modal({ visible, onClose, children, width = "max-w-sm" }) {
-  const panelRef = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    if (!visible) return;
-    const handleKey = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [visible, onClose]);
-  if (!visible) return null;
-  return reactDomExports.createPortal(
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        className: "fixed inset-0 z-50 flex items-center justify-center bg-black/60",
-        onMouseDown: (e) => {
-          if (e.target === e.currentTarget) onClose();
-        },
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            ref: panelRef,
-            className: `relative w-full ${width} rounded-2xl bg-[#1a1a1a] border border-neutral-800 shadow-2xl overflow-hidden`,
-            onMouseDown: (e) => e.stopPropagation(),
-            children
-          }
-        )
-      }
-    ),
-    document.body
-  );
-}
-const ToastContext = reactExports.createContext({
-  showToast: () => {
-  }
-});
-function useToast() {
-  return reactExports.useContext(ToastContext);
-}
-function ToastProvider({ children }) {
-  const [toasts, setToasts] = reactExports.useState([]);
-  const timerRefs = reactExports.useRef(/* @__PURE__ */ new Map());
-  const dismiss = reactExports.useCallback((id2) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id2));
-    const timer = timerRefs.current.get(id2);
-    if (timer) {
-      clearTimeout(timer);
-      timerRefs.current.delete(id2);
-    }
-  }, []);
-  const showToast = reactExports.useCallback(
-    (message, type = "info") => {
-      const id2 = Math.random().toString(36).slice(2);
-      setToasts((prev) => [...prev, { id: id2, message, type }]);
-      const timer = setTimeout(() => dismiss(id2), 3500);
-      timerRefs.current.set(id2, timer);
-    },
-    [dismiss]
-  );
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToastContext.Provider, { value: { showToast }, children: [
-    children,
-    reactDomExports.createPortal(
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center pointer-events-none", children: toasts.map((toast) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          className: `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium max-w-xs animate-fade-in ${toast.type === "error" ? "bg-red-900 text-red-100 border border-red-700" : toast.type === "success" ? "bg-green-900 text-green-100 border border-green-700" : "bg-neutral-800 text-white border border-neutral-700"}`,
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1", children: toast.message }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                onClick: () => dismiss(toast.id),
-                className: "opacity-60 hover:opacity-100 transition-opacity",
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { size: 14 })
-              }
-            )
-          ]
-        },
-        toast.id
-      )) }),
-      document.body
-    )
-  ] });
-}
-function FolderEditModal({ visible, onClose, folderId }) {
-  const folders = useFolderStore((s) => s.folders);
-  const createFolder2 = useFolderStore((s) => s.createFolder);
-  const updateFolderName2 = useFolderStore((s) => s.updateFolderName);
-  const { showToast } = useToast();
-  const existingFolder = folderId ? folders.find((f) => f.id === folderId) : void 0;
-  const [name2, setName] = reactExports.useState(existingFolder?.name ?? "");
-  const [isLoading, setIsLoading] = reactExports.useState(false);
-  const handleSubmit = async () => {
-    const trimmed = name2.trim();
-    if (!trimmed) return;
-    setIsLoading(true);
-    try {
-      if (existingFolder) {
-        await updateFolderName2(existingFolder.id, trimmed);
-        showToast("Folder renamed", "success");
-      } else {
-        await createFolder2(trimmed);
-        showToast("Folder created", "success");
-      }
-      onClose();
-    } catch {
-      showToast("Failed to save folder", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Modal, { visible, onClose, width: "max-w-sm", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-4 py-3 border-b border-neutral-700", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-white", children: existingFolder ? "Rename Folder" : "New Folder" }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex flex-col gap-3", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 16, className: "shrink-0 text-neutral-400" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            value: name2,
-            onChange: (e) => setName(e.target.value),
-            onKeyDown: (e) => e.key === "Enter" && !isLoading && handleSubmit(),
-            placeholder: "Folder name",
-            autoFocus: true,
-            className: "flex-1 bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: onClose,
-            className: "rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors",
-            children: "Cancel"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: handleSubmit,
-            disabled: !name2.trim() || isLoading,
-            className: "rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
-            children: isLoading ? "Saving…" : existingFolder ? "Rename" : "Create"
-          }
-        )
-      ] })
-    ] })
-  ] });
-}
 function groupByDate(conversations) {
   const now2 = Date.now();
   const day = 24 * 60 * 60 * 1e3;
@@ -20535,13 +20797,37 @@ function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }) {
   const conversations = useConversationStore((s) => s.conversations);
   const removeConversation = useConversationStore((s) => s.removeConversation);
   const renameConversation = useConversationStore((s) => s.renameConversation);
+  const moveConversationToFolder = useConversationStore((s) => s.moveConversationToFolder);
   const folders = useFolderStore((s) => s.folders);
+  const deleteFolder2 = useFolderStore((s) => s.deleteFolder);
+  const loadFolder = useFolderStore((s) => s.loadFolder);
   const currentConversationId = useChatStore((s) => s.currentConversationId);
   const { showToast } = useToast();
   const [renamingId, setRenamingId] = reactExports.useState(null);
   const [renameText, setRenameText] = reactExports.useState("");
   const [movingConvId, setMovingConvId] = reactExports.useState(null);
   const [showFolderEdit, setShowFolderEdit] = reactExports.useState(false);
+  const [selectedFolderId, setSelectedFolderId] = reactExports.useState(null);
+  const [renamingFolderId, setRenamingFolderId] = reactExports.useState(null);
+  const [showFolderData, setShowFolderData] = reactExports.useState(false);
+  const [foldersExpanded, setFoldersExpanded] = reactExports.useState(false);
+  const FOLDERS_LIMIT = 5;
+  const visibleFolders = foldersExpanded ? folders : folders.slice(0, FOLDERS_LIMIT);
+  const hasMoreFolders = folders.length > FOLDERS_LIMIT;
+  const [folderContextMenu, setFolderContextMenu] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    if (selectedFolderId) {
+      loadFolder(selectedFolderId);
+    }
+  }, [selectedFolderId, loadFolder]);
+  const selectedFolder = reactExports.useMemo(
+    () => folders.find((f) => f.id === selectedFolderId),
+    [folders, selectedFolderId]
+  );
+  const folderConversations = reactExports.useMemo(
+    () => conversations.filter((c2) => c2.folderId === selectedFolderId).sort((a, b) => b.updatedAt - a.updatedAt),
+    [conversations, selectedFolderId]
+  );
   const handleRename = (conv) => {
     setRenamingId(conv.id);
     setRenameText(conv.title ?? "");
@@ -20566,15 +20852,191 @@ function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }) {
   const handleFolderSelect = async (folderId) => {
     if (!movingConvId) return;
     try {
-      await assignChatToFolder(movingConvId, folderId);
+      await moveConversationToFolder(movingConvId, folderId);
       showToast(folderId ? "Moved to folder" : "Removed from folder", "success");
     } catch {
       showToast("Failed to move conversation", "error");
     }
     setMovingConvId(null);
   };
+  const handleFolderContextMenu = (e, folderId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFolderContextMenu({ folderId, x: e.clientX, y: e.clientY });
+  };
+  const handleDeleteFolder = async (folderId) => {
+    const folder = folders.find((f) => f.id === folderId);
+    if (!window.confirm(`Delete "${folder?.name ?? "folder"}"? Conversations inside will be unfoldered.`)) return;
+    try {
+      await deleteFolder2(folderId);
+      if (selectedFolderId === folderId) setSelectedFolderId(null);
+      showToast("Folder deleted", "success");
+    } catch {
+      showToast("Failed to delete folder", "error");
+    }
+  };
   const groups = groupByDate(conversations);
   const groupLabels = ["Today", "Yesterday", "Previous 7 Days", "Older"];
+  if (selectedFolderId && selectedFolder) {
+    const systemPrompt = selectedFolder.data?.system_prompt;
+    const attachedFiles = selectedFolder.data?.files ?? [];
+    const folderGroups = groupByDate(folderConversations);
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-full flex-col bg-[#111111] no-select", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "app-drag flex items-center gap-1 px-3 pt-9 pb-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => setSelectedFolderId(null),
+            className: "app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0",
+            title: "Back",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { size: 15 })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex items-center gap-1.5 min-w-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 13, className: "shrink-0 text-neutral-400" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-semibold text-neutral-300 uppercase tracking-wider truncate select-none", children: selectedFolder.name })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => setShowFolderData(true),
+            className: "app-no-drag rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors shrink-0",
+            title: "Edit folder",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(Pencil, { size: 13 })
+          }
+        )
+      ] }),
+      (systemPrompt || attachedFiles.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: "mx-2 mb-2 rounded-xl bg-neutral-800/60 border border-neutral-700/50 p-3 cursor-pointer hover:bg-neutral-800 transition-colors",
+          onClick: () => setShowFolderData(true),
+          children: [
+            systemPrompt && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-2 mb-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(MessageSquare, { size: 13, className: "shrink-0 text-neutral-500 mt-0.5" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-0.5", children: "System Prompt" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-neutral-300 line-clamp-2", children: systemPrompt })
+              ] })
+            ] }),
+            attachedFiles.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 13, className: "shrink-0 text-neutral-500 mt-0.5" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] font-semibold text-neutral-500 uppercase tracking-wide mb-0.5", children: [
+                  attachedFiles.length,
+                  " ",
+                  attachedFiles.length === 1 ? "file" : "files"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-neutral-400 truncate", children: attachedFiles.map((f) => f.name ?? f.id).join(", ") })
+              ] })
+            ] })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-y-auto px-2", children: folderConversations.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center px-4 py-12 gap-2 text-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(FolderOpen, { size: 32, className: "text-neutral-700" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-neutral-500 mt-1", children: "No conversations in this folder" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-neutral-600", children: 'Right-click a conversation and choose "Move to Folder"' })
+      ] }) : groupLabels.map((label) => {
+        const group = folderGroups[label];
+        if (!group.length) return null;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "px-3 py-1 text-[11px] font-medium text-neutral-500", children: label }),
+          group.map((conv) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            ConversationItem,
+            {
+              conversation: conv,
+              isSelected: currentConversationId === conv.id,
+              onSelect: () => onSelectConversation(conv.id),
+              onRename: () => handleRename(conv),
+              onDelete: () => handleDelete2(conv.id),
+              onMoveToFolder: () => handleMoveToFolder(conv.id)
+            },
+            conv.id
+          ))
+        ] }, label);
+      }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center px-2 h-[63px] border-t border-neutral-800", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          onClick: onOpenSettings,
+          className: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Settings, { size: 16 }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm", children: "Settings" })
+          ]
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Modal, { visible: !!renamingId, onClose: () => setRenamingId(null), children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-4 py-3 border-b border-neutral-700", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-white", children: "Rename Chat" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 flex flex-col gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              type: "text",
+              value: renameText,
+              onChange: (e) => setRenameText(e.target.value),
+              onKeyDown: (e) => e.key === "Enter" && submitRename(),
+              autoFocus: true,
+              className: "w-full rounded-xl bg-neutral-800 border border-neutral-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => setRenamingId(null),
+                className: "rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition-colors",
+                children: "Cancel"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: submitRename,
+                className: "rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors",
+                children: "Rename"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Modal, { visible: !!movingConvId, onClose: () => setMovingConvId(null), width: "max-w-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-4 py-3 border-b border-neutral-700", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold text-white", children: "Move to Folder" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-h-64 overflow-y-auto p-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              onClick: () => handleFolderSelect(null),
+              className: "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-400 hover:bg-neutral-700 transition-colors",
+              children: "Remove from folder"
+            }
+          ),
+          folders.map((folder) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              onClick: () => handleFolderSelect(folder.id),
+              className: "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-700/50 transition-colors",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 14, className: "text-neutral-400" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-white", children: folder.name })
+              ]
+            },
+            folder.id
+          ))
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        FolderDataModal,
+        {
+          visible: showFolderData,
+          onClose: () => setShowFolderData(false),
+          folder: selectedFolder
+        },
+        selectedFolder.id
+      )
+    ] });
+  }
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-full flex-col bg-[#111111] no-select", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "app-drag flex items-center justify-between px-3 pt-9 pb-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-semibold text-neutral-500 uppercase tracking-wider select-none", children: "Chats" }),
@@ -20600,17 +21062,31 @@ function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }) {
       ] })
     ] }),
     folders.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "px-2 mb-1", children: [
-      folders.map((folder) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      visibleFolders.map((folder) => {
+        const count = conversations.filter((c2) => c2.folderId === folder.id).length;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            onClick: () => setSelectedFolderId(folder.id),
+            onContextMenu: (e) => handleFolderContextMenu(e, folder.id),
+            className: "flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-neutral-400 hover:bg-neutral-800/60 hover:text-white transition-colors group",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 14, className: "shrink-0" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1 truncate text-xs text-left", children: folder.name }),
+              count > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-neutral-600 group-hover:text-neutral-500 shrink-0", children: count })
+            ]
+          },
+          folder.id
+        );
+      }),
+      hasMoreFolders && /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
         {
-          className: "flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-neutral-400 hover:bg-neutral-800/60 hover:text-white transition-colors",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Folder, { size: 14 }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate text-xs", children: folder.name })
-          ]
-        },
-        folder.id
-      )),
+          onClick: () => setFoldersExpanded((v) => !v),
+          className: "flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-neutral-600 hover:text-neutral-400 transition-colors text-xs",
+          children: foldersExpanded ? `Show less` : `${folders.length - FOLDERS_LIMIT} more folder${folders.length - FOLDERS_LIMIT === 1 ? "" : "s"}`
+        }
+      ),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-1 h-px bg-neutral-800 mx-3" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto px-2", children: [
@@ -20635,7 +21111,7 @@ function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }) {
       }),
       conversations.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "px-3 py-8 text-center text-xs text-neutral-600", children: "No conversations yet." })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-2 border-t border-neutral-800", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center px-2 h-[63px] border-t border-neutral-800", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "button",
       {
         onClick: onOpenSettings,
@@ -20711,7 +21187,67 @@ function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }) {
         visible: showFolderEdit,
         onClose: () => setShowFolderEdit(false)
       }
-    )
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      FolderEditModal,
+      {
+        visible: !!renamingFolderId,
+        onClose: () => setRenamingFolderId(null),
+        folderId: renamingFolderId ?? void 0
+      },
+      renamingFolderId ?? "none"
+    ),
+    folderContextMenu && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "fixed inset-0 z-40",
+          onClick: () => setFolderContextMenu(null),
+          onContextMenu: (e) => {
+            e.preventDefault();
+            setFolderContextMenu(null);
+          }
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: "fixed z-50 w-44 rounded-xl bg-[#1a1a1a] border border-neutral-700 shadow-2xl py-1",
+          style: { left: folderContextMenu.x, top: folderContextMenu.y },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                onClick: () => {
+                  setRenamingFolderId(folderContextMenu.folderId);
+                  setFolderContextMenu(null);
+                },
+                className: "flex w-full items-center gap-2.5 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Pencil, { size: 14 }),
+                  "Rename"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "my-1 h-px bg-neutral-700" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                onClick: () => {
+                  handleDeleteFolder(folderContextMenu.folderId);
+                  setFolderContextMenu(null);
+                },
+                className: "flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-neutral-700 transition-colors",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { size: 14 }),
+                  "Delete"
+                ]
+              }
+            )
+          ]
+        }
+      )
+    ] })
   ] });
 }
 function ok$1() {
@@ -57070,13 +57606,14 @@ function MessageList() {
   const displayMessages = [...messages];
   const showStreamingBubble = isStreaming && streamingContent;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative flex-1 overflow-hidden", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {
         ref: containerRef,
         className: "h-full overflow-y-auto py-4",
         onScroll: handleScroll,
-        children: [
+        style: { WebkitOverflowScrolling: "touch" },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-full flex flex-col justify-end", children: [
           displayMessages.map((msg) => /* @__PURE__ */ jsxRuntimeExports.jsx(
             MessageBubble,
             {
@@ -57105,7 +57642,7 @@ function MessageList() {
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-4" })
-        ]
+        ] })
       }
     ),
     !isAtBottom && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -57765,8 +58302,12 @@ function generateId() {
   });
 }
 function MainLayout() {
-  const [view, setView] = reactExports.useState({ type: "empty" });
+  const [view, setView] = reactExports.useState(() => {
+    const id2 = generateId();
+    return { type: "chat", conversationId: id2, isNew: true };
+  });
   const loadConversations = useConversationStore((s) => s.loadConversations);
+  const reloadFolderMemberships = useConversationStore((s) => s.reloadFolderMemberships);
   const loadFolders = useFolderStore((s) => s.loadFolders);
   const fetchModels = useModelStore((s) => s.fetchModels);
   const setSelectedModel = useModelStore((s) => s.setSelectedModel);
@@ -57778,7 +58319,7 @@ function MainLayout() {
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
   reactExports.useEffect(() => {
     loadConversations();
-    loadFolders();
+    loadFolders().then(() => reloadFolderMemberships());
     fetchModels();
     connectSocket();
     return () => {
@@ -57798,6 +58339,12 @@ function MainLayout() {
   }, [models.length]);
   const handleNewChat = () => {
     clearChat();
+    if (webSearchByDefault) {
+      toggleWebSearch();
+    }
+    if (defaultModelId && models.some((m) => m.id === defaultModelId)) {
+      setSelectedModel(defaultModelId);
+    }
     const id2 = generateId();
     setView({ type: "chat", conversationId: id2, isNew: true });
   };
