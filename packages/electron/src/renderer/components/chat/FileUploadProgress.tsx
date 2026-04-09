@@ -8,7 +8,7 @@ export function FileUploadProgress() {
   if (pendingFiles.length === 0) return null;
 
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 pb-1">
+    <div className="flex gap-2 overflow-x-auto px-4 py-2">
       {pendingFiles.map((file) => (
         <div
           key={file.id}

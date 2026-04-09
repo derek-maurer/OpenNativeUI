@@ -68,7 +68,7 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
           <Loader2 size={24} className="animate-spin text-neutral-500" />
         </div>
       ) : (
-        <MessageList />
+        <MessageList onSuggest={handleSend} />
       )}
 
       <InputComposer

@@ -114,6 +114,7 @@ export default function ChatScreen() {
             streamingContent={streamingContent}
             isStreaming={isStreaming}
             streamingStatus={streamingStatus}
+            onSuggest={handleSend}
           />
 
           <InputComposer

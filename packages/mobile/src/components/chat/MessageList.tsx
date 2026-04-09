@@ -12,12 +12,14 @@ import { useTheme } from "@react-navigation/native";
 import type { Message, StreamingStatus } from "@opennative/shared";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
+import { EmptyState } from "./EmptyState";
 
 interface MessageListProps {
   messages: Message[];
   streamingContent: string;
   isStreaming: boolean;
   streamingStatus?: StreamingStatus | null;
+  onSuggest?: (text: string) => void;
 }
 
 const BOTTOM_THRESHOLD = 60;
@@ -27,6 +29,7 @@ export function MessageList({
   streamingContent,
   isStreaming,
   streamingStatus,
+  onSuggest,
 }: MessageListProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -107,7 +110,9 @@ export function MessageList({
         keyboardDismissMode="on-drag"
         alwaysBounceVertical
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<View />}
+        ListEmptyComponent={
+          !isStreaming ? <EmptyState onSuggest={onSuggest ?? (() => {})} /> : <View />
+        }
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />

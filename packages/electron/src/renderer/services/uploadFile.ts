@@ -74,7 +74,13 @@ export async function uploadAndProcessFile(
   }
 
   const { id } = await uploadFileFromBlob(blob, name);
-  await pollUntilReady(id, useAuthStore.getState().serverUrl!, useAuthStore.getState().token!);
+
+  // Images are sent inline as base64 data URLs — no server-side text extraction
+  // happens, so the status endpoint returns "failed". Skip polling for images,
+  // same as the mobile app's prepareImage path.
+  if (!mimeType.startsWith("image/")) {
+    await pollUntilReady(id);
+  }
 
   return { id, dataUrl };
 }

@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "mobile:ios": "npm run ios --workspace=@opennative/mobile",
+    "mobile:ios:release": "npm run ios:release:device --workspace=@opennative/mobile",
     "mobile:android": "npm run android --workspace=@opennative/mobile",
     "mobile:start": "npm run start --workspace=@opennative/mobile",
     "electron:dev": "npm run dev --workspace=@opennative/electron",

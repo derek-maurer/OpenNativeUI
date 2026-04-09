@@ -2,9 +2,14 @@ import { useRef, useState } from "react";
 import { useChatStore } from "@opennative/shared";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
+import { EmptyState } from "./EmptyState";
 import { ChevronDown } from "lucide-react";
 
-export function MessageList() {
+interface MessageListProps {
+  onSuggest?: (text: string) => void;
+}
+
+export function MessageList({ onSuggest }: MessageListProps) {
   const messages = useChatStore((s) => s.messages);
   const streamingContent = useChatStore((s) => s.streamingContent);
   const isStreaming = useChatStore((s) => s.isStreaming);
@@ -38,6 +43,10 @@ export function MessageList() {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         <div className="min-h-full flex flex-col justify-end">
+          {displayMessages.length === 0 && !isStreaming && (
+            <EmptyState onSuggest={onSuggest ?? (() => {})} />
+          )}
+
           {displayMessages.map((msg) => (
             <MessageBubble
               key={msg.id}
