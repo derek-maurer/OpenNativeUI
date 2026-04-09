@@ -27,7 +27,7 @@ function generateId(): string {
 
 const COLLAPSED_WIDTH = 52;
 const DEFAULT_WIDTH = 260;
-const MIN_WIDTH = 200;
+const MIN_WIDTH = 150;
 const MAX_WIDTH = 400;
 
 export function MainLayout() {
