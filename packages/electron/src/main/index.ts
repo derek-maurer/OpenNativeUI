@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, nativeTheme } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, nativeTheme, shell } from "electron";
 import path from "path";
 import fs from "fs";
 
@@ -70,6 +70,11 @@ function createWindow(): void {
     };
   });
 
+  // IPC: open URL in system browser
+  ipcMain.on("shell:openExternal", (_event, url: string) => {
+    shell.openExternal(url);
+  });
+
   // IPC: get native theme
   ipcMain.handle("theme:getNative", () =>
     nativeTheme.shouldUseDarkColors ? "dark" : "light"
@@ -97,10 +102,14 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  // Set dock icon (macOS dev mode — production builds use electron-builder)
-  if (process.platform === "darwin" && app.dock) {
-    const iconPath = path.join(__dirname, "../../build/icon.png");
-    app.dock.setIcon(iconPath);
+  // Set dock icon only in dev — electron-builder injects it for production builds
+  if (process.env.NODE_ENV === "development" && process.platform === "darwin" && app.dock) {
+    try {
+      const iconPath = path.join(__dirname, "../../build/icon.png");
+      app.dock.setIcon(iconPath);
+    } catch {
+      // Icon not available in this environment, ignore
+    }
   }
   createWindow();
 });
@@ -114,5 +123,7 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  } else {
+    mainWindow?.show();
   }
 });

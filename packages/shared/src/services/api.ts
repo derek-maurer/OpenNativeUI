@@ -14,6 +14,13 @@ function getHeaders(): Record<string, string> {
   };
 }
 
+function throwApiError(status: number, body: string): never {
+  if (status === 401 || status === 403) {
+    useAuthStore.getState().logout();
+  }
+  throw new ApiError(status, body);
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${getBaseUrl()}${path}`, {
     method: "GET",
@@ -21,7 +28,7 @@ export async function apiGet<T>(path: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, await response.text());
+    throwApiError(response.status, await response.text());
   }
 
   return response.json();
@@ -35,7 +42,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, await response.text());
+    throwApiError(response.status, await response.text());
   }
 
   return response.json();
@@ -48,7 +55,7 @@ export async function apiDelete<T = void>(path: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, await response.text());
+    throwApiError(response.status, await response.text());
   }
 
   const text = await response.text();

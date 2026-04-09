@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   useChatStore,
   useModelStore,
   useStreamingChat,
+  useSettingsStore,
   fetchConversation,
   historyToMessages,
 } from "@opennative/shared";
 import { Loader2 } from "lucide-react";
 import { MessageList } from "../components/chat/MessageList";
 import { InputComposer } from "../components/chat/InputComposer";
+import { playChime } from "../lib/chime";
 
 interface ChatScreenProps {
   conversationId: string;
@@ -21,8 +23,13 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
   const isStreaming = useChatStore((s) => s.isStreaming);
   const messages = useChatStore((s) => s.messages);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
+  const chimeOnComplete = useSettingsStore((s) => s.chimeOnComplete);
 
-  const { sendMessage, abort } = useStreamingChat();
+  const onComplete = useCallback(() => {
+    if (chimeOnComplete) playChime();
+  }, [chimeOnComplete]);
+
+  const { sendMessage, abort } = useStreamingChat({ onComplete });
 
   // Load conversation on mount (if not new)
   useEffect(() => {

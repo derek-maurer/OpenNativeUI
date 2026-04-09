@@ -10,6 +10,7 @@ interface AuthState {
   user: UserInfo | null;
   isAuthenticated: boolean;
   isConnecting: boolean;
+  _hasHydrated: boolean;
   setServerUrl: (url: string) => void;
   setAuth: (token: string, user: UserInfo) => void;
   setAuthenticated: (value: boolean) => void;
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isConnecting: false,
+      _hasHydrated: false,
 
       setServerUrl: (url) => set({ serverUrl: url.replace(/\/+$/, "") }),
 
@@ -50,7 +52,11 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        // _hasHydrated intentionally excluded — not persisted
       }),
+      onRehydrateStorage: () => () => {
+        useAuthStore.setState({ _hasHydrated: true });
+      },
     }
   )
 );

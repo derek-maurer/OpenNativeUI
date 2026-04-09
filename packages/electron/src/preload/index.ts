@@ -19,4 +19,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   removeThemeListener: (): void => {
     ipcRenderer.removeAllListeners("theme:changed");
   },
+
+  openExternal: (url: string): void => {
+    ipcRenderer.send("shell:openExternal", url);
+  },
 });

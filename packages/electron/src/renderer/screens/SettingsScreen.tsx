@@ -17,7 +17,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
-  const { theme, setTheme, webSearchByDefault, setWebSearchByDefault } = useSettingsStore();
+  const { theme, setTheme, webSearchByDefault, setWebSearchByDefault, chimeOnComplete, setChimeOnComplete } = useSettingsStore();
   const { serverUrl, user, logout } = useAuthStore();
   const { models, defaultModelId, setDefaultModel } = useModelStore();
   const clearAll = useConversationStore((s) => s.clearAll);
@@ -116,6 +116,12 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <div className="flex items-center justify-between px-4 py-3.5">
               <span className="text-sm text-white">Web Search by Default</span>
               <Toggle value={webSearchByDefault} onChange={setWebSearchByDefault} />
+            </div>
+
+            {/* Chime on response */}
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <span className="text-sm text-white">Chime on Response</span>
+              <Toggle value={chimeOnComplete} onChange={setChimeOnComplete} />
             </div>
           </div>
         </section>

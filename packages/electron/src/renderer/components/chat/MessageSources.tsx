@@ -82,7 +82,7 @@ export function MessageSources({ sources }: MessageSourcesProps) {
             return (
               <button
                 key={i}
-                onClick={() => url && window.open(url, "_blank")}
+                onClick={() => url && window.electronAPI.openExternal(url)}
                 disabled={!url}
                 className="flex items-start gap-3 rounded-xl bg-neutral-800 border border-neutral-700 p-3 text-left hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-default"
               >

@@ -4,7 +4,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
-import type { Message } from "@opennative/shared";
+import type { Message, MessageSourceMetadata } from "@opennative/shared";
 import { parseReasoningSegments, hasReasoningContent } from "@opennative/shared";
 import { ThinkingBlock } from "./ThinkingBlock";
 import { MessageSources, flattenCitations } from "./MessageSources";
@@ -67,51 +67,69 @@ function CodeBlock({
   );
 }
 
-const mdComponents = {
-  // react-markdown wraps block code in <pre><code>. Overriding `pre` to a
-  // fragment lets CodeBlock own the entire container (avoids <div> inside
-  // <pre>, which browsers reject and which broke the block rendering).
-  pre: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  code: CodeBlock as any,
-  a: ({ href, children }: any) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-primary underline hover:text-emerald-400 transition-colors"
-    >
-      {children}
-    </a>
-  ),
-  // Citation badges [N]
-  p: ({ children }: any) => {
-    const processed = processCitations(children);
-    return <p className="mb-2 last:mb-0">{processed}</p>;
-  },
-};
-
-function processCitations(children: React.ReactNode): React.ReactNode {
+function processCitations(children: React.ReactNode, citations: MessageSourceMetadata[]): React.ReactNode {
+  if (Array.isArray(children)) {
+    return children.map((child, i) =>
+      typeof child === "string"
+        ? <span key={i}>{processCitations(child, citations)}</span>
+        : child
+    );
+  }
   if (typeof children !== "string") return children;
   const parts = children.split(/(\[\d+\])/g);
   return parts.map((part, i) => {
     const match = part.match(/^\[(\d+)\]$/);
     if (match) {
-      return (
-        <span
-          key={i}
-          className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white mx-0.5 translate-y-[-1px]"
-        >
+      const url = citations[parseInt(match[1], 10) - 1]?.source;
+      const badge = (
+        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white mx-0.5 translate-y-[-1px]">
           {match[1]}
         </span>
+      );
+      return url ? (
+        <button key={i} onClick={() => window.electronAPI.openExternal(url)} className="cursor-pointer hover:opacity-75 transition-opacity">
+          {badge}
+        </button>
+      ) : (
+        <span key={i}>{badge}</span>
       );
     }
     return part;
   });
 }
 
+function makeMdComponents(citations: MessageSourceMetadata[]) {
+  return {
+    // react-markdown wraps block code in <pre><code>. Overriding `pre` to a
+    // fragment lets CodeBlock own the entire container (avoids <div> inside
+    // <pre>, which browsers reject and which broke the block rendering).
+    pre: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    code: CodeBlock as any,
+    a: ({ href, children }: any) => (
+      <a
+        href={href}
+        onClick={(e) => { e.preventDefault(); href && window.electronAPI.openExternal(href); }}
+        className="text-primary underline hover:text-emerald-400 transition-colors cursor-pointer"
+      >
+        {children}
+      </a>
+    ),
+    p: ({ children }: any) => (
+      <p className="mb-2 last:mb-0">{processCitations(children, citations)}</p>
+    ),
+    // Tight lists render text directly in <li> without a <p> wrapper,
+    // so we also need to process citations here.
+    li: ({ children, ...props }: any) => (
+      <li {...props}>{processCitations(children, citations)}</li>
+    ),
+  };
+}
+
 export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const sources = message.sources ?? [];
+  const citations = flattenCitations(sources);
+  const mdComponents = makeMdComponents(citations);
 
   if (isUser) {
     return (

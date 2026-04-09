@@ -9,5 +9,6 @@ interface Window {
     getNativeTheme(): Promise<"light" | "dark">;
     onThemeChanged(callback: (theme: "light" | "dark") => void): void;
     removeThemeListener(): void;
+    openExternal(url: string): void;
   };
 }
