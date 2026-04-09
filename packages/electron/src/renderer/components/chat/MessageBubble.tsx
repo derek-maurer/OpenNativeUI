@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { isValidElement, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -14,57 +14,52 @@ interface MessageBubbleProps {
   isStreaming?: boolean;
 }
 
+// Recursively extract plain text from React children (needed because
+// rehype-highlight wraps code in <span> nodes, not plain strings).
+function extractText(node: React.ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (isValidElement(node)) return extractText((node.props as any)?.children);
+  return "";
+}
+
 function CodeBlock({
   className,
   children,
 }: {
   className?: string;
   children?: React.ReactNode;
-  inline?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
-    const text = String(children ?? "");
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(extractText(children)).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
   }, [children]);
 
-  const isBlock = className?.startsWith("language-");
-  if (!isBlock) {
+  // Inline code — no language class
+  if (!className?.includes("language-")) {
     return (
-      <code className="rounded bg-neutral-700 px-1 py-0.5 text-xs font-mono text-neutral-200">
+      <code className="rounded bg-neutral-700/60 px-1.5 py-0.5 text-xs font-mono text-neutral-200">
         {children}
       </code>
     );
   }
 
+  // Block code — rendered by the `pre` override below, so we own the full container
   return (
-    <div className="group relative my-2 rounded-xl overflow-hidden border border-neutral-700">
-      <div className="flex items-center justify-between bg-neutral-800 px-3 py-1.5">
-        <span className="text-xs text-neutral-400 font-mono">
-          {className?.replace("language-", "") ?? ""}
-        </span>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check size={12} />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy size={12} />
-              Copy
-            </>
-          )}
-        </button>
-      </div>
-      <pre className="overflow-x-auto p-3 text-xs leading-relaxed bg-neutral-900">
+    <div className="group relative my-3 rounded-xl border border-neutral-600 bg-neutral-800 overflow-hidden">
+      <button
+        onClick={handleCopy}
+        className="absolute top-2.5 right-2.5 z-10 rounded-lg bg-neutral-700/70 p-1.5 text-neutral-400 opacity-0 group-hover:opacity-100 hover:bg-neutral-600 hover:text-white transition-all"
+        title={copied ? "Copied!" : "Copy"}
+      >
+        {copied ? <Check size={13} /> : <Copy size={13} />}
+      </button>
+      <pre className="overflow-x-auto p-4 text-xs leading-relaxed bg-neutral-900 m-0">
         <code className={className}>{children}</code>
       </pre>
     </div>
@@ -72,6 +67,10 @@ function CodeBlock({
 }
 
 const mdComponents = {
+  // react-markdown wraps block code in <pre><code>. Overriding `pre` to a
+  // fragment lets CodeBlock own the entire container (avoids <div> inside
+  // <pre>, which browsers reject and which broke the block rendering).
+  pre: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   code: CodeBlock as any,
   a: ({ href, children }: any) => (
     <a
@@ -159,7 +158,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
                 return <ThinkingBlock key={i} entry={seg.entry} />;
               }
               return seg.text ? (
-                <div key={i} className="text-sm text-neutral-100 selectable">
+                <div key={i} className="text-sm text-neutral-100 selectable markdown">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeHighlight]}
@@ -172,7 +171,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
             })}
           </>
         ) : (
-          <div className="text-sm text-neutral-100 selectable">
+          <div className="text-sm text-neutral-100 selectable markdown">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}

@@ -53,7 +53,7 @@ export function ThinkingBlock({ entry }: ThinkingBlockProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-3 pt-1 text-xs text-neutral-400 selectable max-h-64 overflow-y-auto">
+            <div className="px-4 pb-3 pt-1 text-xs text-neutral-400 selectable max-h-64 overflow-y-auto markdown">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {cleanedText}
               </ReactMarkdown>
