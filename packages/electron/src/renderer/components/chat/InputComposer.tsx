@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@opennative/shared";
 import { Plus, ArrowUp, Square } from "lucide-react";
 import { ModelSelectorTrigger, ModelPickerOverlay } from "./ModelSelector";
@@ -19,6 +19,8 @@ export function InputComposer({ onSend, onAbort, disabled }: InputComposerProps)
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { textareaRef.current?.focus(); }, []);
 
   const isStreaming = useChatStore((s) => s.isStreaming);
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);

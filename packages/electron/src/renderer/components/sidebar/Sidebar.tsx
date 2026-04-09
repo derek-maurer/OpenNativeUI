@@ -178,7 +178,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
 
         {/* Action icons */}
         <div className="flex flex-col items-center gap-1 px-1 w-full">
-          <Tooltip label="New Chat" side="right">
+          <Tooltip label="New Chat" shortcut="⇧⌘O" side="right">
             <button
               onClick={onNewChat}
               className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
@@ -198,7 +198,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
 
         {/* Settings */}
         <div className="mt-auto w-full flex items-center justify-center border-t border-neutral-800 py-3">
-          <Tooltip label="Settings" side="right">
+          <Tooltip label="Settings" shortcut="⌘," side="right">
             <button
               onClick={onOpenSettings}
               className="rounded-lg p-2 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
@@ -320,6 +320,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
           >
             <Settings size={16} />
             <span className="text-sm">Settings</span>
+            <span className="ml-auto font-mono text-[11px] text-neutral-600">⌘,</span>
           </button>
         </div>
 
@@ -405,7 +406,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               <FolderPlus size={15} />
             </button>
           </Tooltip>
-          <Tooltip label="New Chat">
+          <Tooltip label="New Chat" shortcut="⇧⌘O">
             <button
               onClick={onNewChat}
               className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
@@ -413,7 +414,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
               <SquarePen size={15} />
             </button>
           </Tooltip>
-          <Tooltip label="Collapse sidebar">
+          <Tooltip label="Collapse sidebar" shortcut="⌘.">
             <button
               onClick={onToggleCollapse}
               className="rounded-lg p-1.5 text-neutral-500 hover:text-white hover:bg-neutral-700 transition-colors"
@@ -495,6 +496,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, onNewChat, onSelectConv
         >
           <Settings size={16} />
           <span className="text-sm">Settings</span>
+          <span className="ml-auto font-mono text-[11px] text-neutral-600">⌘,</span>
         </button>
       </div>
 

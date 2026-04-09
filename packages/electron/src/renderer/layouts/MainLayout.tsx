@@ -119,6 +119,43 @@ export function MainLayout() {
     setView({ type: "chat", conversationId: id, isNew: false });
   };
 
+  // ── Global keyboard shortcuts ────────────────────────────────────────────────
+  // Ref keeps the effect's listener pointing at the latest handleNewChat closure
+  // (which captures models/settings that may update after mount).
+  const handleNewChatRef = useRef(handleNewChat);
+  handleNewChatRef.current = handleNewChat;
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!e.metaKey) return;
+      const tag = (e.target as HTMLElement).tagName;
+      const isEditable = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable;
+
+      // Cmd+. — toggle sidebar
+      if (e.key === "." && !e.shiftKey) {
+        e.preventDefault();
+        setIsCollapsed((v) => !v);
+        return;
+      }
+
+      // Shift+Cmd+O — new conversation
+      if (e.key === "o" && e.shiftKey) {
+        e.preventDefault();
+        handleNewChatRef.current();
+        return;
+      }
+
+      // Cmd+, — settings (skip when typing)
+      if (e.key === "," && !e.shiftKey && !isEditable) {
+        e.preventDefault();
+        setView({ type: "settings" });
+        return;
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.removeEventListener("keydown", onKeyDown); };
+  }, []);
+
   const currentWidth = isCollapsed ? COLLAPSED_WIDTH : sidebarWidth;
 
   return (
