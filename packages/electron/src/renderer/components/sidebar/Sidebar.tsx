@@ -1,26 +1,26 @@
-import { useState, useEffect, useMemo } from "react";
+import type { Conversation } from "@opennative/shared";
 import {
-  useConversationStore,
   useChatStore,
+  useConversationStore,
   useFolderStore,
 } from "@opennative/shared";
 import {
-  SquarePen,
-  Settings,
-  FolderPlus,
+  ArrowLeft,
   Folder,
   FolderOpen,
-  ArrowLeft,
-  Pencil,
-  Trash2,
+  FolderPlus,
   MessageSquare,
+  Pencil,
+  Settings,
+  SquarePen,
+  Trash2,
 } from "lucide-react";
-import type { Conversation } from "@opennative/shared";
-import { ConversationItem } from "./ConversationItem";
-import { Modal } from "../ui/Modal";
-import { FolderEditModal } from "../folders/FolderEditModal";
+import { useEffect, useMemo, useState } from "react";
 import { FolderDataModal } from "../folders/FolderDataModal";
+import { FolderEditModal } from "../folders/FolderEditModal";
+import { Modal } from "../ui/Modal";
 import { useToast } from "../ui/Toast";
+import { ConversationItem } from "./ConversationItem";
 
 interface SidebarProps {
   onNewChat: () => void;
@@ -255,7 +255,7 @@ export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: Sid
         </div>
 
         {/* Settings button */}
-        <div className="px-2 py-[10px] border-t border-neutral-800">
+        <div className="flex items-center px-2 h-[63px] border-t border-neutral-800">
           <button
             onClick={onOpenSettings}
             className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
@@ -420,7 +420,7 @@ export function Sidebar({ onNewChat, onSelectConversation, onOpenSettings }: Sid
       </div>
 
       {/* Settings button */}
-      <div className="px-2 py-[10px] border-t border-neutral-800">
+      <div className="flex items-center px-2 h-[63px] border-t border-neutral-800">
         <button
           onClick={onOpenSettings}
           className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
