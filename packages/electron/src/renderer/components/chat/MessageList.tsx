@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useChatStore } from "@opennative/shared";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
@@ -17,11 +17,6 @@ export function MessageList() {
     const el = containerRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior });
   };
-
-  // Auto-scroll when new content arrives
-  useEffect(() => {
-    if (isAtBottom) scrollToBottom();
-  }, [messages.length, streamingContent, isAtBottom]);
 
   const handleScroll = () => {
     const el = containerRef.current;

@@ -1,0 +1,204 @@
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { Copy, Check, Volume2, VolumeX, Info, X } from "lucide-react";
+import {
+  parseReasoningSegments,
+  hasReasoningContent,
+  type MessageInfo,
+} from "@opennative/shared";
+
+interface MessageActionsProps {
+  content: string;
+  info?: MessageInfo;
+}
+
+export function MessageActions({ content, info }: MessageActionsProps) {
+  const [copied, setCopied] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const infoRef = useRef<HTMLDivElement>(null);
+
+  // Strip reasoning blocks so copy matches what the user sees
+  const plainContent = useMemo(() => {
+    if (!hasReasoningContent(content)) return content;
+    const segments = parseReasoningSegments(content);
+    if (!segments) return content;
+    return segments
+      .filter((s) => s.kind === "text")
+      .map((s) => (s as { kind: "text"; text: string }).text)
+      .join("")
+      .trim();
+  }, [content]);
+
+  // Close info popover on outside click
+  useEffect(() => {
+    if (!infoOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setInfoOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [infoOpen]);
+
+  // Stop speech when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isSpeaking) window.speechSynthesis?.cancel();
+    };
+  }, [isSpeaking]);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(plainContent).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [plainContent]);
+
+  const handleSpeak = useCallback(() => {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+
+    if (isSpeaking) {
+      synth.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const plain = content
+      .replace(/```[\s\S]*?```/g, " code block ")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/[#*_~>\[\]()!|]/g, "")
+      .replace(/\n+/g, " ")
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(plain);
+
+    // Prefer a high-quality local en-US voice over the robotic default.
+    // On macOS/Electron the system voices (Samantha, Alex, etc.) are far
+    // better than the fallback eSpeak/espeak-ng voice.
+    const voices = synth.getVoices();
+    const preferred = pickBestVoice(voices);
+    if (preferred) utterance.voice = preferred;
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    synth.speak(utterance);
+  }, [content, isSpeaking]);
+
+  return (
+    <div className="flex items-center gap-1 mt-2">
+      {info && (
+        <div className="relative" ref={infoRef}>
+          <ActionButton
+            onClick={() => setInfoOpen((v) => !v)}
+            title="Message info"
+            active={infoOpen}
+          >
+            <Info size={14} />
+          </ActionButton>
+
+          {infoOpen && (
+            <div className="absolute left-0 top-7 z-50 w-52 rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-neutral-200">
+                  Message Info
+                </span>
+                <button
+                  onClick={() => setInfoOpen(false)}
+                  className="text-neutral-500 hover:text-neutral-300 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+              <InfoRow label="Model" value={info.model} />
+              <InfoRow label="Output tokens" value={`~${info.outputTokens}`} />
+              <InfoRow
+                label="Duration"
+                value={`${info.totalDuration.toFixed(1)}s`}
+              />
+              <InfoRow
+                label="Tokens/sec"
+                value={info.tokensPerSecond.toFixed(1)}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <ActionButton onClick={handleCopy} title={copied ? "Copied!" : "Copy"}>
+        {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+      </ActionButton>
+
+      <ActionButton
+        onClick={handleSpeak}
+        title={isSpeaking ? "Stop speaking" : "Speak message"}
+        active={isSpeaking}
+      >
+        {isSpeaking ? (
+          <VolumeX size={14} className="text-primary" />
+        ) : (
+          <Volume2 size={14} />
+        )}
+      </ActionButton>
+    </div>
+  );
+}
+
+function ActionButton({
+  children,
+  onClick,
+  title,
+  active,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title?: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={[
+        "flex items-center justify-center rounded-md p-1 transition-colors",
+        active
+          ? "text-primary bg-primary/10"
+          : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-700/50",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Ranked preference list — first match wins.
+// macOS ships "Samantha" and "Alex" as high-quality local TTS voices.
+// Other platforms (Windows, Linux) have their own naming conventions so
+// we fall back progressively to any local en-US voice, then any en voice.
+const PREFERRED_VOICES = ["Samantha", "Alex", "Google US English", "Microsoft Zira"];
+
+function pickBestVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  for (const name of PREFERRED_VOICES) {
+    const match = voices.find((v) => v.name === name);
+    if (match) return match;
+  }
+  // Any local en-US voice
+  const localEnUS = voices.find((v) => v.lang === "en-US" && v.localService);
+  if (localEnUS) return localEnUS;
+  // Any en-US voice
+  const enUS = voices.find((v) => v.lang === "en-US");
+  if (enUS) return enUS;
+  // Any local English voice
+  return voices.find((v) => v.lang.startsWith("en") && v.localService) ?? null;
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-center py-1.5 border-b border-neutral-800 last:border-0">
+      <span className="text-xs text-neutral-500">{label}</span>
+      <span className="text-xs font-medium text-neutral-200">{value}</span>
+    </div>
+  );
+}

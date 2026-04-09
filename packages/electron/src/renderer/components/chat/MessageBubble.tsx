@@ -8,6 +8,7 @@ import type { Message } from "@opennative/shared";
 import { parseReasoningSegments, hasReasoningContent } from "@opennative/shared";
 import { ThinkingBlock } from "./ThinkingBlock";
 import { MessageSources, flattenCitations } from "./MessageSources";
+import { MessageActions } from "./MessageActions";
 
 interface MessageBubbleProps {
   message: Message;
@@ -188,6 +189,11 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
         {/* Sources */}
         {sources.length > 0 && flattenCitations(sources).length > 0 && (
           <MessageSources sources={sources} />
+        )}
+
+        {/* Actions */}
+        {!isStreaming && (
+          <MessageActions content={content} info={message.info} />
         )}
       </div>
     </div>
