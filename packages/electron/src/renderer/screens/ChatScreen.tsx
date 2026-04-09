@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   useChatStore,
   useModelStore,
@@ -54,9 +54,11 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
     return () => { cancelled = true; };
   }, [conversationId, isNew, setConversation]);
 
-  // Send initial message if provided
+  // Send initial message if provided — ref guard prevents StrictMode double-fire
+  const initialMessageSent = useRef(false);
   useEffect(() => {
-    if (initialMessage && isNew) {
+    if (initialMessage && isNew && !initialMessageSent.current) {
+      initialMessageSent.current = true;
       sendMessage(initialMessage, conversationId, true);
     }
   }, []);

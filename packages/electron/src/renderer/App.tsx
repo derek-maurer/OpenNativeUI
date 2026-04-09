@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router";
 import { useAuthStore, useSettingsStore } from "@opennative/shared";
 import { SignInScreen } from "./screens/SignInScreen";
 import { MainLayout } from "./layouts/MainLayout";
+import { ChatBarScreen } from "./screens/ChatBarScreen";
 import { applyThemeClass } from "./lib/theme";
 import { ToastProvider } from "./components/ui/Toast";
 
@@ -31,13 +32,13 @@ export function App() {
 
   return (
     <ToastProvider>
-      {!isAuthenticated ? (
-        <SignInScreen />
-      ) : (
-        <Routes>
-          <Route path="/*" element={<MainLayout />} />
-        </Routes>
-      )}
+      <Routes>
+        <Route path="/chatbar" element={<ChatBarScreen />} />
+        <Route
+          path="/*"
+          element={!isAuthenticated ? <SignInScreen /> : <MainLayout />}
+        />
+      </Routes>
     </ToastProvider>
   );
 }

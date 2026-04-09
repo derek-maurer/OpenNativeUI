@@ -16,7 +16,7 @@ import { MessageSquare } from "lucide-react";
 
 type View =
   | { type: "empty" }
-  | { type: "chat"; conversationId: string; isNew?: boolean }
+  | { type: "chat"; conversationId: string; isNew?: boolean; initialMessage?: string }
   | { type: "settings" };
 
 function generateId(): string {
@@ -121,6 +121,16 @@ export function MainLayout() {
     setView({ type: "chat", conversationId: id, isNew: false });
   };
 
+  // ── Chat bar incoming ────────────────────────────────────────────────────────
+  useEffect(() => {
+    window.electronAPI.onChatBarSubmit(({ query, modelId }) => {
+      if (modelId) setSelectedModel(modelId);
+      const id = generateId();
+      setView({ type: "chat", conversationId: id, isNew: true, initialMessage: query });
+    });
+    return () => window.electronAPI.removeChatBarSubmitListener();
+  }, []);
+
   // ── Global keyboard shortcuts ────────────────────────────────────────────────
   // Ref keeps the effect's listener pointing at the latest handleNewChat closure
   // (which captures models/settings that may update after mount).
@@ -218,6 +228,7 @@ export function MainLayout() {
               key={view.conversationId}
               conversationId={view.conversationId}
               isNew={view.isNew}
+              initialMessage={view.initialMessage}
             />
           </div>
         )}
