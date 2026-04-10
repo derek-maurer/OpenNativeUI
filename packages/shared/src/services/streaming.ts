@@ -323,6 +323,11 @@ function joinReasoningAndPrefix(prefix: string, reasoningDetails: string): strin
  * a separate `delta.reasoning_content` field. We accumulate those into a
  * local `<details>` block and push the whole thing via `onReplaceContent`
  * so the rest of the pipeline stays unaware of where reasoning came from.
+ *
+ * Retry policy: if the connection drops before any content has been delivered
+ * we retry up to MAX_RETRIES times with exponential back-off. Once tokens are
+ * flowing we cannot safely reconnect (the model would generate a different
+ * continuation), so mid-stream errors fall through to onError as before.
  */
 function streamViaSSE(
   serverUrl: string,
@@ -331,6 +336,13 @@ function streamViaSSE(
   callbacks: StreamCallbacks
 ): { abort: () => void } {
   const url = `${serverUrl.replace(/\/+$/, "")}${API_PATHS.CHAT_COMPLETIONS}`;
+  const MAX_RETRIES = 3;
+  const BASE_DELAY_MS = 1500;
+
+  let aborted = false;
+  let retryCount = 0;
+  let activeEs: ReturnType<typeof createSSEConnection> | null = null;
+  let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Emit synthetic status events for features that require pre-token server-side
   // processing (web search, RAG). These mirror what the Socket.IO path receives
@@ -364,6 +376,9 @@ function streamViaSSE(
   let reasoningPrefix = "";
   let reasoningBuffer = "";
   let reasoningStartTime = 0;
+  // True once any token or reasoning chunk has been delivered to the caller.
+  // Used to decide whether a connection error is retryable.
+  let hadAnyContent = false;
 
   const resetReasoning = () => {
     inReasoningBlock = false;
@@ -374,6 +389,7 @@ function streamViaSSE(
 
   const appendVisibleChunk = (chunk: string) => {
     if (!chunk) return;
+    hadAnyContent = true;
     resolveSyntheticStatuses();
     if (inReasoningBlock) {
       // Plain text coming after a reasoning block closes the reasoning
@@ -402,6 +418,7 @@ function streamViaSSE(
 
   const appendReasoningChunk = (chunk: string) => {
     if (!chunk) return;
+    hadAnyContent = true;
     resolveSyntheticStatuses();
     if (!inReasoningBlock) {
       inReasoningBlock = true;
@@ -438,92 +455,130 @@ function streamViaSSE(
   };
 
   const ssePayload = { ...body, stream: true };
-  console.log("[chat:wire] POST (sse)", {
-    url,
-    bodyKeys: Object.keys(ssePayload),
-    params: (ssePayload as { params?: unknown }).params ?? null,
-    body: JSON.stringify(ssePayload),
-  });
+  const sseHeaders = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+  const sseBody = JSON.stringify(ssePayload);
 
-  const es = createSSEConnection(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(ssePayload),
-  });
+  const doConnect = () => {
+    if (aborted) return;
 
-  es.addEventListener("message", (event: any) => {
-    if (!event.data) return;
-
-    if (event.data === "[DONE]") {
-      finalizeReasoningIfOpen();
-      es.removeAllEventListeners();
-      es.close();
-      callbacks.onDone();
-      return;
+    if (retryCount === 0) {
+      console.log("[chat:wire] POST (sse)", {
+        url,
+        bodyKeys: Object.keys(ssePayload),
+        params: (ssePayload as { params?: unknown }).params ?? null,
+        body: sseBody,
+      });
+    } else {
+      console.log(`[chat:sse] reconnect attempt ${retryCount}/${MAX_RETRIES}`);
     }
 
-    try {
-      // Parse loosely — per docs/open-webui-api-reference.md:229 the stream
-      // interleaves OpenAI-shaped chunks (`choices[]`) with sidecar frames
-      // like `{"sources": [...]}` and `{"usage": {...}}` that do NOT have
-      // `choices`. The old typed cast crashed on those and they got swallowed.
-      const frame = JSON.parse(event.data) as Partial<ChatCompletionChunk> & {
-        sources?: MessageSource[];
-        choices?: Array<{
-          delta?: {
-            content?: string;
-            reasoning_content?: string;
-            // Some providers (Anthropic-compat, Ollama) use alternate names.
-            reasoning?: string;
-            thinking?: string;
-          };
-          finish_reason?: string | null;
-        }>;
-      };
+    const es = createSSEConnection(url, { headers: sseHeaders, body: sseBody });
+    activeEs = es;
 
-      const delta = frame.choices?.[0]?.delta;
-      if (delta) {
-        const reasoningChunk =
-          delta.reasoning_content ?? delta.reasoning ?? delta.thinking;
-        if (typeof reasoningChunk === "string" && reasoningChunk.length > 0) {
-          appendReasoningChunk(reasoningChunk);
-        }
+    es.addEventListener("message", (event: any) => {
+      if (!event.data) return;
 
-        const contentChunk = delta.content;
-        if (typeof contentChunk === "string" && contentChunk.length > 0) {
-          appendVisibleChunk(contentChunk);
-        }
-      }
-
-      if (Array.isArray(frame.sources) && frame.sources.length > 0) {
-        callbacks.onSources(frame.sources);
-      }
-
-      if (frame.choices?.[0]?.finish_reason === "stop") {
+      if (event.data === "[DONE]") {
         finalizeReasoningIfOpen();
         es.removeAllEventListeners();
         es.close();
+        activeEs = null;
         callbacks.onDone();
+        return;
       }
-    } catch (e) {
-      // Skip malformed chunks
-    }
-  });
 
-  es.addEventListener("error", (event: any) => {
-    es.removeAllEventListeners();
-    es.close();
-    callbacks.onError(
-      new Error(event?.message || "Streaming connection failed")
-    );
-  });
+      try {
+        // Parse loosely — per docs/open-webui-api-reference.md:229 the stream
+        // interleaves OpenAI-shaped chunks (`choices[]`) with sidecar frames
+        // like `{"sources": [...]}` and `{"usage": {...}}` that do NOT have
+        // `choices`. The old typed cast crashed on those and they got swallowed.
+        const frame = JSON.parse(event.data) as Partial<ChatCompletionChunk> & {
+          sources?: MessageSource[];
+          choices?: Array<{
+            delta?: {
+              content?: string;
+              reasoning_content?: string;
+              // Some providers (Anthropic-compat, Ollama) use alternate names.
+              reasoning?: string;
+              thinking?: string;
+            };
+            finish_reason?: string | null;
+          }>;
+        };
+
+        const delta = frame.choices?.[0]?.delta;
+        if (delta) {
+          const reasoningChunk =
+            delta.reasoning_content ?? delta.reasoning ?? delta.thinking;
+          if (typeof reasoningChunk === "string" && reasoningChunk.length > 0) {
+            appendReasoningChunk(reasoningChunk);
+          }
+
+          const contentChunk = delta.content;
+          if (typeof contentChunk === "string" && contentChunk.length > 0) {
+            appendVisibleChunk(contentChunk);
+          }
+        }
+
+        if (Array.isArray(frame.sources) && frame.sources.length > 0) {
+          callbacks.onSources(frame.sources);
+        }
+
+        if (frame.choices?.[0]?.finish_reason === "stop") {
+          finalizeReasoningIfOpen();
+          es.removeAllEventListeners();
+          es.close();
+          activeEs = null;
+          callbacks.onDone();
+        }
+      } catch (e) {
+        // Skip malformed chunks
+      }
+    });
+
+    es.addEventListener("error", (event: any) => {
+      es.removeAllEventListeners();
+      es.close();
+      activeEs = null;
+
+      if (aborted) return;
+
+      // Only retry if no content has arrived yet — once tokens are flowing we
+      // cannot resume because the model would generate a different continuation.
+      if (!hadAnyContent && retryCount < MAX_RETRIES) {
+        retryCount++;
+        const delay = BASE_DELAY_MS * Math.pow(2, retryCount - 1);
+        console.warn(
+          `[chat:sse] connection error before first token — retry ${retryCount}/${MAX_RETRIES} in ${delay}ms`,
+          event?.message,
+        );
+        retryTimer = setTimeout(() => {
+          retryTimer = null;
+          doConnect();
+        }, delay);
+      } else {
+        callbacks.onError(
+          new Error(event?.message || "Streaming connection failed"),
+        );
+      }
+    });
+  };
+
+  doConnect();
 
   return {
     abort: () => {
-      es.removeAllEventListeners();
-      es.close();
+      aborted = true;
+      if (retryTimer !== null) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+      activeEs?.removeAllEventListeners();
+      activeEs?.close();
+      activeEs = null;
     },
   };
 }
