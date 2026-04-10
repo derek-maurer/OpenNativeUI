@@ -28,7 +28,7 @@ function generateId(): string {
 
 const COLLAPSED_WIDTH = 52;
 const DEFAULT_WIDTH = 260;
-const MIN_WIDTH = 150;
+const MIN_WIDTH = 200;
 const MAX_WIDTH = 400;
 
 export function MainLayout() {
@@ -189,7 +189,7 @@ export function MainLayout() {
       />
       {/* Sidebar */}
       <div
-        className="relative shrink-0 border-r border-line"
+        className="relative shrink-0 overflow-hidden border-r border-line"
         style={{ width: currentWidth }}
       >
         <Sidebar
@@ -208,7 +208,7 @@ export function MainLayout() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-[360px]">
         {/* Drag strip matching the sidebar's titlebar height on the content side */}
         {view.type !== "settings" && (
           <div className="app-drag h-9 shrink-0" />

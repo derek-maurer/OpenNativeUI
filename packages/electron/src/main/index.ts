@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain, dialog, nativeTheme, shell, globalShortcut, screen, session } from "electron";
-import path from "path";
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, screen, session, shell } from "electron";
 import fs from "fs";
+import path from "path";
 
 app.setName("ONI");
 
@@ -155,7 +155,7 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    minWidth: 400,
+    minWidth: 650,
     minHeight: 300,
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 12, y: 14 },
