@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@opennative/shared": "*",
     "@expo/vector-icons": "^15.0.3",
+    "@opennative/shared": "*",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/drawer": "^7.9.8",
     "@react-navigation/elements": "^2.6.3",
@@ -60,6 +60,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@bacons/apple-targets": "^4.0.6",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",

@@ -29,6 +29,12 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "@bacons/apple-targets",
+        {
+          "appleTeamId": "H332U7UU2X"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
