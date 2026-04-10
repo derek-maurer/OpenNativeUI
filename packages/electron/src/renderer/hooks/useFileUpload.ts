@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useChatStore } from "@opennative/shared";
+import { useChatStore, waitUntilProcessed } from "@opennative/shared";
 import { uploadAndProcessFile } from "../services/uploadFile";
 import { useToast } from "../components/ui/Toast";
 
@@ -27,13 +27,29 @@ export function useFileUpload() {
       mimeType,
     });
 
+    // Track the server-assigned ID separately so the catch block always
+    // references the correct store entry regardless of which step fails.
+    let serverId: string | undefined;
+
     try {
       const result = await uploadAndProcessFile(buffer, name, mimeType);
+      serverId = result.id;
+
+      // For documents (no dataUrl), wait for server-side RAG processing to
+      // complete before marking ready, so the model can see the file content.
+      if (!result.dataUrl) {
+        useChatStore.setState((state) => ({
+          pendingFiles: state.pendingFiles.map((f) =>
+            f.id === fileId ? { ...f, id: result.id } : f
+          ),
+        }));
+        await waitUntilProcessed(result.id);
+      }
 
       // Update with server ID and preview
       useChatStore.setState((state) => ({
         pendingFiles: state.pendingFiles.map((f) =>
-          f.id === fileId
+          f.id === fileId || f.id === result.id
             ? {
                 ...f,
                 id: result.id,   // replace temp id with server id
@@ -44,10 +60,13 @@ export function useFileUpload() {
         ),
       }));
     } catch (err: any) {
-      updateFileStatus(fileId, "error");
+      // Use the server ID if we have it (store entry was already updated to it),
+      // otherwise fall back to the local temp ID.
+      const errorId = serverId ?? fileId;
+      updateFileStatus(errorId, "error");
       showToast(err?.message ?? "Upload failed", "error");
       // Auto-remove after 3s
-      setTimeout(() => removePendingFile(fileId), 3000);
+      setTimeout(() => removePendingFile(errorId), 3000);
     }
   }, [addPendingFile, updateFileStatus, removePendingFile, showToast]);
 

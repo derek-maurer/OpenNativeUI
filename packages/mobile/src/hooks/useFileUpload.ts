@@ -8,6 +8,7 @@ import * as Crypto from "expo-crypto";
 import { useChatStore } from "@opennative/shared";
 import {
   uploadFile,
+  waitUntilProcessed,
 } from "@opennative/shared";
 
 export function useFileUpload() {
@@ -29,23 +30,29 @@ export function useFileUpload() {
         mimeType,
       });
 
+      let fileId: string | undefined;
       try {
         console.log(`[useFileUpload] uploading "${name}" (${mimeType}, ${size}B)`);
-        const { id: fileId } = await uploadFile(uri, name, mimeType);
-        console.log(`[useFileUpload] "${name}" uploaded, fileId=${fileId}`);
+        const result = await uploadFile(uri, name, mimeType);
+        fileId = result.id;
+        console.log(`[useFileUpload] "${name}" uploaded, fileId=${fileId} — waiting for processing`);
 
         removePendingFile(tempId);
         addPendingFile({
           id: fileId,
           name,
           size,
-          status: "ready",
+          status: "uploading",
           uri,
           mimeType,
         });
+
+        await waitUntilProcessed(fileId);
+        updateFileStatus(fileId, "ready");
+        console.log(`[useFileUpload] "${name}" processed and ready`);
       } catch (err) {
         console.error(`[useFileUpload] failed for "${name}":`, err);
-        updateFileStatus(tempId, "error");
+        updateFileStatus(fileId ?? tempId, "error");
       }
     },
     []
