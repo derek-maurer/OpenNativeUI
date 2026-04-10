@@ -27,6 +27,21 @@ export interface UserInfo {
   profile_image_url: string;
 }
 
+// Server config
+export interface OpenWebUIConfig {
+  features?: {
+    enable_web_search?: boolean;
+    [key: string]: unknown;
+  };
+  permissions?: {
+    features?: {
+      web_search?: boolean;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+}
+
 // Models
 export interface Model {
   id: string;

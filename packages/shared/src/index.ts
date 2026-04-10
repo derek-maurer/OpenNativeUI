@@ -66,6 +66,8 @@ export {
   signIn,
   validateToken,
   validateConnection,
+  fetchServerConfig,
+  resolveWebSearchAvailable,
   ApiError,
 } from "./services/api";
 

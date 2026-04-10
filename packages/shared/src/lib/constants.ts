@@ -3,6 +3,9 @@ export const API_PATHS = {
   SIGNIN: "/api/v1/auths/signin",
   AUTH_VERIFY: "/api/v1/auths/",
 
+  // Config
+  CONFIG: "/api/config",
+
   // Models
   MODELS: "/api/models",
 

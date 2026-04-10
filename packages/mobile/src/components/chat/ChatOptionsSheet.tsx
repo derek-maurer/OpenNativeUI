@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useChatStore } from "@opennative/shared";
+import { useAuthStore } from "@opennative/shared";
 import { useModelStore } from "@opennative/shared";
 import { useModelPreferencesStore } from "@opennative/shared";
 import { useFolderStore } from "@opennative/shared";
@@ -22,6 +23,7 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
   const { dark, colors } = useTheme();
   const webSearchEnabled = useChatStore((s) => s.webSearchEnabled);
   const toggleWebSearch = useChatStore((s) => s.toggleWebSearch);
+  const webSearchAvailable = useAuthStore((s) => s.webSearchAvailable);
   const currentConversationId = useChatStore((s) => s.currentConversationId);
   const pendingFolderId = useChatStore((s) => s.pendingFolderId);
   const setPendingFolderId = useChatStore((s) => s.setPendingFolderId);
@@ -125,37 +127,39 @@ export function ChatOptionsSheet({ visible, onClose }: ChatOptionsSheetProps) {
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]}>Options</Text>
 
-        {/* Web Search */}
-        <Pressable
-          onPress={toggleWebSearch}
-          style={[styles.row, { backgroundColor: rowBg }]}
-        >
-          <View style={styles.rowIcon}>
-            <Ionicons
-              name="globe-outline"
-              size={22}
-              color={webSearchEnabled ? "#10a37f" : "#737373"}
-            />
-          </View>
-          <Text style={[styles.rowLabel, { color: colors.text }]}>
-            Web Search
-          </Text>
-          <View
-            style={[
-              styles.toggle,
-              webSearchEnabled
-                ? styles.toggleOn
-                : { backgroundColor: dark ? "#404040" : "#d4d4d4" },
-            ]}
+        {/* Web Search — only shown when the server has it enabled */}
+        {webSearchAvailable && (
+          <Pressable
+            onPress={toggleWebSearch}
+            style={[styles.row, { backgroundColor: rowBg }]}
           >
+            <View style={styles.rowIcon}>
+              <Ionicons
+                name="globe-outline"
+                size={22}
+                color={webSearchEnabled ? "#10a37f" : "#737373"}
+              />
+            </View>
+            <Text style={[styles.rowLabel, { color: colors.text }]}>
+              Web Search
+            </Text>
             <View
               style={[
-                styles.toggleThumb,
-                webSearchEnabled && styles.toggleThumbOn,
+                styles.toggle,
+                webSearchEnabled
+                  ? styles.toggleOn
+                  : { backgroundColor: dark ? "#404040" : "#d4d4d4" },
               ]}
-            />
-          </View>
-        </Pressable>
+            >
+              <View
+                style={[
+                  styles.toggleThumb,
+                  webSearchEnabled && styles.toggleThumbOn,
+                ]}
+              />
+            </View>
+          </Pressable>
+        )}
 
         {/* Folder */}
         <Pressable

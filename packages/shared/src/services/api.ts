@@ -1,6 +1,6 @@
 import { useAuthStore } from "../stores/authStore";
 import { API_PATHS } from "../lib/constants";
-import type { ModelsResponse, SignInResponse, UserInfo } from "../lib/types";
+import type { ModelsResponse, OpenWebUIConfig, SignInResponse, UserInfo } from "../lib/types";
 
 function getBaseUrl(): string {
   return useAuthStore.getState().serverUrl.replace(/\/+$/, "");
@@ -91,6 +91,19 @@ export async function signIn(
 export async function validateToken(): Promise<UserInfo> {
   const response = await apiGet<UserInfo>(API_PATHS.AUTH_VERIFY);
   return response;
+}
+
+export async function fetchServerConfig(): Promise<OpenWebUIConfig> {
+  return apiGet<OpenWebUIConfig>(API_PATHS.CONFIG);
+}
+
+export function resolveWebSearchAvailable(
+  config: OpenWebUIConfig,
+  userRole: string
+): boolean {
+  if (!config.features?.enable_web_search) return false;
+  if (userRole === "admin") return true;
+  return config.permissions?.features?.web_search !== false;
 }
 
 export async function validateConnection(): Promise<boolean> {

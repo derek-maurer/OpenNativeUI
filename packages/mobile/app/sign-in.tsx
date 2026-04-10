@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { signIn } from "@opennative/shared";
+import { signIn, fetchServerConfig, resolveWebSearchAvailable } from "@opennative/shared";
 import { useAuthStore } from "@opennative/shared";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -25,7 +25,7 @@ export default function SignInScreen() {
   const [isConnecting, setIsConnecting] = useState(false);
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { setServerUrl: storeSetServerUrl, setAuth } = useAuthStore();
+  const { setServerUrl: storeSetServerUrl, setAuth, setWebSearchAvailable } = useAuthStore();
 
   if (isAuthenticated) {
     return <Redirect href="/(app)" />;
@@ -65,6 +65,11 @@ export default function SignInScreen() {
         role: response.role,
         profile_image_url: response.profile_image_url,
       });
+      fetchServerConfig()
+        .then((config) =>
+          setWebSearchAvailable(resolveWebSearchAvailable(config, response.role))
+        )
+        .catch(() => setWebSearchAvailable(false));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Connection failed");
     } finally {

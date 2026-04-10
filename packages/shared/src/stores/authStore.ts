@@ -11,10 +11,12 @@ interface AuthState {
   isAuthenticated: boolean;
   isConnecting: boolean;
   _hasHydrated: boolean;
+  webSearchAvailable: boolean | null;
   setServerUrl: (url: string) => void;
   setAuth: (token: string, user: UserInfo) => void;
   setAuthenticated: (value: boolean) => void;
   setConnecting: (value: boolean) => void;
+  setWebSearchAvailable: (value: boolean) => void;
   logout: () => void;
 }
 
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isConnecting: false,
       _hasHydrated: false,
+      webSearchAvailable: null,
 
       setServerUrl: (url) => set({ serverUrl: url.replace(/\/+$/, "") }),
 
@@ -36,12 +39,15 @@ export const useAuthStore = create<AuthState>()(
 
       setConnecting: (value) => set({ isConnecting: value }),
 
+      setWebSearchAvailable: (value) => set({ webSearchAvailable: value }),
+
       logout: () =>
         set({
           token: "",
           user: null,
           isAuthenticated: false,
           isConnecting: false,
+          webSearchAvailable: null,
         }),
     }),
     {

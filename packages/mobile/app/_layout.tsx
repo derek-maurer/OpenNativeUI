@@ -17,7 +17,7 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 
-import { useAuthStore, useSettingsStore, validateToken } from "@opennative/shared";
+import { useAuthStore, useSettingsStore, validateToken, fetchServerConfig, resolveWebSearchAvailable } from "@opennative/shared";
 import { ToastProvider } from "@/components/ui/Toast";
 
 SplashScreen.preventAutoHideAsync();
@@ -60,9 +60,24 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      validateToken().catch(() => {
-        useAuthStore.getState().logout();
-      });
+      validateToken()
+        .then(() => {
+          const { user } = useAuthStore.getState();
+          fetchServerConfig()
+            .then((config) =>
+              useAuthStore
+                .getState()
+                .setWebSearchAvailable(
+                  resolveWebSearchAvailable(config, user?.role ?? "user")
+                )
+            )
+            .catch(() =>
+              useAuthStore.getState().setWebSearchAvailable(false)
+            );
+        })
+        .catch(() => {
+          useAuthStore.getState().logout();
+        });
     }
   }, []);
 
