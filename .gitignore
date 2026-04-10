@@ -25,3 +25,5 @@ conduit
 packages/electron/dist-app
 packages/electron/dist
 packages/electron/out
+
+docs/
