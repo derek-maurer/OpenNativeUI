@@ -20,6 +20,7 @@ interface ChatScreenProps {
 
 export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreenProps) {
   const setConversation = useChatStore((s) => s.setConversation);
+  const removeMessagesFrom = useChatStore((s) => s.removeMessagesFrom);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const messages = useChatStore((s) => s.messages);
   const selectedModelId = useModelStore((s) => s.selectedModelId);
@@ -67,6 +68,15 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
     sendMessage(content, conversationId, messages.length === 0);
   };
 
+  const handleRetry = useCallback(
+    (assistantMessageId: string, userContent: string) => {
+      removeMessagesFrom(assistantMessageId);
+      const storeId = useChatStore.getState().currentConversationId;
+      sendMessage(userContent, storeId ?? conversationId, false);
+    },
+    [conversationId, removeMessagesFrom, sendMessage],
+  );
+
   // Show loader while fetching existing conversation
   const isLoading = !isNew && messages.length === 0 && !isStreaming;
 
@@ -77,7 +87,7 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
           <Loader2 size={24} className="animate-spin text-muted" />
         </div>
       ) : (
-        <MessageList onSuggest={handleSend} />
+        <MessageList onSuggest={handleSend} onRetry={handleRetry} />
       )}
 
       <InputComposer

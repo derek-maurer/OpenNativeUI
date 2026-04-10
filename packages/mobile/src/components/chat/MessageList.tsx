@@ -20,6 +20,7 @@ interface MessageListProps {
   isStreaming: boolean;
   statusHistory?: StreamingStatus[];
   onSuggest?: (text: string) => void;
+  onRetry?: (assistantMessageId: string, userContent: string) => void;
 }
 
 const BOTTOM_THRESHOLD = 60;
@@ -30,6 +31,7 @@ export function MessageList({
   isStreaming,
   statusHistory,
   onSuggest,
+  onRetry,
 }: MessageListProps) {
   const flatListRef = useRef<FlatList>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -88,6 +90,18 @@ export function MessageList({
     }
 
     const message = item as Message;
+
+    let retryCallback: (() => void) | undefined;
+    if (message.role === "assistant" && onRetry) {
+      const msgIdx = messages.findIndex((m) => m.id === message.id);
+      const prevUser = msgIdx > 0
+        ? messages.slice(0, msgIdx).reverse().find((m) => m.role === "user")
+        : undefined;
+      if (prevUser) {
+        retryCallback = () => onRetry(message.id, prevUser.content);
+      }
+    }
+
     return (
       <MessageBubble
         role={message.role}
@@ -95,6 +109,7 @@ export function MessageList({
         info={message.info}
         files={message.files}
         sources={message.sources}
+        onRetry={retryCallback}
       />
     );
   };

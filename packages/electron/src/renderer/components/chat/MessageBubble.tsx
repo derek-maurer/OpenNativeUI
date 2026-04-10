@@ -13,6 +13,7 @@ import { MessageActions } from "./MessageActions";
 interface MessageBubbleProps {
   message: Message;
   isStreaming?: boolean;
+  onRetry?: () => void;
 }
 
 // Recursively extract plain text from React children (needed because
@@ -125,7 +126,7 @@ function makeMdComponents(citations: MessageSourceMetadata[]) {
   };
 }
 
-export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
+export function MessageBubble({ message, isStreaming, onRetry }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const sources = message.sources ?? [];
   const citations = flattenCitations(sources);
@@ -211,7 +212,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
 
         {/* Actions */}
         {!isStreaming && (
-          <MessageActions content={content} info={message.info} />
+          <MessageActions content={content} info={message.info} onRetry={onRetry} />
         )}
       </div>
     </div>

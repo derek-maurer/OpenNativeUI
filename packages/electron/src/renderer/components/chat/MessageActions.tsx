@@ -1,21 +1,27 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Copy, Check, Volume2, VolumeX, Info, X } from "lucide-react";
+import { Copy, Check, Volume2, VolumeX, Info, X, RotateCcw } from "lucide-react";
 import {
   parseReasoningSegments,
   hasReasoningContent,
+  getThinkingProfile,
+  useModelStore,
   type MessageInfo,
 } from "@opennative/shared";
+import { RetryPopover } from "./RetryPopover";
 
 interface MessageActionsProps {
   content: string;
   info?: MessageInfo;
+  onRetry?: () => void;
 }
 
-export function MessageActions({ content, info }: MessageActionsProps) {
+export function MessageActions({ content, info, onRetry }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [retryPopoverOpen, setRetryPopoverOpen] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
+  const selectedModelId = useModelStore((s) => s.selectedModelId);
 
   // Strip reasoning blocks so copy matches what the user sees
   const plainContent = useMemo(() => {
@@ -87,6 +93,16 @@ export function MessageActions({ content, info }: MessageActionsProps) {
     synth.speak(utterance);
   }, [content, isSpeaking]);
 
+  const handleRetryPress = useCallback(() => {
+    if (!onRetry) return;
+    const profile = getThinkingProfile(selectedModelId);
+    if (profile) {
+      setRetryPopoverOpen(true);
+    } else {
+      onRetry();
+    }
+  }, [onRetry, selectedModelId]);
+
   return (
     <div className="flex items-center gap-1 mt-2">
       {info && (
@@ -142,6 +158,22 @@ export function MessageActions({ content, info }: MessageActionsProps) {
           <Volume2 size={14} />
         )}
       </ActionButton>
+
+      {onRetry && (
+        <div className="relative">
+          <ActionButton onClick={handleRetryPress} title="Retry">
+            <RotateCcw size={14} />
+          </ActionButton>
+          <RetryPopover
+            open={retryPopoverOpen}
+            onClose={() => setRetryPopoverOpen(false)}
+            onRetry={() => {
+              setRetryPopoverOpen(false);
+              onRetry();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

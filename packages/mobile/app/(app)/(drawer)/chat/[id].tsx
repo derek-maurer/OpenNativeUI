@@ -30,6 +30,7 @@ export default function ChatScreen() {
   const streamingContent = useChatStore((s) => s.streamingContent);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const statusHistory = useChatStore((s) => s.statusHistory);
+  const removeMessagesFrom = useChatStore((s) => s.removeMessagesFrom);
 
   const { sendMessage, abort } = useStreamingChat();
 
@@ -94,6 +95,15 @@ export default function ChatScreen() {
     [id, sendMessage]
   );
 
+  const handleRetry = useCallback(
+    (assistantMessageId: string, userContent: string) => {
+      removeMessagesFrom(assistantMessageId);
+      const storeId = useChatStore.getState().currentConversationId;
+      sendMessage(userContent, storeId ?? id, false);
+    },
+    [id, removeMessagesFrom, sendMessage],
+  );
+
   const openDrawer = () => navigation.dispatch(DrawerActions.openDrawer());
 
   return (
@@ -115,6 +125,7 @@ export default function ChatScreen() {
             isStreaming={isStreaming}
             statusHistory={statusHistory}
             onSuggest={handleSend}
+            onRetry={handleRetry}
           />
 
           <InputComposer

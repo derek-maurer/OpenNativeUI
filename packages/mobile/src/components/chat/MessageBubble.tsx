@@ -25,6 +25,7 @@ interface MessageBubbleProps {
   info?: MessageInfo;
   files?: AttachedFile[];
   sources?: MessageSource[];
+  onRetry?: () => void;
 }
 
 function CodeBlock({ code, style, dark }: { code: string; style: any; dark: boolean }) {
@@ -65,6 +66,7 @@ export const MessageBubble = memo(function MessageBubble({
   info,
   files,
   sources,
+  onRetry,
 }: MessageBubbleProps) {
   const { colors, dark } = useTheme();
   const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({});
@@ -324,7 +326,7 @@ export const MessageBubble = memo(function MessageBubble({
         {!isStreaming && (
           <>
             <MessageSources citations={citations} />
-            <MessageActions content={content} info={info} />
+            <MessageActions content={content} info={info} onRetry={onRetry} />
           </>
         )}
       </View>

@@ -7,9 +7,10 @@ import { ChevronDown } from "lucide-react";
 
 interface MessageListProps {
   onSuggest?: (text: string) => void;
+  onRetry?: (assistantMessageId: string, userContent: string) => void;
 }
 
-export function MessageList({ onSuggest }: MessageListProps) {
+export function MessageList({ onSuggest, onRetry }: MessageListProps) {
   const messages = useChatStore((s) => s.messages);
   const streamingContent = useChatStore((s) => s.streamingContent);
   const isStreaming = useChatStore((s) => s.isStreaming);
@@ -47,13 +48,23 @@ export function MessageList({ onSuggest }: MessageListProps) {
             <EmptyState onSuggest={onSuggest ?? (() => {})} />
           )}
 
-          {displayMessages.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              isStreaming={false}
-            />
-          ))}
+          {displayMessages.map((msg, idx) => {
+            let retryCallback: (() => void) | undefined;
+            if (msg.role === "assistant" && onRetry) {
+              const prevUser = displayMessages.slice(0, idx).reverse().find((m) => m.role === "user");
+              if (prevUser) {
+                retryCallback = () => onRetry(msg.id, prevUser.content);
+              }
+            }
+            return (
+              <MessageBubble
+                key={msg.id}
+                message={msg}
+                isStreaming={false}
+                onRetry={retryCallback}
+              />
+            );
+          })}
 
           {showStreamingBubble && (
             <MessageBubble

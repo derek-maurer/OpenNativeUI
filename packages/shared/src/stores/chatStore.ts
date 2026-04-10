@@ -21,6 +21,7 @@ interface ChatState {
   toggleWebSearch: () => void;
   pushStatusHistory: (status: StreamingStatus) => void;
   setPendingFolderId: (folderId: string | null) => void;
+  removeMessagesFrom: (messageId: string) => void;
 
   addPendingFile: (file: AttachedFile) => void;
   removePendingFile: (fileId: string) => void;
@@ -113,6 +114,13 @@ export const useChatStore = create<ChatState>()((set) => ({
     }),
 
   setPendingFolderId: (folderId) => set({ pendingFolderId: folderId }),
+
+  removeMessagesFrom: (messageId) =>
+    set((state) => {
+      const idx = state.messages.findIndex((m) => m.id === messageId);
+      if (idx < 0) return state;
+      return { messages: state.messages.slice(0, idx) };
+    }),
 
   addPendingFile: (file) =>
     set((state) => ({

@@ -14,27 +14,33 @@ import { useTheme } from "@react-navigation/native";
 import * as Speech from "expo-speech";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
+import { RetrySheet } from "./RetrySheet";
 import {
   parseReasoningSegments,
   hasReasoningContent,
+  getThinkingProfile,
+  useModelStore,
   type MessageInfo,
 } from "@opennative/shared";
 
 interface MessageActionsProps {
   content: string;
   info?: MessageInfo;
+  onRetry?: () => void;
 }
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const ANIM_DURATION = 300;
 
-export function MessageActions({ content, info }: MessageActionsProps) {
+export function MessageActions({ content, info, onRetry }: MessageActionsProps) {
   const { colors, dark } = useTheme();
   const toast = useToast();
   const [infoVisible, setInfoVisible] = useState(false);
+  const [retrySheetVisible, setRetrySheetVisible] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const sheetTranslateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const selectedModelId = useModelStore((s) => s.selectedModelId);
 
   // Strip out any reasoning/thinking blocks so the copied text matches what
   // the user actually sees as the answer. Falls back to the raw content
@@ -110,6 +116,16 @@ export function MessageActions({ content, info }: MessageActionsProps) {
     });
   }, [content, isSpeaking]);
 
+  const handleRetryPress = useCallback(() => {
+    if (!onRetry) return;
+    const thinkingProfile = getThinkingProfile(selectedModelId);
+    if (thinkingProfile) {
+      setRetrySheetVisible(true);
+    } else {
+      onRetry();
+    }
+  }, [onRetry, selectedModelId]);
+
   const buttonColor = dark ? "#888" : "#777";
 
   return (
@@ -151,6 +167,30 @@ export function MessageActions({ content, info }: MessageActionsProps) {
       >
         <Ionicons name="copy-outline" size={17} color={buttonColor} />
       </TouchableOpacity>
+
+      {onRetry && (
+        <TouchableOpacity
+          onPress={handleRetryPress}
+          style={styles.button}
+          activeOpacity={0.6}
+          hitSlop={8}
+          accessibilityLabel="Retry message"
+        >
+          <Ionicons name="refresh-outline" size={17} color={buttonColor} />
+        </TouchableOpacity>
+      )}
+
+      {onRetry && (
+        <RetrySheet
+          visible={retrySheetVisible}
+          onClose={() => setRetrySheetVisible(false)}
+          onRetry={() => {
+            setRetrySheetVisible(false);
+            onRetry();
+          }}
+          modelId={selectedModelId}
+        />
+      )}
 
       {info && (
         <Modal
