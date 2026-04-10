@@ -189,7 +189,7 @@ export function MainLayout() {
       />
       {/* Sidebar */}
       <div
-        className="shrink-0 border-r border-line"
+        className="relative shrink-0 border-r border-line"
         style={{ width: currentWidth }}
       >
         <Sidebar
@@ -200,13 +200,12 @@ export function MainLayout() {
           onOpenSettings={() => setView({ type: "settings" })}
           onOpenSearch={() => setIsSearchOpen(true)}
         />
+        {/* Resize handle — overlaid on the sidebar's right edge so content starts flush */}
+        <div
+          className={`absolute right-0 top-0 bottom-0 w-1 hover:bg-neutral-600 active:bg-neutral-500 transition-colors ${isCollapsed ? "cursor-default" : "cursor-col-resize"}`}
+          onMouseDown={handleResizeMouseDown}
+        />
       </div>
-
-      {/* Resize handle */}
-      <div
-        className={`w-1 shrink-0 hover:bg-neutral-600 active:bg-neutral-500 transition-colors ${isCollapsed ? "cursor-default" : "cursor-col-resize"}`}
-        onMouseDown={handleResizeMouseDown}
-      />
 
       {/* Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
