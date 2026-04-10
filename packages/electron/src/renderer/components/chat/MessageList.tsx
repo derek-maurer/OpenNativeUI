@@ -13,7 +13,7 @@ export function MessageList({ onSuggest }: MessageListProps) {
   const messages = useChatStore((s) => s.messages);
   const streamingContent = useChatStore((s) => s.streamingContent);
   const isStreaming = useChatStore((s) => s.isStreaming);
-  const streamingStatus = useChatStore((s) => s.streamingStatus);
+  const statusHistory = useChatStore((s) => s.statusHistory);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -70,11 +70,7 @@ export function MessageList({ onSuggest }: MessageListProps) {
 
           {isStreaming && !streamingContent && (
             <TypingIndicator
-              description={
-                streamingStatus && !streamingStatus.done
-                  ? streamingStatus.description
-                  : undefined
-              }
+              statusHistory={statusHistory.length > 0 ? statusHistory : undefined}
             />
           )}
 

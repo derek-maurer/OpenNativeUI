@@ -8,7 +8,7 @@ interface ChatState {
   isStreaming: boolean;
   pendingFiles: AttachedFile[];
   webSearchEnabled: boolean;
-  streamingStatus: StreamingStatus | null;
+  statusHistory: StreamingStatus[];
   pendingFolderId: string | null;
 
   setConversation: (id: string, messages: Message[]) => void;
@@ -19,7 +19,7 @@ interface ChatState {
   finalizeStream: (fullMessage: Message) => void;
   clearChat: () => void;
   toggleWebSearch: () => void;
-  setStreamingStatus: (status: StreamingStatus | null) => void;
+  pushStatusHistory: (status: StreamingStatus) => void;
   setPendingFolderId: (folderId: string | null) => void;
 
   addPendingFile: (file: AttachedFile) => void;
@@ -35,7 +35,7 @@ export const useChatStore = create<ChatState>()((set) => ({
   isStreaming: false,
   pendingFiles: [],
   webSearchEnabled: false,
-  streamingStatus: null,
+  statusHistory: [],
   pendingFolderId: null,
 
   setConversation: (id, messages) =>
@@ -44,7 +44,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages,
       streamingContent: "",
       isStreaming: false,
-      streamingStatus: null,
+      statusHistory: [],
     }),
 
   addUserMessage: (message) =>
@@ -70,8 +70,8 @@ export const useChatStore = create<ChatState>()((set) => ({
   setStreaming: (value) =>
     set({
       isStreaming: value,
-      streamingContent: value ? "" : "",
-      streamingStatus: value ? null : null,
+      streamingContent: "",
+      statusHistory: [],
     }),
 
   finalizeStream: (fullMessage) =>
@@ -79,7 +79,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages: [...state.messages, fullMessage],
       streamingContent: "",
       isStreaming: false,
-      streamingStatus: null,
+      statusHistory: [],
     })),
 
   clearChat: () =>
@@ -88,7 +88,7 @@ export const useChatStore = create<ChatState>()((set) => ({
       messages: [],
       streamingContent: "",
       isStreaming: false,
-      streamingStatus: null,
+      statusHistory: [],
       pendingFiles: [],
       webSearchEnabled: false,
       pendingFolderId: null,
@@ -97,7 +97,20 @@ export const useChatStore = create<ChatState>()((set) => ({
   toggleWebSearch: () =>
     set((state) => ({ webSearchEnabled: !state.webSearchEnabled })),
 
-  setStreamingStatus: (status) => set({ streamingStatus: status }),
+  pushStatusHistory: (status) =>
+    set((state) => {
+      const action = status.action;
+      if (!action) {
+        return { statusHistory: [status] };
+      }
+      const idx = state.statusHistory.findIndex((s) => s.action === action);
+      if (idx >= 0) {
+        const updated = [...state.statusHistory];
+        updated[idx] = status;
+        return { statusHistory: updated };
+      }
+      return { statusHistory: [...state.statusHistory, status] };
+    }),
 
   setPendingFolderId: (folderId) => set({ pendingFolderId: folderId }),
 

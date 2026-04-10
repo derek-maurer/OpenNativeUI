@@ -332,6 +332,33 @@ function streamViaSSE(
 ): { abort: () => void } {
   const url = `${serverUrl.replace(/\/+$/, "")}${API_PATHS.CHAT_COMPLETIONS}`;
 
+  // Emit synthetic status events for features that require pre-token server-side
+  // processing (web search, RAG). These mirror what the Socket.IO path receives
+  // as real `status` events, but since the SSE stream carries no status frames
+  // we infer them from the request body. They resolve on the first visible token.
+  const syntheticActions: string[] = [];
+  if ((body.features as Record<string, unknown> | undefined)?.web_search) {
+    syntheticActions.push("web_search");
+    callbacks.onStatus({ action: "web_search", description: "Searching the web...", done: false });
+  }
+  if (body.files && body.files.length > 0) {
+    syntheticActions.push("knowledge_search");
+    callbacks.onStatus({ action: "knowledge_search", description: "Searching knowledge base...", done: false });
+  }
+
+  let syntheticResolved = false;
+  const resolveSyntheticStatuses = () => {
+    if (syntheticResolved) return;
+    syntheticResolved = true;
+    const labels: Record<string, string> = {
+      web_search: "Web search complete",
+      knowledge_search: "Knowledge base searched",
+    };
+    for (const action of syntheticActions) {
+      callbacks.onStatus({ action, description: labels[action] ?? action, done: true });
+    }
+  };
+
   let renderedContent = "";
   let inReasoningBlock = false;
   let reasoningPrefix = "";
@@ -347,6 +374,7 @@ function streamViaSSE(
 
   const appendVisibleChunk = (chunk: string) => {
     if (!chunk) return;
+    resolveSyntheticStatuses();
     if (inReasoningBlock) {
       // Plain text coming after a reasoning block closes the reasoning
       // segment — finalize it with the elapsed duration, then append the
@@ -374,6 +402,7 @@ function streamViaSSE(
 
   const appendReasoningChunk = (chunk: string) => {
     if (!chunk) return;
+    resolveSyntheticStatuses();
     if (!inReasoningBlock) {
       inReasoningBlock = true;
       reasoningPrefix = renderedContent;

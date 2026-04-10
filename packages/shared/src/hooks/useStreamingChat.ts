@@ -55,7 +55,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
         appendStreamToken,
         replaceStreamContent,
         setStreaming,
-        setStreamingStatus,
+        pushStatusHistory,
         finalizeStream,
         messages,
         pendingFiles,
@@ -201,7 +201,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
           replaceStreamContent(content);
         },
         onStatus: (status) => {
-          setStreamingStatus(status.done ? null : status);
+          pushStatusHistory(status);
         },
         onSources: (sources) => {
           collectedSources = sources;
@@ -301,7 +301,21 @@ async function syncToServer(
     "New Chat";
   const chatPayload = buildChatPayload(conversationId, title, model, messages);
   try {
-    await updateServerConversation(conversationId, chatPayload);
+    try {
+      await updateServerConversation(conversationId, chatPayload);
+    } catch (updateErr: any) {
+      if (updateErr?.status !== 401) throw updateErr;
+      // The conversation doesn't exist on the server (e.g. a prior create
+      // silently failed, leaving a client-side UUID that was never persisted).
+      // Fall back to creating it now.
+      console.warn("[chat:sync] update 401 — falling back to create", { conversationId });
+      const stub = buildChatPayload("", title, model, messages);
+      const created = await createServerConversation(stub);
+      const newId = created?.id;
+      if (newId && newId !== conversationId) {
+        useChatStore.setState({ currentConversationId: newId });
+      }
+    }
     await useConversationStore.getState().loadConversations();
     await useConversationStore.getState().reloadFolderMemberships();
   } catch (e) {

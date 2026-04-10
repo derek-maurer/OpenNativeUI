@@ -18,7 +18,7 @@ interface MessageListProps {
   messages: Message[];
   streamingContent: string;
   isStreaming: boolean;
-  streamingStatus?: StreamingStatus | null;
+  statusHistory?: StreamingStatus[];
   onSuggest?: (text: string) => void;
 }
 
@@ -28,7 +28,7 @@ export function MessageList({
   messages,
   streamingContent,
   isStreaming,
-  streamingStatus,
+  statusHistory,
   onSuggest,
 }: MessageListProps) {
   const flatListRef = useRef<FlatList>(null);
@@ -84,7 +84,7 @@ export function MessageList({
           />
         );
       }
-      return <TypingIndicator statusDescription={streamingStatus?.description} />;
+      return <TypingIndicator statusHistory={statusHistory} />;
     }
 
     const message = item as Message;

@@ -15,9 +15,6 @@ function getHeaders(): Record<string, string> {
 }
 
 function throwApiError(status: number, body: string): never {
-  if (status === 401 || status === 403) {
-    useAuthStore.getState().logout();
-  }
   throw new ApiError(status, body);
 }
 

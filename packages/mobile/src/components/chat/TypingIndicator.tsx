@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Animated, {
+import { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
+import ReAnimated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
   withDelay,
 } from "react-native-reanimated";
+import type { StreamingStatus } from "@opennative/shared";
 
 function Dot({ delay }: { delay: number }) {
   const opacity = useSharedValue(0.3);
@@ -30,14 +31,52 @@ function Dot({ delay }: { delay: number }) {
     opacity: opacity.value,
   }));
 
-  return <Animated.View style={[styles.dot, animatedStyle]} />;
+  return <ReAnimated.View style={[styles.dot, animatedStyle]} />;
+}
+
+/**
+ * Shimmer label — pulses the text opacity between dim and bright in a wave
+ * pattern. Uses Animated (not Reanimated) so we can use `useNativeDriver`.
+ */
+function ShimmerLabel({ text }: { text: string }) {
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.45, 1],
+  });
+
+  return (
+    <Animated.Text style={[styles.historyLabel, { opacity }]}>
+      {text}
+    </Animated.Text>
+  );
 }
 
 interface TypingIndicatorProps {
-  statusDescription?: string | null;
+  statusHistory?: StreamingStatus[];
 }
 
-export function TypingIndicator({ statusDescription }: TypingIndicatorProps) {
+export function TypingIndicator({ statusHistory }: TypingIndicatorProps) {
+  const visibleHistory = statusHistory?.filter((s) => s.description) ?? [];
+
   return (
     <View style={styles.container}>
       <View style={styles.avatar} />
@@ -47,11 +86,15 @@ export function TypingIndicator({ statusDescription }: TypingIndicatorProps) {
           <Dot delay={200} />
           <Dot delay={400} />
         </View>
-        {statusDescription ? (
-          <Text style={styles.statusLabel} numberOfLines={1}>
-            {statusDescription}
-          </Text>
-        ) : null}
+        {visibleHistory.map((entry, i) =>
+          entry.done ? (
+            <Text key={entry.action ?? i} style={styles.historyLabelDone}>
+              {entry.description}
+            </Text>
+          ) : (
+            <ShimmerLabel key={entry.action ?? i} text={entry.description} />
+          )
+        )}
       </View>
     </View>
   );
@@ -71,6 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(16,163,127,0.12)",
   },
   content: {
+    flex: 1,
     gap: 4,
   },
   dotsContainer: {
@@ -80,15 +124,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  statusLabel: {
-    fontSize: 12,
-    color: "#737373",
-    paddingHorizontal: 12,
-  },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: "#737373",
+  },
+  historyLabel: {
+    fontSize: 12,
+    color: "#a3a3a3",
+    flexShrink: 1,
+    flexWrap: "wrap",
+    paddingLeft: 12,
+  },
+  historyLabelDone: {
+    fontSize: 12,
+    color: "#525252",
+    flexShrink: 1,
+    flexWrap: "wrap",
+    paddingLeft: 12,
   },
 });
