@@ -27,3 +27,4 @@ packages/electron/dist
 packages/electron/out
 
 docs/
+.vscode/
