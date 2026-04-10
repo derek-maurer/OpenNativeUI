@@ -16,7 +16,6 @@ export const API_PATHS = {
 
   // Files
   FILES_UPLOAD: "/api/v1/files/",
-  FILE_STATUS: (id: string) => `/api/v1/files/${id}/process/status`,
   KNOWLEDGE_ADD_FILE: (id: string) => `/api/v1/knowledge/${id}/file/add`,
 
   // Folders

@@ -1,4 +1,4 @@
-import { useAuthStore, API_PATHS, pollUntilReady } from "@opennative/shared";
+import { useAuthStore, API_PATHS } from "@opennative/shared";
 
 interface UploadResult {
   id: string;
@@ -74,13 +74,6 @@ export async function uploadAndProcessFile(
   }
 
   const { id } = await uploadFileFromBlob(blob, name);
-
-  // Images are sent inline as base64 data URLs — no server-side text extraction
-  // happens, so the status endpoint returns "failed". Skip polling for images,
-  // same as the mobile app's prepareImage path.
-  if (!mimeType.startsWith("image/")) {
-    await pollUntilReady(id);
-  }
 
   return { id, dataUrl };
 }

@@ -8,7 +8,6 @@ import * as Crypto from "expo-crypto";
 import { useChatStore } from "@opennative/shared";
 import {
   uploadFile,
-  pollUntilReady,
 } from "@opennative/shared";
 
 export function useFileUpload() {
@@ -16,11 +15,10 @@ export function useFileUpload() {
   const updateFileStatus = useChatStore((s) => s.updateFileStatus);
   const removePendingFile = useChatStore((s) => s.removePendingFile);
 
-  /** Upload a document (non-image) to the server and poll until processed. */
+  /** Upload a document (non-image) to the server. */
   const uploadDocument = useCallback(
     async (uri: string, name: string, mimeType: string, size: number) => {
       const tempId = Crypto.randomUUID();
-      let activeId = tempId;
 
       addPendingFile({
         id: tempId,
@@ -32,24 +30,22 @@ export function useFileUpload() {
       });
 
       try {
+        console.log(`[useFileUpload] uploading "${name}" (${mimeType}, ${size}B)`);
         const { id: fileId } = await uploadFile(uri, name, mimeType);
+        console.log(`[useFileUpload] "${name}" uploaded, fileId=${fileId}`);
 
         removePendingFile(tempId);
         addPendingFile({
           id: fileId,
           name,
           size,
-          status: "processing",
+          status: "ready",
           uri,
           mimeType,
         });
-        activeId = fileId;
-
-        await pollUntilReady(fileId);
-        updateFileStatus(fileId, "ready");
       } catch (err) {
-        console.error("[useFileUpload] upload failed:", err);
-        updateFileStatus(activeId, "error");
+        console.error(`[useFileUpload] failed for "${name}":`, err);
+        updateFileStatus(tempId, "error");
       }
     },
     []

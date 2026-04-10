@@ -25,54 +25,11 @@ export async function uploadFile(
   });
 
   if (!response.ok) {
-    throw new Error(`File upload failed (${response.status})`);
+    let body = "";
+    try { body = await response.text(); } catch {}
+    console.error(`[fileUpload] upload failed (${response.status}):`, body);
+    throw new Error(`File upload failed (${response.status}): ${body}`);
   }
 
   return response.json();
-}
-
-export async function checkFileStatus(
-  fileId: string
-): Promise<{ status: string }> {
-  const { serverUrl, token } = useAuthStore.getState();
-  const baseUrl = serverUrl.replace(/\/+$/, "");
-
-  const response = await fetch(
-    `${baseUrl}${API_PATHS.FILE_STATUS(fileId)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Status check failed (${response.status})`);
-  }
-
-  return response.json();
-}
-
-export async function pollUntilReady(
-  fileId: string,
-  intervalMs = 1000,
-  maxAttempts = 30
-): Promise<void> {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { status } = await checkFileStatus(fileId);
-
-    if (status === "completed" || status === "ready") {
-      return;
-    }
-
-    if (status === "failed" || status === "error") {
-      throw new Error("File processing failed");
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-  }
-
-  throw new Error("File processing timed out");
 }

@@ -94,7 +94,7 @@ export {
   fetchChatIdsInFolder,
 } from "./services/folderApi";
 
-export { uploadFile, checkFileStatus, pollUntilReady } from "./services/fileUpload";
+export { uploadFile } from "./services/fileUpload";
 
 export {
   getSocket,

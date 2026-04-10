@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   useFolderStore,
   useAuthStore,
-  pollUntilReady,
   type Folder,
   type FolderFileRef,
 } from "@opennative/shared";
@@ -90,11 +89,6 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
           );
 
           if (!isImage) {
-            try {
-              await pollUntilReady(serverId);
-            } catch {
-              // pollUntilReady throws on "failed" status — treat as uploaded anyway
-            }
             setFiles((prev) =>
               prev.map((f) => (f.id === serverId ? { ...f, pending: false } : f))
             );
