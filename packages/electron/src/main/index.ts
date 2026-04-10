@@ -155,8 +155,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    minWidth: 800,
-    minHeight: 600,
+    minWidth: 400,
+    minHeight: 300,
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 12, y: 14 },
     backgroundColor: "#0d0d0d",
