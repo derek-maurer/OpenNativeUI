@@ -2,6 +2,13 @@
 
 A native client for [Open WebUI](https://github.com/open-webui/open-webui) — available as a React Native mobile app (iOS/Android) and an Electron desktop app (macOS, Windows, Linux).
 
+<p align="center">
+  <img src="docs/images/DesktopScreenshot.png" alt="OpenNativeUI desktop app" width="720" />
+</p>
+<p align="center">
+  <img src="docs/images/MobileScreenshot.png" alt="OpenNativeUI mobile app" width="280" />
+</p>
+
 This is a monorepo with three packages:
 
 | Package | Path | Description |
