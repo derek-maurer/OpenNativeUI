@@ -5,11 +5,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { File as ExpoFile } from "expo-file-system";
 import * as Crypto from "expo-crypto";
 
-import { useChatStore } from "@opennative/shared";
-import {
-  uploadFile,
-  waitUntilProcessed,
-} from "@opennative/shared";
+import { useChatStore, uploadFile, waitUntilProcessed, IMAGE_RESIZE_MAX_EDGE } from "@opennative/shared";
 
 export function useFileUpload() {
   const addPendingFile = useChatStore((s) => s.addPendingFile);
@@ -149,8 +145,7 @@ export function useFileUpload() {
 
       // Downscale large photos and convert to JPEG (avoids HEIC issues and
       // keeps the inline base64 payload sent to the model from ballooning).
-      // 1568px on the long edge matches what major vision models downscale to.
-      const MAX_EDGE = 1568;
+      const MAX_EDGE = IMAGE_RESIZE_MAX_EDGE;
       const longEdge = Math.max(asset.width ?? 0, asset.height ?? 0);
       const actions: ImageManipulator.Action[] =
         longEdge > MAX_EDGE

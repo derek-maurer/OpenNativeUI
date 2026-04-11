@@ -33,6 +33,12 @@ export const API_PATHS = {
     `/api/v1/chats/folder/${folderId}`,
 } as const;
 
+/**
+ * Maximum long-edge pixel size for image resizing before upload.
+ * Matches the downscale target used by major vision model providers.
+ */
+export const IMAGE_RESIZE_MAX_EDGE = 1568;
+
 export const STORAGE_KEYS = {
   AUTH: "auth-storage",
   SETTINGS: "settings-storage",

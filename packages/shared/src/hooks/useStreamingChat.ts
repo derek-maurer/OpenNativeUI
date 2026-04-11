@@ -304,11 +304,11 @@ async function syncToServer(
     try {
       await updateServerConversation(conversationId, chatPayload);
     } catch (updateErr: any) {
-      if (updateErr?.status !== 401) throw updateErr;
+      if (updateErr?.status !== 404) throw updateErr;
       // The conversation doesn't exist on the server (e.g. a prior create
       // silently failed, leaving a client-side UUID that was never persisted).
       // Fall back to creating it now.
-      console.warn("[chat:sync] update 401 — falling back to create", { conversationId });
+      console.warn("[chat:sync] update 404 — falling back to create", { conversationId });
       const stub = buildChatPayload("", title, model, messages);
       const created = await createServerConversation(stub);
       const newId = created?.id;

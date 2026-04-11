@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { useModelStore } from "@opennative/shared";
+import { useModelStore, filterModels } from "@opennative/shared";
 import { BottomSheet } from "@/components/common/BottomSheet";
 
 export function ModelSelector() {
@@ -25,13 +25,7 @@ export function ModelSelector() {
   const displayName =
     selectedModel?.name ?? selectedModel?.id ?? "Select model";
 
-  const filtered = query.trim()
-    ? models.filter(
-        (m) =>
-          m.name.toLowerCase().includes(query.toLowerCase()) ||
-          (m.owned_by ?? "").toLowerCase().includes(query.toLowerCase())
-      )
-    : models;
+  const filtered = filterModels(models, query);
 
   const handleClose = () => {
     setVisible(false);

@@ -7,9 +7,10 @@ import * as WebBrowser from "expo-web-browser";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
 import { MessageActions } from "./MessageActions";
-import { MessageSources, flattenCitations } from "./MessageSources";
+import { MessageSources } from "./MessageSources";
 import { ThinkingBlock } from "./ThinkingBlock";
 import {
+  flattenCitations,
   hasReasoningContent,
   parseReasoningSegments,
   type MessageInfo,

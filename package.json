@@ -6,6 +6,10 @@
     "packages/*"
   ],
   "scripts": {
+    "validate": "npm run validate --workspace=@opennative/mobile && npm run validate --workspace=@opennative/electron && npm run validate --workspace=@opennative/shared",
+    "validate:mobile": "npm run validate --workspace=@opennative/mobile",
+    "validate:electron": "npm run validate --workspace=@opennative/electron",
+    "validate:shared": "npm run validate --workspace=@opennative/shared",
     "mobile:ios": "npm run ios --workspace=@opennative/mobile",
     "mobile:ios:release": "npm run ios:release:device --workspace=@opennative/mobile",
     "mobile:android": "npm run android --workspace=@opennative/mobile",

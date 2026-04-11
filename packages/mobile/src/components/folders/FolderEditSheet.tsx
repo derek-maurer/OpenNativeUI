@@ -20,8 +20,9 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { BottomSheet } from "@/components/common/BottomSheet";
 import {
   uploadFile,
-  pollUntilReady,
+  waitUntilProcessed,
   useFolderStore,
+  IMAGE_RESIZE_MAX_EDGE,
   type Folder,
   type FolderFileRef,
 } from "@opennative/shared";
@@ -98,7 +99,7 @@ export function FolderEditSheet({ visible, onClose, folder }: FolderEditSheetPro
               : f
           )
         );
-        await pollUntilReady(serverId);
+        await waitUntilProcessed(serverId);
         setFiles((prev) =>
           prev.map((f) =>
             f.id === serverId ? { ...f, pending: false } : f
@@ -130,7 +131,7 @@ export function FolderEditSheet({ visible, onClose, folder }: FolderEditSheetPro
 
       // Downscale + JPEG-convert to keep payloads sane (matches the chat
       // composer's image flow).
-      const MAX_EDGE = 1568;
+      const MAX_EDGE = IMAGE_RESIZE_MAX_EDGE;
       const longEdge = Math.max(asset.width ?? 0, asset.height ?? 0);
       const actions: ImageManipulator.Action[] =
         longEdge > MAX_EDGE

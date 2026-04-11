@@ -1,31 +1,12 @@
 import { useState } from "react";
 import { ExternalLink, X } from "lucide-react";
 import { Modal } from "../ui/Modal";
-import type { MessageSource, MessageSourceMetadata } from "@opennative/shared";
+import { flattenCitations, getDomain, getFaviconUrl } from "@opennative/shared";
+import type { MessageSource } from "@opennative/shared";
+export { flattenCitations };
 
 interface MessageSourcesProps {
   sources: MessageSource[];
-}
-
-function getDomain(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
-
-function faviconUrl(url: string): string {
-  try {
-    const origin = new URL(url).origin;
-    return `https://www.google.com/s2/favicons?domain=${origin}&sz=32`;
-  } catch {
-    return "";
-  }
-}
-
-export function flattenCitations(sources: MessageSource[]): MessageSourceMetadata[] {
-  return sources.flatMap((s) => s.metadata ?? []);
 }
 
 export function MessageSources({ sources }: MessageSourcesProps) {
@@ -44,20 +25,17 @@ export function MessageSources({ sources }: MessageSourcesProps) {
       >
         {/* Stacked favicon preview */}
         <div className="flex -space-x-1.5">
-          {citations.slice(0, previewCount).map((cite, i) => {
-            const url = cite.source ?? "";
-            return (
-              <img
-                key={i}
-                src={faviconUrl(url)}
-                alt=""
-                className="h-4 w-4 rounded-sm border border-line bg-surface"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            );
-          })}
+          {citations.slice(0, previewCount).map((cite, i) => (
+            <img
+              key={i}
+              src={getFaviconUrl(cite.url, 32)}
+              alt=""
+              className="h-4 w-4 rounded-sm border border-line bg-surface"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ))}
         </div>
         <span className="text-xs text-secondary">
           {citations.length} source{citations.length !== 1 ? "s" : ""}
@@ -76,25 +54,22 @@ export function MessageSources({ sources }: MessageSourcesProps) {
         </div>
         <div className="max-h-96 overflow-y-auto p-4 flex flex-col gap-2">
           {citations.map((cite, i) => {
-            const url = cite.source ?? "";
-            const title = cite.title ?? getDomain(url) ?? `Source ${i + 1}`;
-            const domain = getDomain(url);
+            const domain = getDomain(cite.url);
             return (
               <button
                 key={i}
-                onClick={() => url && window.electronAPI.openExternal(url)}
-                disabled={!url}
-                className="flex items-start gap-3 rounded-xl bg-surface border border-line-strong p-3 text-left hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-default"
+                onClick={() => window.electronAPI.openExternal(cite.url)}
+                className="flex items-start gap-3 rounded-xl bg-surface border border-line-strong p-3 text-left hover:bg-hover transition-colors"
               >
                 <span className="mt-0.5 shrink-0 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-secondary border border-line-strong">
                   {i + 1}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-fg truncate">{title}</p>
+                  <p className="text-sm font-medium text-fg truncate">{cite.title}</p>
                   {domain && (
                     <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
                       <img
-                        src={faviconUrl(url)}
+                        src={getFaviconUrl(cite.url, 32)}
                         alt=""
                         className="h-3 w-3"
                         onError={(e) => {
@@ -102,7 +77,7 @@ export function MessageSources({ sources }: MessageSourcesProps) {
                         }}
                       />
                       {domain}
-                      {url && <ExternalLink size={10} className="ml-1 opacity-60" />}
+                      <ExternalLink size={10} className="ml-1 opacity-60" />
                     </p>
                   )}
                 </div>

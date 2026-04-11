@@ -149,26 +149,9 @@ function toggleChatBar(): void {
   chatBarWindow.webContents.send("chatbar:rehydrate");
 }
 
-// ── Main window ───────────────────────────────────────────────────────────────
+// ── IPC handlers (registered once at startup) ─────────────────────────────────
 
-function createWindow(): void {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 650,
-    minHeight: 300,
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 12, y: 14 },
-    backgroundColor: "#0d0d0d",
-    show: false,
-    webPreferences: {
-      preload: path.join(__dirname, "../preload/index.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
-  });
-
+function registerIpcHandlers(): void {
   // IPC: open file dialog
   ipcMain.handle("dialog:openFile", async () => {
     if (!mainWindow) return null;
@@ -279,6 +262,27 @@ function createWindow(): void {
       mainWindow.webContents.send("chatbar:incoming", payload);
     }
   });
+}
+
+// ── Main window ───────────────────────────────────────────────────────────────
+
+function createWindow(): void {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 650,
+    minHeight: 300,
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 12, y: 14 },
+    backgroundColor: "#0d0d0d",
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, "../preload/index.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  });
 
   mainWindow.once("ready-to-show", () => {
     mainWindow?.show();
@@ -307,6 +311,7 @@ app.whenReady().then(() => {
     }
   }
 
+  registerIpcHandlers();
   createWindow();
   createChatBarWindow();
 

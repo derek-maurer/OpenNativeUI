@@ -175,7 +175,7 @@ export function MessageBubble({ message, isStreaming, onRetry }: MessageBubblePr
           <>
             {segments.map((seg, i) => {
               if (seg.kind === "reasoning") {
-                return <ThinkingBlock key={i} entry={seg.entry} />;
+                return <ThinkingBlock key={i} entry={seg.entry} isStreaming={isStreaming} />;
               }
               return seg.text ? (
                 <div key={i} className="text-sm text-neutral-100 selectable markdown">
@@ -206,7 +206,7 @@ export function MessageBubble({ message, isStreaming, onRetry }: MessageBubblePr
         )}
 
         {/* Sources */}
-        {sources.length > 0 && flattenCitations(sources).length > 0 && (
+        {citations.length > 0 && (
           <MessageSources sources={sources} />
         )}
 

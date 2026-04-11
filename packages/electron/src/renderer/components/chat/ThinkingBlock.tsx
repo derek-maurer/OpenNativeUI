@@ -8,21 +8,36 @@ import { cleanReasoningText, formatDuration } from "@opennative/shared";
 
 interface ThinkingBlockProps {
   entry: ReasoningEntry;
+  /**
+   * True while the assistant message that owns this block is still
+   * streaming. Individual reasoning entries also carry their own `isDone`
+   * flag — the header treats a block as in-progress when EITHER the
+   * streaming flag is set OR the entry itself isn't done yet.
+   */
+  isStreaming?: boolean;
 }
 
-export function ThinkingBlock({ entry }: ThinkingBlockProps) {
+export function ThinkingBlock({ entry, isStreaming }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const inProgress = !entry.isDone;
-  const durationText =
-    entry.isDone && entry.duration != null
-      ? `Thought for ${formatDuration(entry.duration)}`
-      : "Thinking…";
+  const inProgress = isStreaming === true || !entry.isDone;
+  const isCodeInterpreter = entry.blockType === "code_interpreter";
+
+  const headerLabel = (() => {
+    if (entry.summary && !inProgress) {
+      return entry.summary;
+    }
+    if (isCodeInterpreter) {
+      return inProgress ? "Analyzing…" : "Analyzed";
+    }
+    if (inProgress) return "Thinking…";
+    if (entry.duration > 0) {
+      return `Thought for ${formatDuration(entry.duration)}`;
+    }
+    return "Thought";
+  })();
 
   const cleanedText = cleanReasoningText(entry.reasoning);
-
-  const headerLabel =
-    entry.blockType === "code_interpreter" ? "Code Interpreter" : durationText;
 
   return (
     <div className="my-2 rounded-xl border border-line-strong bg-surface overflow-hidden">

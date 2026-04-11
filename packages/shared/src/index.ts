@@ -8,7 +8,31 @@ export { registerStorage, lazyStorage, onStorageRegistered } from "./lib/storage
 export { registerSSEFactory, type SSEConnection, type SSEFactory } from "./lib/sse";
 
 // Constants
-export { API_PATHS, STORAGE_KEYS } from "./lib/constants";
+export { API_PATHS, STORAGE_KEYS, IMAGE_RESIZE_MAX_EDGE } from "./lib/constants";
+
+// Empty state helpers (greeting + suggestion chips)
+export { SUGGESTIONS, getGreeting, getShownSuggestions } from "./lib/emptyState";
+
+// Message content utilities
+export { extractPlainContent, stripMarkdownForSpeech } from "./lib/messageUtils";
+
+// Model list utilities
+export { filterModels } from "./lib/modelUtils";
+
+// Citation / source utilities
+export {
+  flattenCitations,
+  getDomain,
+  getFaviconUrl,
+  type Citation,
+} from "./lib/citations";
+
+// Conversation list utilities
+export {
+  groupConversationsByDate,
+  filterConversations,
+  type ConversationDateGroup,
+} from "./lib/conversationUtils";
 
 // Thinking-control profiles (per model family, loaded from
 // config/thinkingModels.json — edit that file to add a new family).

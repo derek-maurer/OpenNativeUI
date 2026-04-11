@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Copy, Check, Volume2, VolumeX, Info, X, RotateCcw } from "lucide-react";
 import {
-  parseReasoningSegments,
-  hasReasoningContent,
   getThinkingProfile,
   useModelStore,
+  extractPlainContent,
+  stripMarkdownForSpeech,
   type MessageInfo,
 } from "@opennative/shared";
 import { RetryPopover } from "./RetryPopover";
@@ -24,16 +24,7 @@ export function MessageActions({ content, info, onRetry }: MessageActionsProps) 
   const selectedModelId = useModelStore((s) => s.selectedModelId);
 
   // Strip reasoning blocks so copy matches what the user sees
-  const plainContent = useMemo(() => {
-    if (!hasReasoningContent(content)) return content;
-    const segments = parseReasoningSegments(content);
-    if (!segments) return content;
-    return segments
-      .filter((s) => s.kind === "text")
-      .map((s) => (s as { kind: "text"; text: string }).text)
-      .join("")
-      .trim();
-  }, [content]);
+  const plainContent = useMemo(() => extractPlainContent(content), [content]);
 
   // Close info popover on outside click
   useEffect(() => {
@@ -71,12 +62,7 @@ export function MessageActions({ content, info, onRetry }: MessageActionsProps) 
       return;
     }
 
-    const plain = content
-      .replace(/```[\s\S]*?```/g, " code block ")
-      .replace(/`([^`]+)`/g, "$1")
-      .replace(/[#*_~>\[\]()!|]/g, "")
-      .replace(/\n+/g, " ")
-      .trim();
+    const plain = stripMarkdownForSpeech(content);
 
     const utterance = new SpeechSynthesisUtterance(plain);
 

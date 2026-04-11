@@ -13,7 +13,7 @@ interface FolderEditModalProps {
 export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalProps) {
   const folders = useFolderStore((s) => s.folders);
   const createFolder = useFolderStore((s) => s.createFolder);
-  const updateFolderName = useFolderStore((s) => s.updateFolderName);
+  const renameFolder = useFolderStore((s) => s.renameFolder);
   const { showToast } = useToast();
 
   const existingFolder = folderId ? folders.find((f) => f.id === folderId) : undefined;
@@ -24,7 +24,7 @@ export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalP
     if (visible) {
       setName(existingFolder?.name ?? "");
     }
-  }, [visible]);
+  }, [visible, existingFolder?.name]);
 
   const handleSubmit = async () => {
     const trimmed = name.trim();
@@ -32,7 +32,7 @@ export function FolderEditModal({ visible, onClose, folderId }: FolderEditModalP
     setIsLoading(true);
     try {
       if (existingFolder) {
-        await updateFolderName(existingFolder.id, trimmed);
+        await renameFolder(existingFolder.id, trimmed);
         showToast("Folder renamed", "success");
       } else {
         await createFolder(trimmed);

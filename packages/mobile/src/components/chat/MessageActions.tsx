@@ -16,10 +16,10 @@ import * as Clipboard from "expo-clipboard";
 import { useToast } from "@/components/ui/Toast";
 import { RetrySheet } from "./RetrySheet";
 import {
-  parseReasoningSegments,
-  hasReasoningContent,
   getThinkingProfile,
   useModelStore,
+  extractPlainContent,
+  stripMarkdownForSpeech,
   type MessageInfo,
 } from "@opennative/shared";
 
@@ -43,18 +43,8 @@ export function MessageActions({ content, info, onRetry }: MessageActionsProps) 
   const selectedModelId = useModelStore((s) => s.selectedModelId);
 
   // Strip out any reasoning/thinking blocks so the copied text matches what
-  // the user actually sees as the answer. Falls back to the raw content
-  // when the message has no reasoning markers (the fast path).
-  const plainContent = useMemo(() => {
-    if (!hasReasoningContent(content)) return content;
-    const segments = parseReasoningSegments(content);
-    if (!segments) return content;
-    return segments
-      .filter((s) => s.kind === "text")
-      .map((s) => (s as { kind: "text"; text: string }).text)
-      .join("")
-      .trim();
-  }, [content]);
+  // the user actually sees as the answer.
+  const plainContent = useMemo(() => extractPlainContent(content), [content]);
 
   const openSheet = useCallback(() => {
     setInfoVisible(true);
@@ -100,13 +90,7 @@ export function MessageActions({ content, info, onRetry }: MessageActionsProps) 
       return;
     }
 
-    // Strip markdown syntax for cleaner speech
-    const plain = content
-      .replace(/```[\s\S]*?```/g, " code block ")
-      .replace(/`([^`]+)`/g, "$1")
-      .replace(/[#*_~>\[\]()!|]/g, "")
-      .replace(/\n+/g, " ")
-      .trim();
+    const plain = stripMarkdownForSpeech(content);
 
     setIsSpeaking(true);
     Speech.speak(plain, {

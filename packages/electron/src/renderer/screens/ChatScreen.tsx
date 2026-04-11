@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useChatStore,
   useModelStore,
@@ -32,6 +32,8 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
 
   const { sendMessage, abort } = useStreamingChat({ onComplete });
 
+  const [loading, setLoading] = useState(!isNew);
+
   // Load conversation on mount (if not new)
   useEffect(() => {
     if (isNew) {
@@ -39,6 +41,7 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
       return;
     }
 
+    setLoading(true);
     let cancelled = false;
     fetchConversation(conversationId)
       .then((serverConv) => {
@@ -50,6 +53,9 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
       })
       .catch(() => {
         if (!cancelled) setConversation(conversationId, []);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
 
     return () => { cancelled = true; };
@@ -78,7 +84,7 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
   );
 
   // Show loader while fetching existing conversation
-  const isLoading = !isNew && messages.length === 0 && !isStreaming;
+  const isLoading = loading;
 
   return (
     <div className="flex h-full flex-col">

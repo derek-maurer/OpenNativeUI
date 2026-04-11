@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useModelStore } from "@opennative/shared";
+import { useModelStore, filterModels } from "@opennative/shared";
 import { ChevronDown, Check, Search } from "lucide-react";
 import { Modal } from "../ui/Modal";
 
@@ -24,13 +24,7 @@ export function ModelPickerOverlay({
 
   const effectiveSelected = selectedModelId !== undefined ? selectedModelId : storeSelectedId;
 
-  const filtered = query.trim()
-    ? models.filter(
-        (m) =>
-          m.name.toLowerCase().includes(query.toLowerCase()) ||
-          (m.owned_by ?? "").toLowerCase().includes(query.toLowerCase())
-      )
-    : models;
+  const filtered = filterModels(models, query);
 
   // Reset search and focus input when opened
   useEffect(() => {

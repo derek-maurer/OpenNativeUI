@@ -1,4 +1,4 @@
-import { useAuthStore, API_PATHS } from "@opennative/shared";
+import { useAuthStore, API_PATHS, IMAGE_RESIZE_MAX_EDGE } from "@opennative/shared";
 
 interface UploadResult {
   id: string;
@@ -29,7 +29,7 @@ export async function uploadFileFromBlob(
   return { id: json.id };
 }
 
-async function resizeImageBlob(blob: Blob, maxEdge = 1568): Promise<Blob> {
+async function resizeImageBlob(blob: Blob, maxEdge = IMAGE_RESIZE_MAX_EDGE): Promise<Blob> {
   const url = URL.createObjectURL(blob);
   try {
     const img = new Image();

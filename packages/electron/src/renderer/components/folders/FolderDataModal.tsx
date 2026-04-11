@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   useFolderStore,
   useAuthStore,
+  waitUntilProcessed,
   type Folder,
   type FolderFileRef,
 } from "@opennative/shared";
@@ -89,6 +90,7 @@ export function FolderDataModal({ visible, onClose, folder }: FolderDataModalPro
           );
 
           if (!isImage) {
+            await waitUntilProcessed(serverId);
             setFiles((prev) =>
               prev.map((f) => (f.id === serverId ? { ...f, pending: false } : f))
             );
