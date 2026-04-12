@@ -51,11 +51,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("chatbar:setHeight", height);
   },
 
-  submitFromChatBar: (query: string, modelId: string): void => {
-    ipcRenderer.send("chatbar:submit", { query, modelId });
+  submitFromChatBar: (query: string, modelId: string, webSearch: boolean): void => {
+    ipcRenderer.send("chatbar:submit", { query, modelId, webSearch });
   },
 
-  onChatBarSubmit: (callback: (payload: { query: string; modelId: string }) => void): void => {
+  onChatBarSubmit: (callback: (payload: { query: string; modelId: string; webSearch: boolean }) => void): void => {
     ipcRenderer.on("chatbar:incoming", (_event, payload) => callback(payload));
   },
 

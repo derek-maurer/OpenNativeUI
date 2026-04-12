@@ -5,6 +5,7 @@ import {
   useModelStore,
   useChatStore,
   useSettingsStore,
+  useModelPreferencesStore,
   connectSocket,
   disconnectSocket,
 } from "@opennative/shared";
@@ -123,8 +124,14 @@ export function MainLayout() {
 
   // ── Chat bar incoming ────────────────────────────────────────────────────────
   useEffect(() => {
-    window.electronAPI.onChatBarSubmit(({ query, modelId }) => {
+    window.electronAPI.onChatBarSubmit(({ query, modelId, webSearch }) => {
+      // Pick up any thinking-preference changes made in the chat bar
+      useModelPreferencesStore.persist.rehydrate();
+
+      clearChat();
+      if (webSearch) toggleWebSearch();
       if (modelId) setSelectedModel(modelId);
+
       const id = generateId();
       setView({ type: "chat", conversationId: id, isNew: true, initialMessage: query });
     });

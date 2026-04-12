@@ -98,6 +98,13 @@ function createChatBarWindow(): void {
 
   chatBarWindow = new BrowserWindow(windowOptions);
 
+  // Keep the window available on every macOS Space so the hotkey never
+  // triggers a Space switch.  The window is hidden when inactive, so it
+  // won't actually appear on other Spaces until the user invokes it.
+  if (process.platform === "darwin") {
+    chatBarWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  }
+
   // Hide on blur (clicking outside)
   chatBarWindow.on("blur", () => {
     if (!chatBarWindow) return;
@@ -144,6 +151,10 @@ function toggleChatBar(): void {
   chatBarWindow.setPosition(x, y);
   chatBarWindow.show();
   chatBarWindow.focus();
+
+  // Focus the web contents so the renderer's <input> can receive focus
+  chatBarWindow.webContents.focus();
+
   // Trigger rehydration so the chat bar picks up any auth/model changes
   // that happened in the main window since the chat bar last loaded.
   chatBarWindow.webContents.send("chatbar:rehydrate");
@@ -252,7 +263,7 @@ function registerIpcHandlers(): void {
   });
 
   // Chat bar submit → forward to main window and focus it
-  ipcMain.on("chatbar:submit", (_event, payload: { query: string; modelId: string }) => {
+  ipcMain.on("chatbar:submit", (_event, payload: { query: string; modelId: string; webSearch: boolean }) => {
     chatBarWindow?.hide();
     chatBarWindow?.setSize(680, 72);
     if (mainWindow) {

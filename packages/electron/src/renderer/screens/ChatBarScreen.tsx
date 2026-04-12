@@ -1,11 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuthStore, useModelStore, useSettingsStore } from "@opennative/shared";
-import { Asterisk, ArrowUp, ChevronDown, Search, Check } from "lucide-react";
+import {
+  useAuthStore,
+  useModelStore,
+  useSettingsStore,
+  useModelPreferencesStore,
+  getThinkingProfile,
+  resolveEffectiveThinkingValue,
+} from "@opennative/shared";
+import { ArrowUp, ChevronDown, Search, Check, Globe, Lightbulb } from "lucide-react";
 
 export function ChatBarScreen() {
   const [query, setQuery] = useState("");
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelSearch, setModelSearch] = useState("");
+  const [webSearch, setWebSearch] = useState(false);
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const models = useModelStore((s) => s.models);
@@ -14,10 +22,49 @@ export function ChatBarScreen() {
   const fetchModels = useModelStore((s) => s.fetchModels);
   const defaultModelId = useModelStore((s) => s.defaultModelId);
 
+  const thinkingByModel = useModelPreferencesStore((s) => s.thinkingByModel);
+  const setThinkingForModel = useModelPreferencesStore((s) => s.setThinkingForModel);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const modelSearchRef = useRef<HTMLInputElement>(null);
 
   const selectedModel = models.find((m) => m.id === selectedModelId);
+
+  // Thinking profile for the currently selected model
+  const thinkingProfile = selectedModelId ? getThinkingProfile(selectedModelId) : null;
+  const currentThinking = selectedModelId ? (thinkingByModel[selectedModelId] ?? null) : null;
+  const thinkingResolved = thinkingProfile
+    ? resolveEffectiveThinkingValue(thinkingProfile, currentThinking)
+    : null;
+
+  const isThinkingOn = thinkingProfile
+    ? (thinkingProfile.offValue !== undefined
+        ? thinkingResolved !== thinkingProfile.offValue
+        : true)
+    : false;
+
+  // Label for tiered thinking levels (e.g. "Low", "Medium", "High")
+  const thinkingLabel = thinkingProfile && thinkingProfile.offValue === undefined
+    ? (thinkingProfile.options.find((o) => o.value === thinkingResolved)?.label ?? null)
+    : null;
+
+  const handleThinkingClick = () => {
+    if (!thinkingProfile || !selectedModelId) return;
+
+    if (thinkingProfile.offValue !== undefined) {
+      // Binary: toggle on/off
+      const isOn = thinkingResolved !== thinkingProfile.offValue;
+      setThinkingForModel(
+        selectedModelId,
+        isOn ? thinkingProfile.offValue : (thinkingProfile.options[0]?.value ?? true),
+      );
+    } else {
+      // Tiered: cycle through options
+      const idx = thinkingProfile.options.findIndex((o) => o.value === thinkingResolved);
+      const nextIdx = (idx + 1) % thinkingProfile.options.length;
+      setThinkingForModel(selectedModelId, thinkingProfile.options[nextIdx].value);
+    }
+  };
 
   const filteredModels = modelSearch.trim()
     ? models.filter((m) => m.name.toLowerCase().includes(modelSearch.toLowerCase()))
@@ -51,6 +98,11 @@ export function ChatBarScreen() {
       useAuthStore.persist.rehydrate();
       useSettingsStore.persist.rehydrate();
       useModelStore.persist.rehydrate();
+      useModelPreferencesStore.persist.rehydrate();
+      // Apply web-search-by-default setting
+      setWebSearch(useSettingsStore.getState().webSearchByDefault);
+      // Focus the input every time the window is shown
+      requestAnimationFrame(() => inputRef.current?.focus());
     });
     return () => window.electronAPI.removeChatBarRehydrateListener();
   }, []);
@@ -61,6 +113,7 @@ export function ChatBarScreen() {
       setShowModelPicker(false);
       setQuery("");
       setModelSearch("");
+      setWebSearch(false);
       // Re-focus input so it's ready next time window appears
       requestAnimationFrame(() => inputRef.current?.focus());
     });
@@ -88,8 +141,9 @@ export function ChatBarScreen() {
   const handleSubmit = () => {
     const q = query.trim();
     if (!q) return;
-    window.electronAPI.submitFromChatBar(q, selectedModelId ?? "");
+    window.electronAPI.submitFromChatBar(q, selectedModelId ?? "", webSearch);
     setQuery("");
+    setWebSearch(false);
     setShowModelPicker(false);
   };
 
@@ -123,8 +177,34 @@ export function ChatBarScreen() {
 
         {/* Input row */}
         <div className="flex items-center h-[72px] shrink-0 px-4 gap-3">
-          {/* App icon */}
-          <Asterisk size={18} className="shrink-0 text-primary" />
+          {/* Quick toggles */}
+          <div className="flex items-center gap-1 shrink-0">
+            {thinkingProfile && (
+              <button
+                onClick={handleThinkingClick}
+                title={`Thinking${thinkingLabel ? `: ${thinkingLabel}` : ""}`}
+                className={`flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] font-medium transition-colors ${
+                  isThinkingOn
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted hover:text-secondary hover:bg-hover"
+                }`}
+              >
+                <Lightbulb size={14} />
+                {thinkingLabel && <span>{thinkingLabel}</span>}
+              </button>
+            )}
+            <button
+              onClick={() => setWebSearch((v) => !v)}
+              title="Web search"
+              className={`flex items-center rounded-lg p-1.5 transition-colors ${
+                webSearch
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted hover:text-secondary hover:bg-hover"
+              }`}
+            >
+              <Globe size={14} />
+            </button>
+          </div>
 
           {/* Text input */}
           <input

@@ -21,8 +21,8 @@ interface Window {
     setChatBarHotkey(hotkey: string): Promise<{ success: boolean; error?: string }>;
     hideChatBar(): void;
     setChatBarHeight(height: number): void;
-    submitFromChatBar(query: string, modelId: string): void;
-    onChatBarSubmit(callback: (payload: { query: string; modelId: string }) => void): void;
+    submitFromChatBar(query: string, modelId: string, webSearch: boolean): void;
+    onChatBarSubmit(callback: (payload: { query: string; modelId: string; webSearch: boolean }) => void): void;
     removeChatBarSubmitListener(): void;
     onChatBarWillHide(callback: () => void): void;
     removeChatBarWillHideListener(): void;
