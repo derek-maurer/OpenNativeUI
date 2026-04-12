@@ -4,11 +4,12 @@ import {
   ChevronLeft,
   Folder,
   FolderPlus,
+  Pin,
   Search,
   Settings,
   SquarePen,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Tooltip } from "../ui/Tooltip";
 import { ConversationItem } from "./ConversationItem";
 
@@ -29,6 +30,11 @@ interface MainSidebarViewProps {
   onRenameConversation: (conv: Conversation) => void;
   onDeleteConversation: (id: string) => void;
   onMoveConversation: (id: string) => void;
+  onPinConversation: (conv: Conversation) => void;
+  onArchiveConversation: (id: string) => void;
+  onShareConversation: (id: string) => void;
+  onCloneConversation: (id: string) => void;
+  onDownloadConversation: (id: string) => void;
 }
 
 export function MainSidebarView({
@@ -46,12 +52,26 @@ export function MainSidebarView({
   onRenameConversation,
   onDeleteConversation,
   onMoveConversation,
+  onPinConversation,
+  onArchiveConversation,
+  onShareConversation,
+  onCloneConversation,
+  onDownloadConversation,
 }: MainSidebarViewProps) {
   const [foldersExpanded, setFoldersExpanded] = useState(false);
 
   const visibleFolders = foldersExpanded ? folders : folders.slice(0, FOLDERS_LIMIT);
   const hasMoreFolders = folders.length > FOLDERS_LIMIT;
-  const groups = groupConversationsByDate(conversations);
+
+  const pinnedConversations = useMemo(
+    () => conversations.filter((c) => c.pinned),
+    [conversations]
+  );
+  const unpinnedConversations = useMemo(
+    () => conversations.filter((c) => !c.pinned),
+    [conversations]
+  );
+  const groups = groupConversationsByDate(unpinnedConversations);
 
   return (
     <div className="flex h-full flex-col bg-sidebar no-select">
@@ -134,6 +154,32 @@ export function MainSidebarView({
 
       {/* Conversation list */}
       <div className="flex-1 overflow-y-auto px-2">
+        {/* Pinned section */}
+        {pinnedConversations.length > 0 && (
+          <div className="mb-2">
+            <p className="flex items-center gap-1 px-3 py-1 text-[11px] font-medium text-muted">
+              <Pin size={10} />
+              Pinned
+            </p>
+            {pinnedConversations.map((conv) => (
+              <ConversationItem
+                key={conv.id}
+                conversation={conv}
+                isSelected={currentConversationId === conv.id}
+                onSelect={() => onSelectConversation(conv.id)}
+                onRename={() => onRenameConversation(conv)}
+                onDelete={() => onDeleteConversation(conv.id)}
+                onMoveToFolder={() => onMoveConversation(conv.id)}
+                onPin={() => onPinConversation(conv)}
+                onArchive={() => onArchiveConversation(conv.id)}
+                onShare={() => onShareConversation(conv.id)}
+                onClone={() => onCloneConversation(conv.id)}
+                onDownload={() => onDownloadConversation(conv.id)}
+              />
+            ))}
+          </div>
+        )}
+
         {groups.map(({ title, data }) => (
           <div key={title} className="mb-2">
             <p className="px-3 py-1 text-[11px] font-medium text-muted">{title}</p>
@@ -146,6 +192,11 @@ export function MainSidebarView({
                 onRename={() => onRenameConversation(conv)}
                 onDelete={() => onDeleteConversation(conv.id)}
                 onMoveToFolder={() => onMoveConversation(conv.id)}
+                onPin={() => onPinConversation(conv)}
+                onArchive={() => onArchiveConversation(conv.id)}
+                onShare={() => onShareConversation(conv.id)}
+                onClone={() => onCloneConversation(conv.id)}
+                onDownload={() => onDownloadConversation(conv.id)}
               />
             ))}
           </div>

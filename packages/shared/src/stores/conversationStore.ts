@@ -2,9 +2,15 @@ import { create } from "zustand";
 import type { Conversation } from "../lib/types";
 import {
   fetchConversations,
+  fetchPinnedConversations,
   deleteServerConversation,
   deleteAllServerConversations,
   updateServerConversation,
+  pinConversation as pinConversationApi,
+  archiveConversation as archiveConversationApi,
+  shareConversation as shareConversationApi,
+  unshareConversation as unshareConversationApi,
+  cloneConversation as cloneConversationApi,
   toConversation,
 } from "../services/conversationApi";
 import { assignChatToFolder, fetchChatIdsInFolder } from "../services/folderApi";
@@ -21,6 +27,11 @@ interface ConversationState {
     id: string,
     folderId: string | null
   ) => Promise<void>;
+  pinConversation: (id: string, isPinned: boolean) => Promise<void>;
+  archiveConversation: (id: string) => Promise<void>;
+  shareConversation: (id: string) => Promise<string>;
+  unshareConversation: (id: string) => Promise<void>;
+  cloneConversation: (id: string) => Promise<Conversation>;
   reloadFolderMemberships: () => Promise<void>;
   updateConversationLocally: (id: string, updates: Partial<Conversation>) => void;
   clearAll: () => Promise<void>;
@@ -33,8 +44,24 @@ export const useConversationStore = create<ConversationState>()((set) => ({
   loadConversations: async () => {
     set({ isLoading: true });
     try {
-      const serverConversations = await fetchConversations(50, 0);
-      const conversations = serverConversations.map(toConversation);
+      const [serverConversations, serverPinned] = await Promise.all([
+        fetchConversations(50, 0),
+        fetchPinnedConversations(),
+      ]);
+      const unpinned = serverConversations.map(toConversation);
+      // The pinned endpoint returns minimal ChatTitleIdResponse objects
+      // without a `pinned` field, so we set it explicitly. Folder
+      // assignments are resolved separately by reloadFolderMemberships().
+      const pinned = serverPinned.map((sc) => ({
+        ...toConversation(sc),
+        pinned: true,
+      }));
+      // Merge pinned + unpinned, deduplicating by id (pinned wins)
+      const seen = new Set(pinned.map((c) => c.id));
+      const conversations = [
+        ...pinned,
+        ...unpinned.filter((c) => !seen.has(c.id)),
+      ];
       set({ conversations, isLoading: false });
     } catch {
       set({ isLoading: false });
@@ -70,6 +97,58 @@ export const useConversationStore = create<ConversationState>()((set) => ({
         c.id === id ? { ...c, folderId, updatedAt: Date.now() } : c
       ),
     }));
+  },
+
+  pinConversation: async (id, isPinned) => {
+    // The server endpoint is a toggle (ignores the body), so use the
+    // response's actual pinned state rather than the requested value
+    // to stay in sync if local state was stale.
+    const result = await pinConversationApi(id, isPinned);
+    const pinned = result.pinned ?? isPinned;
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, pinned, updatedAt: Date.now() } : c
+      ),
+    }));
+  },
+
+  archiveConversation: async (id) => {
+    await archiveConversationApi(id);
+    set((state) => ({
+      conversations: state.conversations.filter((c) => c.id !== id),
+    }));
+  },
+
+  shareConversation: async (id) => {
+    const result = await shareConversationApi(id);
+    // The API returns the shared copy — its `id` is the share identifier
+    // used in /s/{share_id} URLs. The original chat's share_id field
+    // points to this same value.
+    const shareId = result.id;
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, shareId, updatedAt: Date.now() } : c
+      ),
+    }));
+    return shareId;
+  },
+
+  unshareConversation: async (id) => {
+    await unshareConversationApi(id);
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, shareId: null, updatedAt: Date.now() } : c
+      ),
+    }));
+  },
+
+  cloneConversation: async (id) => {
+    const result = await cloneConversationApi(id);
+    const cloned = toConversation(result);
+    set((state) => ({
+      conversations: [cloned, ...state.conversations],
+    }));
+    return cloned;
   },
 
   reloadFolderMemberships: async () => {

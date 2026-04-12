@@ -124,6 +124,9 @@ export interface Conversation {
   updatedAt: number;
   model: string;
   folderId?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
+  shareId?: string | null;
 }
 
 export interface FolderFileRef {
@@ -205,6 +208,8 @@ export interface ServerConversation {
   created_at: number;
   share_id?: string | null;
   folder_id?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
 }
 
 // Chat completions

@@ -16,6 +16,12 @@ export const API_PATHS = {
   CHATS: "/api/v1/chats/",
   CHATS_NEW: "/api/v1/chats/new",
   CHAT_BY_ID: (id: string) => `/api/v1/chats/${id}`,
+  CHAT_PIN: (id: string) => `/api/v1/chats/${id}/pin`,
+  CHAT_ARCHIVE: (id: string) => `/api/v1/chats/${id}/archive`,
+  CHAT_SHARE: (id: string) => `/api/v1/chats/${id}/share`,
+  CHAT_CLONE: (id: string) => `/api/v1/chats/${id}/clone`,
+  CHATS_PINNED: "/api/v1/chats/pinned",
+  CHATS_ARCHIVED: "/api/v1/chats/archived",
 
   // Files
   FILES_UPLOAD: "/api/v1/files/",

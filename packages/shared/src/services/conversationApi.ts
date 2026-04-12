@@ -11,6 +11,11 @@ import type {
 
 // --- Server API calls ---
 
+/**
+ * Fetch the conversation list. The server returns ChatTitleIdResponse objects
+ * (id, title, updated_at, created_at) — not full ServerConversation payloads.
+ * toConversation() handles missing fields with safe defaults.
+ */
 export async function fetchConversations(
   limit = 50,
   skip = 0
@@ -21,6 +26,17 @@ export async function fetchConversations(
   return apiGet<ServerConversation[]>(
     `${API_PATHS.CHATS}?limit=${limit}&skip=${skip}&include_folders=true`
   );
+}
+
+/**
+ * Fetch pinned conversations. Returns the same minimal shape as
+ * fetchConversations (ChatTitleIdResponse). The pinned endpoint does not
+ * include a `pinned` field or support `include_folders`; callers must
+ * set pinned=true themselves and rely on reloadFolderMemberships() for
+ * folder assignments.
+ */
+export async function fetchPinnedConversations(): Promise<ServerConversation[]> {
+  return apiGet<ServerConversation[]>(API_PATHS.CHATS_PINNED);
 }
 
 export async function fetchConversation(
@@ -102,6 +118,40 @@ export async function deleteServerConversation(id: string): Promise<void> {
 
 export async function deleteAllServerConversations(): Promise<void> {
   await apiDelete(API_PATHS.CHATS);
+}
+
+export async function pinConversation(
+  id: string,
+  isPinned: boolean
+): Promise<ServerConversation> {
+  return apiPost<ServerConversation>(API_PATHS.CHAT_PIN(id), {
+    is_pinned: isPinned,
+  });
+}
+
+export async function archiveConversation(
+  id: string
+): Promise<ServerConversation> {
+  return apiPost<ServerConversation>(API_PATHS.CHAT_ARCHIVE(id), {});
+}
+
+export async function shareConversation(
+  id: string
+): Promise<ServerConversation & { share_id: string }> {
+  return apiPost<ServerConversation & { share_id: string }>(
+    API_PATHS.CHAT_SHARE(id),
+    {}
+  );
+}
+
+export async function unshareConversation(id: string): Promise<void> {
+  await apiDelete(API_PATHS.CHAT_SHARE(id));
+}
+
+export async function cloneConversation(
+  id: string
+): Promise<ServerConversation> {
+  return apiPost<ServerConversation>(API_PATHS.CHAT_CLONE(id), {});
 }
 
 // --- Format conversion helpers ---
@@ -243,5 +293,8 @@ export function toConversation(sc: ServerConversation): Conversation {
     createdAt: sc.created_at * 1000,
     updatedAt: sc.updated_at * 1000,
     folderId: sc.folder_id ?? null,
+    pinned: sc.pinned ?? false,
+    archived: sc.archived ?? false,
+    shareId: sc.share_id ?? null,
   };
 }

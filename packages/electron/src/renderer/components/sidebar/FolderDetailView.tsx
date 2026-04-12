@@ -16,6 +16,11 @@ interface FolderDetailViewProps {
   onRenameConversation: (conv: Conversation) => void;
   onDeleteConversation: (id: string) => void;
   onMoveConversation: (id: string) => void;
+  onPinConversation: (conv: Conversation) => void;
+  onArchiveConversation: (id: string) => void;
+  onShareConversation: (id: string) => void;
+  onCloneConversation: (id: string) => void;
+  onDownloadConversation: (id: string) => void;
 }
 
 export function FolderDetailView({
@@ -28,6 +33,11 @@ export function FolderDetailView({
   onRenameConversation,
   onDeleteConversation,
   onMoveConversation,
+  onPinConversation,
+  onArchiveConversation,
+  onShareConversation,
+  onCloneConversation,
+  onDownloadConversation,
 }: FolderDetailViewProps) {
   const [showFolderData, setShowFolderData] = useState(false);
 
@@ -119,6 +129,11 @@ export function FolderDetailView({
                   onRename={() => onRenameConversation(conv)}
                   onDelete={() => onDeleteConversation(conv.id)}
                   onMoveToFolder={() => onMoveConversation(conv.id)}
+                  onPin={() => onPinConversation(conv)}
+                  onArchive={() => onArchiveConversation(conv.id)}
+                  onShare={() => onShareConversation(conv.id)}
+                  onClone={() => onCloneConversation(conv.id)}
+                  onDownload={() => onDownloadConversation(conv.id)}
                 />
               ))}
             </div>

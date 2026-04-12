@@ -27,6 +27,7 @@ const MAX_RECENT_FOLDERS = 3;
 type Row =
   | { type: "foldersButton"; id: string }
   | { type: "folderTile"; folder: Folder; count: number; id: string }
+  | { type: "pinnedHeader"; id: string }
   | { type: "dateHeader"; title: string; id: string }
   | { type: "item"; conversation: Conversation; id: string };
 
@@ -86,11 +87,20 @@ export function ExpandedDrawer({
 
   const recentFolders = getRecentFolders(folders, conversations, MAX_RECENT_FOLDERS);
 
+  const pinnedConversations = conversations.filter((c) => c.pinned);
+  const unpinnedConversations = conversations.filter((c) => !c.pinned);
+
   const flatData: Row[] = [{ type: "foldersButton", id: "folders-button" }];
   for (const { folder, count } of recentFolders) {
     flatData.push({ type: "folderTile", folder, count, id: `folder-${folder.id}` });
   }
-  for (const group of groupConversationsByDate(conversations)) {
+  if (pinnedConversations.length > 0) {
+    flatData.push({ type: "pinnedHeader", id: "pinned-header" });
+    for (const conv of pinnedConversations) {
+      flatData.push({ type: "item", conversation: conv, id: conv.id });
+    }
+  }
+  for (const group of groupConversationsByDate(unpinnedConversations)) {
     flatData.push({ type: "dateHeader", title: group.title, id: `date-${group.title}` });
     for (const conv of group.data) {
       flatData.push({ type: "item", conversation: conv, id: conv.id });
@@ -132,6 +142,15 @@ export function ExpandedDrawer({
             <Text style={[styles.folderTileCount, { color: subText }]}>{item.count}</Text>
           )}
         </Pressable>
+      );
+    }
+
+    if (item.type === "pinnedHeader") {
+      return (
+        <View style={styles.pinnedHeaderRow}>
+          <Ionicons name="pin" size={10} color="#737373" />
+          <Text style={styles.pinnedHeaderText}>Pinned</Text>
+        </View>
       );
     }
 
@@ -298,6 +317,21 @@ const styles = StyleSheet.create({
   },
   folderTileCount: {
     fontSize: 12,
+  },
+  pinnedHeaderRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  pinnedHeaderText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#737373",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
   },
   sectionHeader: {
     fontSize: 11,

@@ -3,7 +3,9 @@ import {
   useChatStore,
   useConversationStore,
   useFolderStore,
+  fetchConversation,
 } from "@opennative/shared";
+import { useAuthStore } from "@opennative/shared";
 import { useEffect, useMemo, useState } from "react";
 import { FolderEditModal } from "../folders/FolderEditModal";
 import { useToast } from "../ui/Toast";
@@ -35,6 +37,11 @@ export function Sidebar({
   const removeConversation = useConversationStore((s) => s.removeConversation);
   const renameConversation = useConversationStore((s) => s.renameConversation);
   const moveConversationToFolder = useConversationStore((s) => s.moveConversationToFolder);
+  const pinConv = useConversationStore((s) => s.pinConversation);
+  const archiveConv = useConversationStore((s) => s.archiveConversation);
+  const shareConv = useConversationStore((s) => s.shareConversation);
+  const cloneConv = useConversationStore((s) => s.cloneConversation);
+  const serverUrl = useAuthStore((s) => s.serverUrl);
   const folders = useFolderStore((s) => s.folders);
   const deleteFolder = useFolderStore((s) => s.deleteFolder);
   const loadFolder = useFolderStore((s) => s.loadFolder);
@@ -111,6 +118,60 @@ export function Sidebar({
     setFolderContextMenu({ folderId, x: e.clientX, y: e.clientY });
   };
 
+  const handlePin = async (conv: Conversation) => {
+    try {
+      await pinConv(conv.id, !conv.pinned);
+      showToast(conv.pinned ? "Unpinned" : "Pinned", "success");
+    } catch {
+      showToast("Failed to pin", "error");
+    }
+  };
+
+  const handleArchive = async (id: string) => {
+    try {
+      await archiveConv(id);
+      showToast("Archived", "success");
+    } catch {
+      showToast("Failed to archive", "error");
+    }
+  };
+
+  const handleShare = async (id: string) => {
+    try {
+      const shareId = await shareConv(id);
+      const shareUrl = `${serverUrl.replace(/\/+$/, "")}/s/${shareId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      showToast("Share link copied", "success");
+    } catch {
+      showToast("Failed to share", "error");
+    }
+  };
+
+  const handleClone = async (id: string) => {
+    try {
+      await cloneConv(id);
+      showToast("Conversation cloned", "success");
+    } catch {
+      showToast("Failed to clone", "error");
+    }
+  };
+
+  const handleDownload = async (id: string) => {
+    try {
+      const serverConv = await fetchConversation(id);
+      const json = JSON.stringify(serverConv, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${serverConv.chat?.title ?? "chat"}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      showToast("Failed to download", "error");
+    }
+  };
+
   const handleDeleteFolder = async (folderId: string) => {
     const folder = folders.find((f) => f.id === folderId);
     if (
@@ -155,6 +216,11 @@ export function Sidebar({
           onRenameConversation={handleRename}
           onDeleteConversation={handleDelete}
           onMoveConversation={setMovingConvId}
+          onPinConversation={handlePin}
+          onArchiveConversation={handleArchive}
+          onShareConversation={handleShare}
+          onCloneConversation={handleClone}
+          onDownloadConversation={handleDownload}
         />
       ) : (
         <MainSidebarView
@@ -172,6 +238,11 @@ export function Sidebar({
           onRenameConversation={handleRename}
           onDeleteConversation={handleDelete}
           onMoveConversation={setMovingConvId}
+          onPinConversation={handlePin}
+          onArchiveConversation={handleArchive}
+          onShareConversation={handleShare}
+          onCloneConversation={handleClone}
+          onDownloadConversation={handleDownload}
         />
       )}
 

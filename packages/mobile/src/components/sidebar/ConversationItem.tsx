@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
-import { View, Text, Pressable, Alert, StyleSheet, Animated } from "react-native";
+import { View, Text, Pressable, Alert, StyleSheet, Animated, Share } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { useConversationStore } from "@opennative/shared";
+import { useConversationStore, useAuthStore, fetchConversation } from "@opennative/shared";
 import { FolderPickerSheet } from "@/components/folders/FolderPickerSheet";
+import { ConversationActionsSheet } from "./ConversationActionsSheet";
 import type { Conversation } from "@opennative/shared";
+import { File, Paths } from "expo-file-system";
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -24,7 +26,13 @@ export function ConversationItem({
   const moveConversationToFolder = useConversationStore(
     (s) => s.moveConversationToFolder,
   );
+  const pinConv = useConversationStore((s) => s.pinConversation);
+  const archiveConv = useConversationStore((s) => s.archiveConversation);
+  const shareConv = useConversationStore((s) => s.shareConversation);
+  const cloneConv = useConversationStore((s) => s.cloneConversation);
+  const serverUrl = useAuthStore((s) => s.serverUrl);
   const swipeableRef = useRef<Swipeable>(null);
+  const [actionsVisible, setActionsVisible] = useState(false);
   const [folderPickerVisible, setFolderPickerVisible] = useState(false);
 
   const handleDelete = () => {
@@ -66,16 +74,70 @@ export function ConversationItem({
     );
   };
 
+  const handlePin = async () => {
+    try {
+      await pinConv(conversation.id, !conversation.pinned);
+    } catch (e) {
+      Alert.alert("Error", "Failed to pin conversation");
+    }
+  };
+
+  const handleArchive = () => {
+    Alert.alert(
+      "Archive Conversation",
+      "Are you sure you want to archive this conversation?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Archive",
+          onPress: async () => {
+            try {
+              await archiveConv(conversation.id);
+            } catch (e) {
+              Alert.alert("Error", "Failed to archive conversation");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareId = await shareConv(conversation.id);
+      const shareUrl = `${serverUrl.replace(/\/+$/, "")}/s/${shareId}`;
+      await Share.share({ url: shareUrl, message: shareUrl });
+    } catch (e) {
+      Alert.alert("Error", "Failed to share conversation");
+    }
+  };
+
+  const handleClone = async () => {
+    try {
+      await cloneConv(conversation.id);
+    } catch (e) {
+      Alert.alert("Error", "Failed to clone conversation");
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const serverConv = await fetchConversation(conversation.id);
+      const json = JSON.stringify(serverConv, null, 2);
+      const fileName = `${(conversation.title || "chat").replace(/[/\\?%*:|"<>]/g, "_")}.json`;
+      const file = new File(Paths.cache, fileName);
+      if (!file.exists) {
+        file.create();
+      }
+      file.write(json);
+      await Share.share({ url: file.uri, title: fileName });
+    } catch (e) {
+      Alert.alert("Error", "Failed to export conversation");
+    }
+  };
+
   const handleLongPress = () => {
-    Alert.alert(conversation.title, undefined, [
-      { text: "Rename", onPress: handleRename },
-      {
-        text: "Move to folder",
-        onPress: () => setFolderPickerVisible(true),
-      },
-      { text: "Delete", style: "destructive", onPress: handleDelete },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    setActionsVisible(true);
   };
 
   const handleFolderSelect = async (folderId: string | null) => {
@@ -151,6 +213,20 @@ export function ConversationItem({
           </Pressable>
         </Pressable>
       </Swipeable>
+
+      <ConversationActionsSheet
+        visible={actionsVisible}
+        conversation={conversation}
+        onClose={() => setActionsVisible(false)}
+        onShare={handleShare}
+        onDownload={handleDownload}
+        onRename={handleRename}
+        onPin={handlePin}
+        onClone={handleClone}
+        onMoveToFolder={() => setFolderPickerVisible(true)}
+        onArchive={handleArchive}
+        onDelete={handleDelete}
+      />
 
       <FolderPickerSheet
         visible={folderPickerVisible}

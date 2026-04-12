@@ -1,5 +1,14 @@
 import { useState, useRef } from "react";
-import { Pencil, Trash2, FolderOpen } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  FolderOpen,
+  Pin,
+  Archive,
+  Share2,
+  Copy,
+  Download,
+} from "lucide-react";
 import type { Conversation } from "@opennative/shared";
 
 interface ConversationItemProps {
@@ -9,6 +18,11 @@ interface ConversationItemProps {
   onRename: () => void;
   onDelete: () => void;
   onMoveToFolder: () => void;
+  onPin: () => void;
+  onArchive: () => void;
+  onShare: () => void;
+  onClone: () => void;
+  onDownload: () => void;
 }
 
 export function ConversationItem({
@@ -18,6 +32,11 @@ export function ConversationItem({
   onRename,
   onDelete,
   onMoveToFolder,
+  onPin,
+  onArchive,
+  onShare,
+  onClone,
+  onDownload,
 }: ConversationItemProps) {
   const [showActions, setShowActions] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
@@ -82,11 +101,39 @@ export function ConversationItem({
             style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
           >
             <button
+              onClick={() => { onShare(); closeContextMenu(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
+            >
+              <Share2 size={14} />
+              Share
+            </button>
+            <button
+              onClick={() => { onDownload(); closeContextMenu(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
+            >
+              <Download size={14} />
+              Download
+            </button>
+            <button
               onClick={() => { onRename(); closeContextMenu(); }}
               className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
             >
               <Pencil size={14} />
               Rename
+            </button>
+            <button
+              onClick={() => { onPin(); closeContextMenu(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
+            >
+              <Pin size={14} />
+              {conversation.pinned ? "Unpin" : "Pin"}
+            </button>
+            <button
+              onClick={() => { onClone(); closeContextMenu(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
+            >
+              <Copy size={14} />
+              Clone
             </button>
             <button
               onClick={() => { onMoveToFolder(); closeContextMenu(); }}
@@ -96,6 +143,13 @@ export function ConversationItem({
               Move to Folder
             </button>
             <div className="my-1 h-px bg-line-strong" />
+            <button
+              onClick={() => { onArchive(); closeContextMenu(); }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-fg hover:bg-hover hover:text-fg transition-colors"
+            >
+              <Archive size={14} />
+              Archive
+            </button>
             <button
               onClick={() => { onDelete(); closeContextMenu(); }}
               className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:bg-hover transition-colors"
