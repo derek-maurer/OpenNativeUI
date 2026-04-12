@@ -131,11 +131,32 @@ export function MessageBubble({ message, isStreaming, onRetry }: MessageBubblePr
   const sources = message.sources ?? [];
   const citations = flattenCitations(sources);
   const mdComponents = makeMdComponents(citations);
+  const [userCopied, setUserCopied] = useState(false);
+
+  const handleCopyUserMessage = useCallback(() => {
+    if (message.content) {
+      navigator.clipboard.writeText(message.content).then(() => {
+        setUserCopied(true);
+        setTimeout(() => setUserCopied(false), 1500);
+      });
+    }
+  }, [message.content]);
 
   if (isUser) {
     return (
-      <div className="flex justify-end px-4 py-1">
-        <div className="max-w-[75%]">
+      <div className="group flex justify-end px-4 py-1">
+        <div className="relative max-w-[75%]">
+          {/* Copy button */}
+          {message.content && (
+            <button
+              onClick={handleCopyUserMessage}
+              className="absolute -left-8 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-secondary opacity-0 group-hover:opacity-100 hover:bg-hover hover:text-fg transition-all"
+              title={userCopied ? "Copied!" : "Copy"}
+            >
+              {userCopied ? <Check size={14} /> : <Copy size={14} />}
+            </button>
+          )}
+
           {/* User text */}
           {message.content && (
             <div className="rounded-2xl rounded-br-sm bg-bubble px-4 py-2.5 text-sm text-fg selectable">

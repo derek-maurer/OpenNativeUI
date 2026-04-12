@@ -100,10 +100,21 @@ export const MessageBubble = memo(function MessageBubble({
 
   const imageFiles = files?.filter((f) => f.mimeType?.startsWith("image/")) ?? [];
 
+  const toast = useToast();
+
+  const handleCopyUserMessage = useCallback(async () => {
+    if (content.length > 0) {
+      await Clipboard.setStringAsync(content);
+      toast.show("Copied to clipboard");
+    }
+  }, [content, toast]);
+
   if (role === "user") {
     return (
       <View style={styles.userRow}>
-        <View
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onLongPress={handleCopyUserMessage}
           style={[
             styles.userBubble,
             { backgroundColor: dark ? "#2f2f2f" : "#f0f0f0" },
@@ -145,7 +156,7 @@ export const MessageBubble = memo(function MessageBubble({
               {content}
             </Text>
           )}
-        </View>
+        </TouchableOpacity>
       </View>
     );
   }
