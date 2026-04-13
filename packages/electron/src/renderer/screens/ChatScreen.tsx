@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { MessageList } from "../components/chat/MessageList";
 import { InputComposer } from "../components/chat/InputComposer";
 import { playChime } from "../lib/chime";
+import { useFileUpload } from "../hooks/useFileUpload";
 
 interface ChatScreenProps {
   conversationId: string;
@@ -31,8 +32,11 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
   }, [chimeOnComplete]);
 
   const { sendMessage, abort } = useStreamingChat({ onComplete });
+  const { uploadBlob } = useFileUpload();
 
   const [loading, setLoading] = useState(!isNew);
+  const [dragOver, setDragOver] = useState(false);
+  const dragCounter = useRef(0);
 
   // Load conversation on mount (if not new)
   useEffect(() => {
@@ -86,8 +90,57 @@ export function ChatScreen({ conversationId, isNew, initialMessage }: ChatScreen
   // Show loader while fetching existing conversation
   const isLoading = loading;
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (dragCounter.current === 1) setDragOver(true);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      dragCounter.current = 0;
+      setDragOver(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length === 0) return;
+
+      for (const file of files) {
+        uploadBlob(file);
+      }
+    },
+    [uploadBlob]
+  );
+
   return (
-    <div className="flex h-full flex-col">
+    <div
+      className="relative flex h-full flex-col"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {dragOver && (
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-primary/10">
+          <div className="rounded-xl border-2 border-dashed border-primary px-8 py-6">
+            <p className="text-sm font-medium text-primary">
+              Drop files to attach
+            </p>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
           <Loader2 size={24} className="animate-spin text-muted" />

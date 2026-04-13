@@ -58,22 +58,30 @@ export async function uploadAndProcessFile(
   mimeType: string
 ): Promise<{ id: string; dataUrl?: string }> {
   const raw = Uint8Array.from(atob(base64Buffer), (c) => c.charCodeAt(0));
-  let blob = new Blob([raw], { type: mimeType });
+  const blob = new Blob([raw], { type: mimeType });
+  return uploadAndProcessBlob(blob, name, mimeType);
+}
 
+export async function uploadAndProcessBlob(
+  blob: Blob,
+  name: string,
+  mimeType: string
+): Promise<{ id: string; dataUrl?: string }> {
+  let processedBlob = blob;
   let dataUrl: string | undefined;
 
   // Resize images before upload
   if (mimeType.startsWith("image/")) {
-    blob = await resizeImageBlob(blob);
+    processedBlob = await resizeImageBlob(blob);
     // Generate preview dataUrl
     dataUrl = await new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
+      reader.readAsDataURL(processedBlob);
     });
   }
 
-  const { id } = await uploadFileFromBlob(blob, name);
+  const { id } = await uploadFileFromBlob(processedBlob, name);
 
   return { id, dataUrl };
 }
