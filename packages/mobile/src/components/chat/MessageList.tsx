@@ -52,7 +52,7 @@ export function MessageList({
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
-  }, [messages.length, streamingContent.length]);
+  }, [messages.length, streamingContent.length > 0]);
 
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
