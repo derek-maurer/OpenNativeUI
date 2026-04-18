@@ -28,7 +28,7 @@
     {
       "id": "ollama-think-tiered",
       "label": "Thinking Level",
-      "match": ["deepseek-r1", "^qwen3"],
+      "match": ["deepseek-r1"],
       "paramName": "think",
       "defaultValue": "medium",
       "options": [
@@ -36,6 +36,17 @@
         { "value": "medium", "label": "Medium" },
         { "value": "high", "label": "High" }
       ]
+    },
+    {
+      "id": "qwen-think-binary",
+      "label": "Thinking",
+      "match": ["^qwen3"],
+      "paramName": "think",
+      "defaultValue": true,
+      "options": [
+        { "value": true, "label": "On" }
+      ],
+      "offValue": false
     },
     {
       "id": "gemma-think-binary",
